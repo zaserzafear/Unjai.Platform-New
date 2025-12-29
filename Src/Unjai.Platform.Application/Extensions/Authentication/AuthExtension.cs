@@ -1,0 +1,65 @@
+﻿using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
+
+namespace Unjai.Platform.Application.Extensions.Authentication;
+
+public static class AuthExtension
+{
+    public static void AddAuthExtensions(this IServiceCollection services, JwtSetting jwtSetting, ApiKeyOption apiKeyOption)
+    {
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                RoleClaimType = jwtSetting.RoleClaimType,
+
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSetting.Secret)),
+                ValidateIssuer = true,
+                ValidIssuer = jwtSetting.Issuer,
+                ValidateAudience = true,
+                ValidAudience = jwtSetting.Audience,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.FromSeconds(jwtSetting.ClockSkew),
+            };
+
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    if (context.Request.Cookies.ContainsKey("AccessToken"))
+                    {
+                        context.Token = context.Request.Cookies["AccessToken"];
+                    }
+
+                    return Task.CompletedTask;
+                }
+            };
+        });
+
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy(ServiceDefaultsExtensions.HealthPolicyName,
+                policy => policy.Requirements.Add(new HealthChecksApiKeyRequirement(apiKeyOption.HealthCheck)));
+        });
+
+        services.AddSingleton<IAuthorizationHandler>(new HealthChecksApiKeyHandler(apiKeyOption.HealthCheck));
+    }
+
+    public static WebApplication UseAuthExtensions(this WebApplication app)
+    {
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        return app;
+    }
+}

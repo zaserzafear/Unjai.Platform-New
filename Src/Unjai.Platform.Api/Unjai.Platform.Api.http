@@ -1,0 +1,6 @@
+@Unjai.Platform.Api_HostAddress = http://localhost:5296
+
+GET {{Unjai.Platform.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

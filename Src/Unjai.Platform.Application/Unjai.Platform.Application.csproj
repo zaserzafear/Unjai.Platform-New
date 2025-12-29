@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Unjai.Platform.Contracts\Unjai.Platform.Contracts.csproj" />
+    <ProjectReference Include="..\Unjai.Platform.Domain\Unjai.Platform.Domain.csproj" />
+    <ProjectReference Include="..\Unjai.Platform.Extensions.ObjectMapper\Unjai.Platform.Extensions.ObjectMapper.csproj" />
+    <ProjectReference Include="..\Unjai.Platform.Infrastructure\Unjai.Platform.Infrastructure.csproj" />
+    <ProjectReference Include="..\Unjai.Platform.ServiceDefaults\Unjai.Platform.ServiceDefaults.csproj" />
+  </ItemGroup>
+</Project>

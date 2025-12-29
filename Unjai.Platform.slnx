@@ -1,0 +1,25 @@
+<Solution>
+  <Folder Name="/01-Presentation/">
+    <Project Path="Src/Unjai.Platform.Api/Unjai.Platform.Api.csproj" />
+  </Folder>
+  <Folder Name="/02-Application/">
+    <Project Path="Src/Unjai.Platform.Application/Unjai.Platform.Application.csproj" Id="09774af2-f17c-4a92-9346-89f16545f1ab" />
+    <Project Path="Src/Unjai.Platform.Extensions.ObjectMapper/Unjai.Platform.Extensions.ObjectMapper.csproj" Id="12f9be13-4e16-4f0c-aa3b-e7a83ed72c30" />
+    <Project Path="Src/Unjai.Platform.ServiceDefaults/Unjai.Platform.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/03-Domain/">
+    <Project Path="Src/Unjai.Platform.Domain/Unjai.Platform.Domain.csproj" Id="bf4e4921-1056-4ad2-be97-38d15014fff7" />
+  </Folder>
+  <Folder Name="/04-Infrastructure/">
+    <Project Path="Src/Unjai.Platform.Infrastructure/Unjai.Platform.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/05-Contracts/">
+    <Project Path="Src/Unjai.Platform.Contracts/Unjai.Platform.Contracts.csproj" Id="011f27da-2d0a-4dbb-a6c1-6c6a6e494a13" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <Project Path="Src/Unjai.Platform.AppHost/Unjai.Platform.AppHost.csproj" />
+  </Folder>
+</Solution>

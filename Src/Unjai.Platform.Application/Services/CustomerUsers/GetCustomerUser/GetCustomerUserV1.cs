@@ -1,0 +1,50 @@
+﻿using Microsoft.Extensions.Logging;
+using Unjai.Platform.Application.Models;
+using Unjai.Platform.Application.Services.CustomerUsers.Exceptions;
+using Unjai.Platform.Contracts.CustomerUsers.Dtos;
+
+namespace Unjai.Platform.Application.Services.CustomerUsers.GetCustomerUser;
+
+public interface IGetCustomerUserV1
+{
+    Task<AppResult<CustomerUserDto>> Handle(Guid userId, CancellationToken cancellationToken);
+}
+
+internal sealed class GetCustomerUserV1(ILogger<GetCustomerUserV1> logger) : IGetCustomerUserV1
+{
+    public async Task<AppResult<CustomerUserDto>> Handle(Guid userId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            throw new CustomerUserNotFoundException($"User Id {userId} Not Found.");
+        }
+        catch (CustomerUserNotFoundException ex)
+        {
+            logger.LogWarning(
+                ex,
+                "Customer user not found. UserId: {UserId}",
+                userId
+            );
+
+            return AppResult<CustomerUserDto>.Fail(
+                httpStatus: 404,
+                statusCode: "CUSTOMER_USER_NOT_FOUND",
+                message: ex.Message
+            );
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Failed to get customer user due to an unexpected error. UserId: {UserId}",
+                userId
+            );
+
+            return AppResult<CustomerUserDto>.Fail(
+                httpStatus: 500,
+                statusCode: "INTERNAL_SERVER_ERROR",
+                message: ex.Message
+            );
+        }
+    }
+}
