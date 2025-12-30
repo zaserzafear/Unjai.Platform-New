@@ -27,5 +27,7 @@ public static class RateLimitingExtension
 
             return new FixedWindowPolicyResolver(policies);
         });
+
+        services.AddSingleton<RateLimitEnforcer>();
     }
 }

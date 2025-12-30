@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,8 +15,8 @@ public static class RateLimitingEndpointExtensions
             return async invocationContext =>
             {
                 var filter = new RedisRateLimitFilter(
-                    factoryContext.ApplicationServices.GetRequiredService<RedisRateLimiter>(),
-                    factoryContext.ApplicationServices.GetRequiredService<IRateLimitPolicyResolver>(),
+                    factoryContext.ApplicationServices
+                        .GetRequiredService<RateLimitEnforcer>(),
                     policyName);
 
                 return await filter.InvokeAsync(invocationContext, next);
@@ -29,4 +26,3 @@ public static class RateLimitingEndpointExtensions
         return builder;
     }
 }
-
