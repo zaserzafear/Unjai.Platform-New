@@ -2,7 +2,7 @@
 
 namespace Unjai.Platform.Infrastructure.RateLimiting;
 
-public sealed class RedisRateLimiter(IConnectionMultiplexer multiplexer)
+internal sealed class RedisRateLimiter(IConnectionMultiplexer multiplexer)
 {
     private readonly IDatabase _redis = multiplexer.GetDatabase();
 
@@ -11,19 +11,13 @@ public sealed class RedisRateLimiter(IConnectionMultiplexer multiplexer)
         int limit,
         TimeSpan window)
     {
-        const string script = """
-        local current = redis.call("INCR", KEYS[1])
-        if tonumber(current) == 1 then
-            redis.call("PEXPIRE", KEYS[1], ARGV[1])
-        end
-        return current
-        """;
+        var count = await _redis.StringIncrementAsync(key);
 
-        var result = (long)await _redis.ScriptEvaluateAsync(
-            script,
-            new RedisKey[] { key },
-            new RedisValue[] { (long)window.TotalMilliseconds });
+        if (count == 1)
+        {
+            await _redis.KeyExpireAsync(key, window);
+        }
 
-        return result <= limit;
+        return count <= limit;
     }
 }

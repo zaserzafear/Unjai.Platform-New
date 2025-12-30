@@ -2,12 +2,10 @@ using System.Globalization;
 using Asp.Versioning;
 using Scalar.AspNetCore;
 using Unjai.Platform.Api.Endpoints.Extensions;
-using Unjai.Platform.Api.RateLimiting;
 using Unjai.Platform.Application.Extensions.Authentication;
 using Unjai.Platform.Application.Helpers;
 using Unjai.Platform.Application.Services.CustomerUsers.Extensions;
 using Unjai.Platform.Infrastructure.Database.Extensions;
-using Unjai.Platform.Infrastructure.RateLimiting;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -140,7 +138,6 @@ if (string.IsNullOrWhiteSpace(redisConnectionString))
 else
 {
     builder.Services.AddRateLimitingExtension(redisConnectionString);
-    builder.Services.AddSingleton<IRateLimitRejectionHandler, ApiRateLimitRejectionHandler>();
 }
 
 builder.Services.AddCustomerUserExtension();

@@ -18,7 +18,8 @@ public sealed class GetUserEndpoint : IEndpoint
             var result = await useCase.Handle(id, cancellationToken);
 
             return ApiResponseResults.ToHttpResult(result);
-        }).MapToApiVersion(1)
-        .RequireRateLimit("fixed-5-per-minutes");
+        })
+            .RequireRateLimiting("get-user")
+            .MapToApiVersion(1);
     }
 }

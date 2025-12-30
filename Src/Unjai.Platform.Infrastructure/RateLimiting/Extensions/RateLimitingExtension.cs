@@ -10,6 +10,22 @@ public static class RateLimitingExtension
         services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
 
         services.AddSingleton<RedisRateLimiter>();
-        services.AddSingleton<IRateLimitPolicyResolver, FixedWindowPolicyResolver>();
+        services.AddSingleton<IRateLimitPolicyResolver>(sp =>
+        {
+            var policies = new Dictionary<string, RateLimitPolicy>
+            {
+                ["get-user"] = new RateLimitPolicy(
+                    Name: "get-user",
+                    Limit: 5,
+                    Window: TimeSpan.FromMinutes(1)),
+
+                ["login"] = new RateLimitPolicy(
+                    Name: "login",
+                    Limit: 10,
+                    Window: TimeSpan.FromSeconds(30))
+            };
+
+            return new FixedWindowPolicyResolver(policies);
+        });
     }
 }
