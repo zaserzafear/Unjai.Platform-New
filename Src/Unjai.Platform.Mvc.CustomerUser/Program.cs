@@ -1,10 +1,5 @@
-using System.Globalization;
-using Asp.Versioning;
-using Scalar.AspNetCore;
-using Unjai.Platform.Api.Endpoints.Extensions;
 using Unjai.Platform.Application.Extensions.Authentication;
 using Unjai.Platform.Application.Helpers;
-using Unjai.Platform.Application.Services.CustomerUsers.Extensions;
 using Unjai.Platform.Infrastructure.Database.Extensions;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 
@@ -18,40 +13,10 @@ using var loggerFactory = LoggerFactory.Create(config =>
 
 var logger = loggerFactory.CreateLogger("Program");
 
-builder.Services.AddApiVersioning(options =>
-{
-    options.DefaultApiVersion = new ApiVersion(1);
-    options.ReportApiVersions = true;
-    options.AssumeDefaultVersionWhenUnspecified = true;
-    options.ApiVersionReader = ApiVersionReader.Combine(
-        new UrlSegmentApiVersionReader(),
-        new HeaderApiVersionReader("X-Api-Version"));
-})
-    .AddApiExplorer(options =>
-    {
-        options.GroupNameFormat = "'v'VVV";
-        options.SubstituteApiVersionInUrl = true;
-    });
-
-var apiVersions = builder.Configuration
-    .GetSection("ApiVersions")
-    .Get<string[]>()
-    ?? Array.Empty<string>();
-
-foreach (var version in apiVersions)
-{
-    var apiVersion = new ApiVersion(int.Parse(version, CultureInfo.InvariantCulture));
-    var groupName = "v" + apiVersion.MajorVersion;
-    builder.Services.AddOpenApi(groupName);
-}
-
-builder.Services.AddEndpoints(typeof(Program).Assembly);
-
 builder.AddServiceDefaults();
 
 // Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddControllersWithViews();
 
 var jwtSetting = builder.Configuration
     .GetSection("Jwt")
@@ -141,45 +106,31 @@ else
     builder.Services.AddRateLimitingExtension(redisConnectionString);
 }
 
-builder.Services.AddCustomerUserExtension();
-
 var app = builder.Build();
 
 app.UseOutputCache();
 app.MapDefaultEndpoints();
 
-var apiVersionSetBuilder = app.NewApiVersionSet();
-
-foreach (var version in apiVersions)
-{
-    var apiVersion = new ApiVersion(int.Parse(version, CultureInfo.InvariantCulture));
-    apiVersionSetBuilder = apiVersionSetBuilder.HasApiVersion(apiVersion);
-}
-
-var apiVersionSet = apiVersionSetBuilder.ReportApiVersions().Build();
-
-var versionedGroup = app
-    .MapGroup("api/v{version:apiVersion}")
-    .WithApiVersionSet(apiVersionSet);
-
-app.MapEndpoints(versionedGroup);
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference(options =>
-    {
-        foreach (var description in app.DescribeApiVersions())
-        {
-            var group = description.GroupName;
-            options.AddDocument(group);
-        }
-    });
-
     app.ApplyMigrations();
 }
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+}
+
+app.UseRouting();
 
 app.UseAuthExtensions();
 
-await app.RunAsync();
+app.MapStaticAssets();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();
+
+
+app.Run();

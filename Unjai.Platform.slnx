@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/01-Presentation/">
     <Project Path="Src/Unjai.Platform.Api/Unjai.Platform.Api.csproj" />
+    <Project Path="Src/Unjai.Platform.Mvc.CustomerUser/Unjai.Platform.Mvc.CustomerUser.csproj" />
   </Folder>
   <Folder Name="/02-Application/">
     <Project Path="Src/Unjai.Platform.Application/Unjai.Platform.Application.csproj" Id="09774af2-f17c-4a92-9346-89f16545f1ab" />

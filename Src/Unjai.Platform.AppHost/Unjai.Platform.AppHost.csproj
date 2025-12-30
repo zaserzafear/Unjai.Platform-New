@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Unjai.Platform.Api\Unjai.Platform.Api.csproj" />
+    <ProjectReference Include="..\Unjai.Platform.Mvc.CustomerUser\Unjai.Platform.Mvc.CustomerUser.csproj" />
   </ItemGroup>
 
 </Project>

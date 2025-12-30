@@ -39,4 +39,10 @@ builder.AddProject<Projects.Unjai_Platform_Api>("unjai-platform-api")
     .WithEnvironment("Jwt__Secret", jwtSecret)
     .WithEnvironment("ApiKeys__HealthCheck", apiKeyHealthCheck);
 
+builder.AddProject<Projects.Unjai_Platform_Mvc_CustomerUser>("unjai-platform-mvc-customeruser")
+    .WithReference(postgresdb).WaitFor(postgresdb)
+    .WithReference(redis).WaitFor(redis)
+    .WithEnvironment("Jwt__Secret", jwtSecret)
+    .WithEnvironment("ApiKeys__HealthCheck", apiKeyHealthCheck);
+
 builder.Build().Run();
