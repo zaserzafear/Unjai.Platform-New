@@ -9,7 +9,6 @@ public static class RateLimitingExtension
     {
         services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
 
-        services.AddSingleton<RedisRateLimiter>();
         services.AddSingleton<IRateLimitPolicyResolver>(sp =>
         {
             var policies = new Dictionary<string, RateLimitPolicy>
@@ -28,6 +27,7 @@ public static class RateLimitingExtension
             return new FixedWindowPolicyResolver(policies);
         });
 
+        services.AddSingleton<RedisRateLimiter>();
         services.AddSingleton<RateLimitEnforcer>();
     }
 }

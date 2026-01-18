@@ -93,17 +93,17 @@ builder.Services.AddPostgresClientExtension(
     read,
     write);
 
-var redisConnectionString =
-    builder.Configuration.GetConnectionString("Redis");
+var redisRateLimitConnectionString =
+    builder.Configuration.GetConnectionString("RedisRateLimit");
 
-if (string.IsNullOrWhiteSpace(redisConnectionString))
+if (string.IsNullOrWhiteSpace(redisRateLimitConnectionString))
 {
     throw new InvalidOperationException(
-        "Redis connection string 'Redis' was not found or is empty.");
+        "Redis connection string 'RedisRateLimit' was not found or is empty.");
 }
 else
 {
-    builder.Services.AddRateLimitingExtension(redisConnectionString);
+    builder.Services.AddRateLimitingExtension(redisRateLimitConnectionString);
 }
 
 var app = builder.Build();

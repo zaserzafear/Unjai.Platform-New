@@ -25,7 +25,11 @@ $$;
 var postgresdb = postgres.AddDatabase(unjaiDbName)
     .WithCreationScript(creationScript);
 
-var redis = builder.AddRedis("Redis")
+var redisRateLimit = builder.AddRedis("RedisRateLimit")
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithRedisInsight(redisInsight => redisInsight.WithLifetime(ContainerLifetime.Persistent));
+
+var redisRateCache = builder.AddRedis("redisRateCache")
     .WithLifetime(ContainerLifetime.Persistent)
     .WithRedisInsight(redisInsight => redisInsight.WithLifetime(ContainerLifetime.Persistent));
 
@@ -35,13 +39,15 @@ var apiKeyHealthCheck = configuration.GetValue<string>("ApiKeys:HealthCheck");
 
 builder.AddProject<Projects.Unjai_Platform_Api>("unjai-platform-api")
     .WithReference(postgresdb).WaitFor(postgresdb)
-    .WithReference(redis).WaitFor(redis)
+    .WithReference(redisRateLimit).WaitFor(redisRateLimit)
+    .WithReference(redisRateCache).WaitFor(redisRateCache)
     .WithEnvironment("Jwt__Secret", jwtSecret)
     .WithEnvironment("ApiKeys__HealthCheck", apiKeyHealthCheck);
 
 builder.AddProject<Projects.Unjai_Platform_Mvc_CustomerUser>("unjai-platform-mvc-customeruser")
     .WithReference(postgresdb).WaitFor(postgresdb)
-    .WithReference(redis).WaitFor(redis)
+    .WithReference(redisRateLimit).WaitFor(redisRateLimit)
+    .WithReference(redisRateCache).WaitFor(redisRateCache)
     .WithEnvironment("Jwt__Secret", jwtSecret)
     .WithEnvironment("ApiKeys__HealthCheck", apiKeyHealthCheck);
 

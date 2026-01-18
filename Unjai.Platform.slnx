@@ -12,7 +12,8 @@
     <Project Path="Src/Unjai.Platform.Domain/Unjai.Platform.Domain.csproj" Id="bf4e4921-1056-4ad2-be97-38d15014fff7" />
   </Folder>
   <Folder Name="/04-Infrastructure/">
-    <Project Path="Src/Unjai.Platform.Infrastructure/Unjai.Platform.Infrastructure.csproj" />
+    <Project Path="Src/Unjai.Platform.Infrastructure.RateLimiting/Unjai.Platform.Infrastructure.RateLimiting.csproj" Id="37eef336-be88-472d-8dee-28b3232e947d" />
+    <Project Path="Src/Unjai.Platform.Infrastructure/Unjai.Platform.Infrastructure.csproj" Id="8935d0fc-9d7e-4e68-a6b7-fa919a13e7fe" />
   </Folder>
   <Folder Name="/05-Contracts/">
     <Project Path="Src/Unjai.Platform.Contracts/Unjai.Platform.Contracts.csproj" Id="011f27da-2d0a-4dbb-a6c1-6c6a6e494a13" />

@@ -1,6 +1,6 @@
 ﻿namespace Unjai.Platform.Infrastructure.RateLimiting;
 
-public interface IRateLimitPolicyResolver
+internal interface IRateLimitPolicyResolver
 {
     RateLimitPolicy Resolve(string policyName);
 }
