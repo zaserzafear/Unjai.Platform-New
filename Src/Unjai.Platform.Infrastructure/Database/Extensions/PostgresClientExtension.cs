@@ -10,31 +10,61 @@ public static class PostgresClientExtension
         this IServiceCollection services,
         string defaultConnectionString,
         string readConnectionString,
-        string writeConnectionString
-        )
+        string writeConnectionString)
+    {
+        AddHealthChecks(
+            services,
+            defaultConnectionString,
+            readConnectionString,
+            writeConnectionString);
+
+        AddDbContexts(
+            services,
+            defaultConnectionString,
+            writeConnectionString);
+    }
+
+    private static void AddHealthChecks(
+        IServiceCollection services,
+        string defaultConnectionString,
+        string readConnectionString,
+        string writeConnectionString)
     {
         services.AddHealthChecks()
-             .AddNpgSql(
-                 connectionString: defaultConnectionString,
-                 name: "postgres-default",
-                 failureStatus: HealthStatus.Unhealthy,
-                 tags: ["ready", "postgres"])
-             .AddNpgSql(
-                 connectionString: readConnectionString,
-                 name: "postgres-read",
-                 failureStatus: HealthStatus.Unhealthy,
-                 tags: ["ready", "postgres"])
-             .AddNpgSql(
-                 connectionString: writeConnectionString,
-                 name: "postgres-write",
-                 failureStatus: HealthStatus.Unhealthy,
-                 tags: ["ready", "postgres"]);
+            .AddNpgSql(
+                connectionString: defaultConnectionString,
+                name: "postgres-default",
+                failureStatus: HealthStatus.Unhealthy,
+                tags: ["ready", "postgres"])
+            .AddNpgSql(
+                connectionString: readConnectionString,
+                name: "postgres-read",
+                failureStatus: HealthStatus.Unhealthy,
+                tags: ["ready", "postgres"])
+            .AddNpgSql(
+                connectionString: writeConnectionString,
+                name: "postgres-write",
+                failureStatus: HealthStatus.Unhealthy,
+                tags: ["ready", "postgres"]);
+    }
 
+    private static void AddDbContexts(
+        IServiceCollection services,
+        string defaultConnectionString,
+        string writeConnectionString)
+    {
         services.AddDbContext<AppDbContext>(options =>
-            options.UseNpgsql(defaultConnectionString));
+            options.UseNpgsql(writeConnectionString));
 
         services.AddDbContext<ReadDbContext>(options =>
-            options.UseNpgsql(readConnectionString));
+            options
+                .UseNpgsql(
+                    defaultConnectionString,
+                    npgsql =>
+                        npgsql.UseQuerySplittingBehavior(
+                            QuerySplittingBehavior.SplitQuery))
+                .UseQueryTrackingBehavior(
+                    QueryTrackingBehavior.NoTracking));
 
         services.AddDbContext<WriteDbContext>(options =>
             options.UseNpgsql(writeConnectionString));
