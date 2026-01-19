@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Unjai.Platform.Infrastructure.RateLimiting;
+namespace Unjai.Platform.Infrastructure.RateLimiting.Filters;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public sealed class RequireRateLimitingAttribute : TypeFilterAttribute

@@ -8,7 +8,7 @@ using Unjai.Platform.Application.Services.CustomerUsers.Extensions;
 using Unjai.Platform.Infrastructure.Caching.Extensions;
 using Unjai.Platform.Infrastructure.Database.Extensions;
 using Unjai.Platform.Infrastructure.Messaging.Extensions;
-using Unjai.Platform.Infrastructure.RateLimiting;
+using Unjai.Platform.Infrastructure.RateLimiting.Configurations;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 using Unjai.Platform.Infrastructure.Redis.Extensions;
 

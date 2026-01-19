@@ -1,4 +1,4 @@
-﻿namespace Unjai.Platform.Infrastructure.RateLimiting;
+﻿namespace Unjai.Platform.Infrastructure.RateLimiting.Configurations;
 
 public static class RateLimitPolicyKeys
 {

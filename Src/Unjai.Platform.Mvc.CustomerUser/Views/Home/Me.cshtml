@@ -1,0 +1,163 @@
+﻿@model Unjai.Platform.Mvc.CustomerUser.Models.Home.MeViewModel
+
+@{
+    ViewData["Title"] = "My Account";
+}
+
+<div class="account-container">
+    <!-- Sidebar -->
+    <aside class="account-sidebar">
+        <div class="profile-summary">
+            <div class="avatar">
+                <img src="https://via.placeholder.com/80" alt="Avatar" />
+            </div>
+            <div class="profile-info">
+                <strong>@Model.FullName</strong>
+                <div class="email">@Model.Email</div>
+            </div>
+        </div>
+
+        <ul class="menu">
+            <li class="active">
+                <a asp-action="Me">ข้อมูลส่วนตัว</a>
+            </li>
+            <li>
+                <a asp-action="ChangePassword">เปลี่ยนรหัสผ่าน</a>
+            </li>
+            <li>
+                <a asp-action="Settings">การตั้งค่า</a>
+            </li>
+            <li>
+                <a asp-action="Addresses">ที่อยู่จัดส่ง</a>
+            </li>
+            <li>
+                <a asp-action="Orders">คำสั่งซื้อของฉัน</a>
+            </li>
+            <li class="logout">
+                <a asp-action="Logout">ออกจากระบบ</a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="account-content">
+        <h2>ข้อมูลส่วนตัว</h2>
+
+        <div class="card">
+            <div class="row">
+                <label>ชื่อ - นามสกุล</label>
+                <span>@Model.FullName</span>
+            </div>
+
+            <div class="row">
+                <label>อีเมล</label>
+                <span>@Model.Email</span>
+            </div>
+
+            <div class="row">
+                <label>เบอร์โทรศัพท์</label>
+                <span>@Model.PhoneNumber</span>
+            </div>
+
+            <div class="row">
+                <label>วันที่สมัคร</label>
+                <span>@Model.CreatedAt.ToString("dd/MM/yyyy")</span>
+            </div>
+
+            <div class="actions">
+                <a asp-action="EditProfile" class="btn-primary">
+                    แก้ไขข้อมูล
+                </a>
+            </div>
+        </div>
+    </main>
+</div>
+
+<style>
+    .account-container {
+        display: flex;
+        gap: 24px;
+    }
+
+    /* Sidebar */
+    .account-sidebar {
+        width: 260px;
+        background: #fff;
+        border: 1px solid #e5e5e5;
+        border-radius: 8px;
+        padding: 16px;
+    }
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .profile-summary img {
+        border-radius: 50%;
+    }
+
+    .menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .menu li {
+        margin-bottom: 8px;
+    }
+
+    .menu a {
+        display: block;
+        padding: 10px 12px;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #333;
+    }
+
+    .menu li.active a,
+    .menu a:hover {
+        background: #f0f4ff;
+        color: #2f5cff;
+    }
+
+    .menu li.logout a {
+        color: #d9534f;
+    }
+
+    /* Content */
+    .account-content {
+        flex: 1;
+    }
+
+    .card {
+        background: #fff;
+        border: 1px solid #e5e5e5;
+        border-radius: 8px;
+        padding: 24px;
+    }
+
+    .card .row {
+        display: flex;
+        margin-bottom: 16px;
+    }
+
+    .card label {
+        width: 180px;
+        color: #777;
+    }
+
+    .actions {
+        margin-top: 24px;
+    }
+
+    .btn-primary {
+        background: #2f5cff;
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+    }
+</style>
