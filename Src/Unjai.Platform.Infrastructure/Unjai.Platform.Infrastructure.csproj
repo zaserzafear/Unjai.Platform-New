@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
     <PackageReference Include="Npgsql" />
@@ -10,6 +11,5 @@
   
   <ItemGroup>
     <ProjectReference Include="..\Unjai.Platform.Domain\Unjai.Platform.Domain.csproj" />
-    <ProjectReference Include="..\Unjai.Platform.Infrastructure.RateLimiting\Unjai.Platform.Infrastructure.RateLimiting.csproj" />
   </ItemGroup>
 </Project>

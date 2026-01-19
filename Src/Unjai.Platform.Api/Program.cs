@@ -7,6 +7,7 @@ using Unjai.Platform.Application.Helpers;
 using Unjai.Platform.Application.Services.CustomerUsers.Extensions;
 using Unjai.Platform.Infrastructure.Database.Extensions;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
+using Unjai.Platform.Infrastructure.Redis.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -128,18 +129,20 @@ builder.Services.AddPostgresClientExtension(
     read,
     write);
 
-var redisRateLimitConnectionString =
-    builder.Configuration.GetConnectionString("RedisRateLimit");
+var redisConnectionString =
+    builder.Configuration.GetConnectionString("Redis");
 
-if (string.IsNullOrWhiteSpace(redisRateLimitConnectionString))
+if (string.IsNullOrWhiteSpace(redisConnectionString))
 {
     throw new InvalidOperationException(
-        "Redis connection string 'RedisRateLimit' was not found or is empty.");
+        "Redis connection string 'Redis' was not found or is empty.");
 }
 else
 {
-    builder.Services.AddRateLimitingExtension(redisRateLimitConnectionString);
+    builder.Services.AddRedisConnection(redisConnectionString);
 }
+
+builder.Services.AddRateLimitingExtension();
 
 builder.Services.AddCustomerUserExtension();
 
