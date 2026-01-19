@@ -5,7 +5,9 @@ using Unjai.Platform.Api.Endpoints.Extensions;
 using Unjai.Platform.Application.Extensions.Authentication;
 using Unjai.Platform.Application.Helpers;
 using Unjai.Platform.Application.Services.CustomerUsers.Extensions;
+using Unjai.Platform.Infrastructure.Caching.Extensions;
 using Unjai.Platform.Infrastructure.Database.Extensions;
+using Unjai.Platform.Infrastructure.Messaging.Extensions;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 using Unjai.Platform.Infrastructure.Redis.Extensions;
 
@@ -142,7 +144,9 @@ else
     builder.Services.AddRedisConnection(redisConnectionString);
 }
 
+builder.Services.AddRedisMessagingExtension();
 builder.Services.AddRateLimitingExtension();
+builder.Services.AddCachingExtension();
 
 builder.Services.AddCustomerUserExtension();
 

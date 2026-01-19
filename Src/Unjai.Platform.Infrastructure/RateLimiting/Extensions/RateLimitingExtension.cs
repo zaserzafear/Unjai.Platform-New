@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Unjai.Platform.Infrastructure.RateLimiting.Services;
 
 namespace Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 
@@ -8,6 +9,8 @@ public static class RateLimitingExtension
     {
         services.AddSingleton<RedisRateLimiter>();
         services.AddSingleton<RateLimitEnforcer>();
+
+        services.AddHostedService<RateLimitBlockedService>();
 
         services.AddSingleton<IRateLimitPolicyResolver>(sp =>
         {
