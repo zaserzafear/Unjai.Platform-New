@@ -1,6 +1,7 @@
 ﻿using Unjai.Platform.Api.Endpoints.Extensions;
 using Unjai.Platform.Api.Models;
 using Unjai.Platform.Application.Services.CustomerUsers.GetCustomerUser;
+using Unjai.Platform.Infrastructure.RateLimiting;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 
 namespace Unjai.Platform.Api.Endpoints.CustomerUsers;
@@ -19,7 +20,7 @@ public sealed class GetUserEndpoint : IEndpoint
 
             return ApiResponseResults.ToHttpResult(result);
         })
-            .RequireRateLimiting("get-user")
+            .RequireRateLimiting(RateLimitPolicyKeys.GetUser)
             .MapToApiVersion(1);
     }
 }

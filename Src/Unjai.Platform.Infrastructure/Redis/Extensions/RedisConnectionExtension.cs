@@ -9,6 +9,18 @@ public static class RedisConnectionExtension
         this IServiceCollection services,
         string redisConnectionString)
     {
-        services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
+        services.AddSingleton<IConnectionMultiplexer>(
+            ConnectionMultiplexer.Connect(redisConnectionString));
+
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.ConnectionMultiplexerFactory = () =>
+            {
+                var provider = services.BuildServiceProvider();
+                var multiplexer = provider.GetRequiredService<IConnectionMultiplexer>();
+
+                return Task.FromResult(multiplexer);
+            };
+        });
     }
 }

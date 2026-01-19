@@ -1,11 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Unjai.Platform.Infrastructure.RateLimiting.Services;
 
 namespace Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 
 public static class RateLimitingExtension
 {
-    public static void AddRateLimitingExtension(this IServiceCollection services)
+    public static void AddRateLimitingExtension(
+        this IServiceCollection services)
     {
         services.AddSingleton<RedisRateLimiter>();
         services.AddSingleton<RateLimitEnforcer>();
@@ -14,18 +16,19 @@ public static class RateLimitingExtension
 
         services.AddSingleton<IRateLimitPolicyResolver>(sp =>
         {
-            var policies = new Dictionary<string, RateLimitPolicy>
-            {
-                ["get-user"] = new RateLimitPolicy(
-                    Name: "get-user",
-                    Limit: 5,
-                    Window: TimeSpan.FromMinutes(1)),
+            var options = sp
+                .GetRequiredService<IOptions<RateLimitingOptions>>()
+                .Value;
 
-                ["login"] = new RateLimitPolicy(
-                    Name: "login",
-                    Limit: 10,
-                    Window: TimeSpan.FromSeconds(30))
-            };
+            var policies = new Dictionary<string, RateLimitPolicy>();
+
+            foreach (var (key, policy) in options.Policies)
+            {
+                policies[key] = new RateLimitPolicy(
+                    Name: key,
+                    Limit: policy.Limit,
+                    Window: policy.Window);
+            }
 
             return new FixedWindowPolicyResolver(policies);
         });
