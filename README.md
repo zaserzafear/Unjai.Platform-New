@@ -40,10 +40,26 @@ dotnet ef migrations remove \
 ```
 
 ### Generate SQL Script (Idempotent)
+Generates an idempotent SQL script containing all migrations up to the latest one.
 ```bash
 dotnet ef migrations script \
   --project ./Src/Unjai.Platform.Infrastructure/Unjai.Platform.Infrastructure.csproj \
   --context AppDbContext \
   --idempotent \
-  -o ./Src/.container/postgres/initdb/20260125072850_Initial.sql
+  --output ./Src/.container/postgres/initdb/20260125072850_Initial.sql
+```
+This command can also generate a script for a specific migration range:
+
+- **FROM**: starting migration (exclusive)
+- **TO**: target migration (inclusive)
+
+Only migrations after **FROM** and up to **TO** will be included in the script.
+```bash
+dotnet ef migrations script \
+  --project ./Src/Unjai.Platform.Infrastructure/Unjai.Platform.Infrastructure.csproj \
+  --context AppDbContext \
+  --idempotent \
+  <FROM> \
+  <TO> \
+  --output ./Src/.container/postgres/initdb/20260125072850_Initial.sql
 ```
