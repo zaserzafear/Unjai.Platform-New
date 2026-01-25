@@ -58,7 +58,7 @@ builder.AddServiceDefaults();
 builder.Services.AddOpenApi();
 
 var jwtSetting = builder.Configuration
-    .GetSection("Jwt")
+    .GetSection(JwtSettingConfig.Section)
     .Get<JwtSetting>()
     ?? throw new InvalidOperationException("Jwt configuration missing");
 
@@ -79,7 +79,7 @@ if (string.IsNullOrWhiteSpace(jwtSetting.Secret))
 }
 
 var apiKeyOption = builder.Configuration
-    .GetSection("ApiKeys")
+    .GetSection(ApiKeyConfig.Section)
     .Get<ApiKeyOption>()
     ?? new ApiKeyOption();
 
@@ -101,36 +101,36 @@ if (string.IsNullOrWhiteSpace(apiKeyOption.HealthCheck))
 
 builder.Services.AddAuthExtensions(jwtSetting, apiKeyOption);
 
-var primary = builder.Configuration.GetConnectionString("UnjaiDb");
+var dbPrimary = builder.Configuration.GetConnectionString("UnjaiDb");
 
-if (string.IsNullOrWhiteSpace(primary))
+if (string.IsNullOrWhiteSpace(dbPrimary))
 {
     throw new InvalidOperationException(
         "ConnectionString 'UnjaiDb' must be configured.");
 }
 
-var read = builder.Configuration.GetConnectionString("UnjaiDbRead");
-if (string.IsNullOrWhiteSpace(read))
+var dbRead = builder.Configuration.GetConnectionString("UnjaiDbRead");
+if (string.IsNullOrWhiteSpace(dbRead))
 {
     logger.LogWarning(
         "ConnectionString 'UnjaiDbRead' is missing. Falling back to 'UnjaiDb'.");
 
-    read = primary;
+    dbRead = dbPrimary;
 }
 
-var write = builder.Configuration.GetConnectionString("UnjaiDbWrite");
-if (string.IsNullOrWhiteSpace(write))
+var dbWrite = builder.Configuration.GetConnectionString("UnjaiDbWrite");
+if (string.IsNullOrWhiteSpace(dbWrite))
 {
     logger.LogWarning(
         "ConnectionString 'UnjaiDbWrite' is missing. Falling back to 'UnjaiDb'.");
 
-    write = primary;
+    dbWrite = dbPrimary;
 }
 
 builder.Services.AddPostgresClientExtension(
-    primary,
-    read,
-    write);
+    dbPrimary,
+    dbRead,
+    dbWrite);
 
 var redisConnectionString =
     builder.Configuration.GetConnectionString("Redis");

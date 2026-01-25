@@ -1,12 +1,12 @@
+using Microsoft.Extensions.Options;
 using Unjai.Platform.Application.Extensions.Authentication;
 using Unjai.Platform.Application.Helpers;
-using Unjai.Platform.Application.Services.CustomerUsers.Extensions;
 using Unjai.Platform.Infrastructure.Caching.Extensions;
-using Unjai.Platform.Infrastructure.Database.Extensions;
 using Unjai.Platform.Infrastructure.Messaging.Extensions;
 using Unjai.Platform.Infrastructure.RateLimiting.Configurations;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 using Unjai.Platform.Infrastructure.Redis.Extensions;
+using Unjai.Platform.Mvc.CustomerUser.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +24,7 @@ builder.AddServiceDefaults();
 builder.Services.AddControllersWithViews();
 
 var jwtSetting = builder.Configuration
-    .GetSection("Jwt")
+    .GetSection(JwtSettingConfig.Section)
     .Get<JwtSetting>()
     ?? throw new InvalidOperationException("Jwt configuration missing");
 
@@ -45,7 +45,7 @@ if (string.IsNullOrWhiteSpace(jwtSetting.Secret))
 }
 
 var apiKeyOption = builder.Configuration
-    .GetSection("ApiKeys")
+    .GetSection(ApiKeyConfig.Section)
     .Get<ApiKeyOption>()
     ?? new ApiKeyOption();
 
@@ -66,37 +66,6 @@ if (string.IsNullOrWhiteSpace(apiKeyOption.HealthCheck))
 }
 
 builder.Services.AddAuthExtensions(jwtSetting, apiKeyOption);
-
-var primary = builder.Configuration.GetConnectionString("UnjaiDb");
-
-if (string.IsNullOrWhiteSpace(primary))
-{
-    throw new InvalidOperationException(
-        "ConnectionString 'UnjaiDb' must be configured.");
-}
-
-var read = builder.Configuration.GetConnectionString("UnjaiDbRead");
-if (string.IsNullOrWhiteSpace(read))
-{
-    logger.LogWarning(
-        "ConnectionString 'UnjaiDbRead' is missing. Falling back to 'UnjaiDb'.");
-
-    read = primary;
-}
-
-var write = builder.Configuration.GetConnectionString("UnjaiDbWrite");
-if (string.IsNullOrWhiteSpace(write))
-{
-    logger.LogWarning(
-        "ConnectionString 'UnjaiDbWrite' is missing. Falling back to 'UnjaiDb'.");
-
-    write = primary;
-}
-
-builder.Services.AddPostgresClientExtension(
-    primary,
-    read,
-    write);
 
 var redisConnectionString =
     builder.Configuration.GetConnectionString("Redis");
@@ -121,7 +90,36 @@ builder.Services
 
 builder.Services.AddRateLimitingExtension();
 
-builder.Services.AddCustomerUserExtension();
+builder.Services.AddOptions<ApiOptions>()
+    .Configure<IConfiguration>((options, configuration) =>
+    {
+        var raw =
+            configuration["Api:BaseUrl"]
+            ?? configuration["UNJAI_PLATFORM_API_HTTP"];
+
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            throw new InvalidOperationException(
+                "Configuration value 'Api:BaseUrl' is not set. Configure 'Api:BaseUrl' or provide it via the Aspire environment variable.");
+        }
+
+        if (!Uri.TryCreate(raw, UriKind.Absolute, out var uri))
+        {
+            throw new InvalidOperationException(
+                $"Configuration value 'Api:BaseUrl' is invalid. The value '{raw}' must be an absolute URI.");
+        }
+
+        options.BaseUrl = uri;
+    })
+    .Validate(
+        options => options.BaseUrl.IsAbsoluteUri,
+        "Configuration value 'Api:BaseUrl' must be an absolute URI.");
+
+builder.Services.AddHttpClient(HttpClientNames.UserApi, (sp, client) =>
+{
+    var options = sp.GetRequiredService<IOptions<ApiOptions>>().Value;
+    client.BaseAddress = options.BaseUrl;
+});
 
 var app = builder.Build();
 
@@ -131,7 +129,6 @@ app.MapDefaultEndpoints();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.ApplyMigrations();
 }
 else
 {

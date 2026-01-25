@@ -33,15 +33,15 @@ var configuration = builder.Configuration;
 var jwtSecret = configuration.GetValue<string>("Jwt:Secret");
 var apiKeyHealthCheck = configuration.GetValue<string>("ApiKeys:HealthCheck");
 
-builder.AddProject<Projects.Unjai_Platform_Api>("unjai-platform-api")
+var apiProject = builder.AddProject<Projects.Unjai_Platform_Api>("unjai-platform-api")
     .WithReference(postgresdb).WaitFor(postgresdb)
     .WithReference(redis).WaitFor(redis)
     .WithEnvironment("Jwt__Secret", jwtSecret)
     .WithEnvironment("ApiKeys__HealthCheck", apiKeyHealthCheck);
 
 builder.AddProject<Projects.Unjai_Platform_Mvc_CustomerUser>("unjai-platform-mvc-customeruser")
-    .WithReference(postgresdb).WaitFor(postgresdb)
     .WithReference(redis).WaitFor(redis)
+    .WithReference(apiProject)
     .WithEnvironment("Jwt__Secret", jwtSecret)
     .WithEnvironment("ApiKeys__HealthCheck", apiKeyHealthCheck);
 
