@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using Unjai.Platform.Domain.Entities.OutboxMessages;
 using Unjai.Platform.Domain.Primitives;
 
 namespace Unjai.Platform.Infrastructure.Database;
@@ -43,4 +44,6 @@ internal class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
+
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 }
