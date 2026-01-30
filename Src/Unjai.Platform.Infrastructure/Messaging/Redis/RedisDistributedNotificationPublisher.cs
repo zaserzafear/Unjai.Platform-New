@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using Unjai.Platform.Infrastructure.Caching.Services;
-using Unjai.Platform.Infrastructure.RateLimiting.Services;
+using Unjai.Platform.Infrastructure.RateLimiting.Infrastructure.Redis;
 
 namespace Unjai.Platform.Infrastructure.Messaging.Redis;
 

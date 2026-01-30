@@ -1,4 +1,7 @@
-﻿namespace Unjai.Platform.Infrastructure.RateLimiting;
+﻿using Unjai.Platform.Infrastructure.RateLimiting.Abstractions;
+using Unjai.Platform.Infrastructure.RateLimiting.Core;
+
+namespace Unjai.Platform.Infrastructure.RateLimiting.Policies;
 
 internal sealed class FixedWindowPolicyResolver(
     IReadOnlyDictionary<string, RateLimitPolicy> policies

@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Unjai.Platform.Infrastructure.RateLimiting.Filters;
+using Unjai.Platform.Infrastructure.RateLimiting.AspNetCore.Filters;
+using Unjai.Platform.Infrastructure.RateLimiting.Core;
 
 namespace Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 

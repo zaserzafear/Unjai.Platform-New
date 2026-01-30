@@ -1,4 +1,4 @@
-﻿namespace Unjai.Platform.Infrastructure.RateLimiting;
+﻿namespace Unjai.Platform.Infrastructure.RateLimiting.Core;
 
 internal sealed record RateLimitResult(
     bool IsAllowed,

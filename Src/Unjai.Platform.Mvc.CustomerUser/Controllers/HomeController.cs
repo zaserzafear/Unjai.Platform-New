@@ -1,14 +1,17 @@
 using System.Diagnostics;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
-using Unjai.Platform.Infrastructure.RateLimiting.Configurations;
-using Unjai.Platform.Infrastructure.RateLimiting.Filters;
+using Unjai.Platform.Application.Models;
+using Unjai.Platform.Contracts.CustomerUsers.Dtos;
+using Unjai.Platform.Infrastructure.RateLimiting.AspNetCore.Filters;
+using Unjai.Platform.Infrastructure.RateLimiting.Core;
+using Unjai.Platform.Mvc.CustomerUser.Configurations;
 using Unjai.Platform.Mvc.CustomerUser.Models;
 using Unjai.Platform.Mvc.CustomerUser.Models.Home;
 
 namespace Unjai.Platform.Mvc.CustomerUser.Controllers;
 
-public class HomeController : Controller
+public class HomeController(IHttpClientFactory httpClientFactory) : Controller
 {
     public IActionResult Index()
     {
@@ -27,8 +30,23 @@ public class HomeController : Controller
     }
 
     [RequireRateLimiting(RateLimitPolicyKeys.GetUser)]
-    public IActionResult Me()
+    public async Task<IActionResult> MeAsync(CancellationToken cancellationToken)
     {
+        var httpClient = httpClientFactory.CreateClient(
+            HttpClientNames.InternalApi);
+
+        using var request = new HttpRequestMessage(
+            HttpMethod.Get,
+            "api/v1/users/123e4567-e89b-12d3-a456-426614174000");
+
+        using var response = await httpClient.SendAsync(
+            request,
+            HttpCompletionOption.ResponseHeadersRead,
+            cancellationToken);
+
+        var body = await response.Content.ReadFromJsonAsync<ApiResponse<CustomerUserDto>>(
+        cancellationToken: cancellationToken);
+
         var model = new MeViewModel
         {
             FullName = User.FindFirst("name")?.Value ?? "-",

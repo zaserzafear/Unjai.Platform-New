@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using Unjai.Platform.Infrastructure.Messaging.Redis;
 
-namespace Unjai.Platform.Infrastructure.RateLimiting.Services;
+namespace Unjai.Platform.Infrastructure.RateLimiting.Infrastructure.Redis;
 
 internal sealed class RateLimitBlockedService(
     ILogger<RateLimitBlockedService> logger,

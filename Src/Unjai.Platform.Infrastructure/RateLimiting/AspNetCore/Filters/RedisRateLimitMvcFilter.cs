@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Unjai.Platform.Infrastructure.RateLimiting.Core;
 
-namespace Unjai.Platform.Infrastructure.RateLimiting.Filters;
+namespace Unjai.Platform.Infrastructure.RateLimiting.AspNetCore.Filters;
 
 internal sealed class RedisRateLimitMvcFilter(
         RateLimitEnforcer enforcer,

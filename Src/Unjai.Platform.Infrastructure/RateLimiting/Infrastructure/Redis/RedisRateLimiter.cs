@@ -2,7 +2,7 @@
 using StackExchange.Redis;
 using Unjai.Platform.Infrastructure.Messaging.Redis;
 
-namespace Unjai.Platform.Infrastructure.RateLimiting;
+namespace Unjai.Platform.Infrastructure.RateLimiting.Infrastructure.Redis;
 
 internal sealed class RedisRateLimiter(
     IConnectionMultiplexer multiplexer,

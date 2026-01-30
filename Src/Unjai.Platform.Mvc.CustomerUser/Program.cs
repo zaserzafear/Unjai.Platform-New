@@ -3,6 +3,7 @@ using Unjai.Platform.Application.Extensions.Authentication;
 using Unjai.Platform.Application.Helpers;
 using Unjai.Platform.Infrastructure.Caching.Extensions;
 using Unjai.Platform.Infrastructure.Messaging.Extensions;
+using Unjai.Platform.Infrastructure.RateLimiting.AspNetCore.Delegates;
 using Unjai.Platform.Infrastructure.RateLimiting.Configurations;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 using Unjai.Platform.Infrastructure.Redis.Extensions;
@@ -20,6 +21,8 @@ var logger = loggerFactory.CreateLogger("Program");
 
 builder.AddServiceDefaults();
 
+builder.Services.AddHttpContextAccessor();
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -32,7 +35,7 @@ if (string.IsNullOrWhiteSpace(jwtSetting.Secret))
 {
     if (builder.Environment.IsDevelopment())
     {
-        jwtSetting.Secret = CryptoHelper.GenerateJwtSecret();
+        jwtSetting.Secret = CryptoHelper.GenerateSecret(64);
         logger.LogCritical(
             "SECURITY WARNING (DEV ONLY): Jwt:Secret was auto-generated. " +
             "COPY THIS VALUE AND STORE IT SECURELY. Value={Secret}",
@@ -53,7 +56,7 @@ if (string.IsNullOrWhiteSpace(apiKeyOption.HealthCheck))
 {
     if (builder.Environment.IsDevelopment())
     {
-        apiKeyOption.HealthCheck = CryptoHelper.GenerateApiKey();
+        apiKeyOption.HealthCheck = CryptoHelper.GenerateSecret(32);
         logger.LogCritical(
             "SECURITY WARNING (DEV ONLY): ApiKeys:HealthCheck was auto-generated. " +
             "COPY THIS VALUE AND STORE IT SECURELY. Value={ApiKey}",
@@ -83,10 +86,29 @@ else
 builder.Services.AddCachingExtension();
 builder.Services.AddRedisMessagingExtension();
 
-builder.Services
-    .AddOptions<RateLimitingOptions>()
-    .BindConfiguration(RateLimitingConfig.Section)
-    .ValidateOnStart();
+var rateLimitingOptions =
+    builder.Configuration
+        .GetSection(RateLimitingConfig.Section)
+        .Get<RateLimitingOptions>()
+    ?? throw new InvalidOperationException("RateLimiting configuration missing");
+
+if (string.IsNullOrWhiteSpace(rateLimitingOptions.Secret))
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        rateLimitingOptions.Secret = CryptoHelper.GenerateSecret(64);
+
+        logger.LogCritical(
+            "SECURITY WARNING (DEV ONLY): RateLimiting:Secret was auto-generated. " +
+            "COPY THIS VALUE AND STORE IT SECURELY. Value={Secret}",
+            rateLimitingOptions.Secret);
+    }
+    else
+    {
+        throw new InvalidOperationException(
+            "RateLimiting:Secret must be configured in production.");
+    }
+}
 
 builder.Services.AddRateLimitingExtension();
 
@@ -115,11 +137,12 @@ builder.Services.AddOptions<ApiOptions>()
         options => options.BaseUrl.IsAbsoluteUri,
         "Configuration value 'Api:BaseUrl' must be an absolute URI.");
 
-builder.Services.AddHttpClient(HttpClientNames.UserApi, (sp, client) =>
+builder.Services.AddHttpClient(HttpClientNames.InternalApi, (sp, client) =>
 {
     var options = sp.GetRequiredService<IOptions<ApiOptions>>().Value;
+
     client.BaseAddress = options.BaseUrl;
-});
+}).AddHttpMessageHandler<RateLimitContextHandler>();
 
 var app = builder.Build();
 

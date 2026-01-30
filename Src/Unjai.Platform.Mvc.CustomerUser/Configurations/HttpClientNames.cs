@@ -2,5 +2,5 @@
 
 public static class HttpClientNames
 {
-    public const string UserApi = "UserApi";
+    public const string InternalApi = "InternalApi";
 }

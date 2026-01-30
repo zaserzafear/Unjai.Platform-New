@@ -1,4 +1,4 @@
-﻿namespace Unjai.Platform.Api.Models;
+﻿namespace Unjai.Platform.Application.Models;
 
 public sealed class ApiResponse<T>
 {

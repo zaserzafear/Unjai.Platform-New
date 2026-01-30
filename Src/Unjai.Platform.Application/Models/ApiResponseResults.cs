@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
-using Unjai.Platform.Application.Models;
+using Microsoft.AspNetCore.Http;
 
-namespace Unjai.Platform.Api.Models;
+namespace Unjai.Platform.Application.Models;
 
 public static class ApiResponseResults
 {

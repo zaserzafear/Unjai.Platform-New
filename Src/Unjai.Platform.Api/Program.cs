@@ -53,6 +53,8 @@ builder.Services.AddEndpoints(typeof(Program).Assembly);
 
 builder.AddServiceDefaults();
 
+builder.Services.AddHttpContextAccessor();
+
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -66,7 +68,7 @@ if (string.IsNullOrWhiteSpace(jwtSetting.Secret))
 {
     if (builder.Environment.IsDevelopment())
     {
-        jwtSetting.Secret = CryptoHelper.GenerateJwtSecret();
+        jwtSetting.Secret = CryptoHelper.GenerateSecret(64);
         logger.LogCritical(
             "SECURITY WARNING (DEV ONLY): Jwt:Secret was auto-generated. " +
             "COPY THIS VALUE AND STORE IT SECURELY. Value={Secret}",
@@ -87,7 +89,7 @@ if (string.IsNullOrWhiteSpace(apiKeyOption.HealthCheck))
 {
     if (builder.Environment.IsDevelopment())
     {
-        apiKeyOption.HealthCheck = CryptoHelper.GenerateApiKey();
+        apiKeyOption.HealthCheck = CryptoHelper.GenerateSecret(32);
         logger.LogCritical(
             "SECURITY WARNING (DEV ONLY): ApiKeys:HealthCheck was auto-generated. " +
             "COPY THIS VALUE AND STORE IT SECURELY. Value={ApiKey}",
@@ -148,10 +150,29 @@ else
 builder.Services.AddCachingExtension();
 builder.Services.AddRedisMessagingExtension();
 
-builder.Services
-    .AddOptions<RateLimitingOptions>()
-    .BindConfiguration(RateLimitingConfig.Section)
-    .ValidateOnStart();
+var rateLimitingOptions =
+    builder.Configuration
+        .GetSection(RateLimitingConfig.Section)
+        .Get<RateLimitingOptions>()
+    ?? throw new InvalidOperationException("RateLimiting configuration missing");
+
+if (string.IsNullOrWhiteSpace(rateLimitingOptions.Secret))
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        rateLimitingOptions.Secret = CryptoHelper.GenerateSecret(64);
+
+        logger.LogCritical(
+            "SECURITY WARNING (DEV ONLY): RateLimiting:Secret was auto-generated. " +
+            "COPY THIS VALUE AND STORE IT SECURELY. Value={Secret}",
+            rateLimitingOptions.Secret);
+    }
+    else
+    {
+        throw new InvalidOperationException(
+            "RateLimiting:Secret must be configured in production.");
+    }
+}
 
 builder.Services.AddRateLimitingExtension();
 

@@ -32,17 +32,20 @@ var redis = builder.AddRedis("Redis")
 var configuration = builder.Configuration;
 var jwtSecret = configuration.GetValue<string>("Jwt:Secret");
 var apiKeyHealthCheck = configuration.GetValue<string>("ApiKeys:HealthCheck");
+var rateLimitingSecret = configuration.GetValue<string>("RateLimiting:Secret");
 
 var apiProject = builder.AddProject<Projects.Unjai_Platform_Api>("unjai-platform-api")
     .WithReference(postgresdb).WaitFor(postgresdb)
     .WithReference(redis).WaitFor(redis)
     .WithEnvironment("Jwt__Secret", jwtSecret)
-    .WithEnvironment("ApiKeys__HealthCheck", apiKeyHealthCheck);
+    .WithEnvironment("ApiKeys__HealthCheck", apiKeyHealthCheck)
+    .WithEnvironment("RateLimiting__Secret", rateLimitingSecret);
 
 builder.AddProject<Projects.Unjai_Platform_Mvc_CustomerUser>("unjai-platform-mvc-customeruser")
     .WithReference(redis).WaitFor(redis)
     .WithReference(apiProject)
     .WithEnvironment("Jwt__Secret", jwtSecret)
-    .WithEnvironment("ApiKeys__HealthCheck", apiKeyHealthCheck);
+    .WithEnvironment("ApiKeys__HealthCheck", apiKeyHealthCheck)
+    .WithEnvironment("RateLimiting__Secret", rateLimitingSecret);
 
 builder.Build().Run();
