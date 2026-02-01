@@ -3,7 +3,7 @@ using Unjai.Platform.Infrastructure.RateLimiting.Core;
 
 namespace Unjai.Platform.Infrastructure.RateLimiting.Policies;
 
-internal sealed class FixedWindowPolicyResolver(
+internal sealed class PolicyResolver(
     IReadOnlyDictionary<string, RateLimitPolicy> policies
     ) : IRateLimitPolicyResolver
 {

@@ -32,8 +32,11 @@ internal sealed class RateLimitEnforcer(
 
         var allowed = await rateLimiter.IsAllowedAsync(
             key,
+            policy.Strategy,
             policy.Limit,
-            policy.Window);
+            policy.Window,
+            policy.TokensPerPeriod,
+            policy.ReplenishmentPeriod);
 
         if (!allowed)
             return RateLimitResult.Rejected(policy);

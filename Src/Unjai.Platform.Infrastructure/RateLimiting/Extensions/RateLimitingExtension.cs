@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Unjai.Platform.Infrastructure.RateLimiting.Abstractions;
 using Unjai.Platform.Infrastructure.RateLimiting.AspNetCore.Delegates;
 using Unjai.Platform.Infrastructure.RateLimiting.Configurations;
@@ -30,24 +29,23 @@ public static class RateLimitingExtension
             {
                 policies[key] = new RateLimitPolicy(
                     Name: key,
+                    Strategy: policy.Strategy,
                     Limit: policy.Limit,
-                    Window: policy.Window);
+                    Window: policy.Window,
+                    TokensPerPeriod: policy.TokensPerPeriod,
+                    ReplenishmentPeriod: policy.ReplenishmentPeriod);
             }
 
-            return new FixedWindowPolicyResolver(policies);
+            return new PolicyResolver(policies);
         });
 
         services.AddSingleton<IRateLimitContextSigner>(sp =>
         {
-            var options = sp
-                .GetRequiredService<IOptions<RateLimitingOptions>>()
-                .Value;
-
-            var secret = Convert.FromBase64String(options.Secret);
+            var secret = Convert.FromBase64String(rateLimitingOptions.Secret);
 
             return new HmacRateLimitContextSigner(
                 secret,
-                options.ContextTtl);
+                rateLimitingOptions.ContextTtl);
         });
     }
 }
