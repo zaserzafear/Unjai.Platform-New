@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
+﻿using Microsoft.AspNetCore.Mvc.Filters;
+using Unjai.Platform.Infrastructure.RateLimiting.Abstractions;
 using Unjai.Platform.Infrastructure.RateLimiting.Core;
 
 namespace Unjai.Platform.Infrastructure.RateLimiting.AspNetCore.Filters;
 
 internal sealed class RedisRateLimitMvcFilter(
         RateLimitEnforcer enforcer,
+        IMvcRateLimitResultFactory resultFactory,
         string policyName) : IAsyncActionFilter
 {
     public async Task OnActionExecutionAsync(
@@ -20,7 +20,7 @@ internal sealed class RedisRateLimitMvcFilter(
         if (!result.IsAllowed)
         {
             context.Result =
-                new StatusCodeResult(StatusCodes.Status429TooManyRequests);
+                resultFactory.CreateTooManyRequestsResult(context.HttpContext);
             return;
         }
 

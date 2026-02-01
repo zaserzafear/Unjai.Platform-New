@@ -3,10 +3,12 @@ using Unjai.Platform.Application.Extensions.Authentication;
 using Unjai.Platform.Application.Helpers;
 using Unjai.Platform.Infrastructure.Caching.Extensions;
 using Unjai.Platform.Infrastructure.Messaging.Extensions;
+using Unjai.Platform.Infrastructure.RateLimiting.Abstractions;
 using Unjai.Platform.Infrastructure.RateLimiting.AspNetCore.Delegates;
 using Unjai.Platform.Infrastructure.RateLimiting.Configurations;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 using Unjai.Platform.Infrastructure.Redis.Extensions;
+using Unjai.Platform.Mvc.CustomerUser;
 using Unjai.Platform.Mvc.CustomerUser.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -115,6 +117,7 @@ if (string.IsNullOrWhiteSpace(rateLimitingOptions.Secret))
 }
 
 builder.Services.AddRateLimitingExtension(rateLimitingOptions);
+builder.Services.AddScoped<IMvcRateLimitResultFactory, MvcRateLimitResultFactory>();
 
 builder.Services.AddOptions<ApiOptions>()
     .Configure<IConfiguration>((options, configuration) =>

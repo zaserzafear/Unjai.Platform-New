@@ -13,18 +13,21 @@ namespace Unjai.Platform.Mvc.CustomerUser.Controllers;
 
 public class HomeController(IHttpClientFactory httpClientFactory) : Controller
 {
+    [EnforceRateLimit(RateLimitPolicyKeys.Default)]
     public IActionResult Index()
     {
         return View();
     }
 
     [Route("privacy")]
+    [EnforceRateLimit(RateLimitPolicyKeys.Default)]
     public IActionResult Privacy()
     {
         return View();
     }
 
     [Route("error")]
+    [EnforceRateLimit(RateLimitPolicyKeys.Default)]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
@@ -32,7 +35,7 @@ public class HomeController(IHttpClientFactory httpClientFactory) : Controller
     }
 
     [Route("me")]
-    [RequireRateLimiting(RateLimitPolicyKeys.GetUser)]
+    [EnforceRateLimit(RateLimitPolicyKeys.GetUser)]
     public async Task<IActionResult> MeAsync(CancellationToken cancellationToken)
     {
         var httpClient = httpClientFactory.CreateClient(

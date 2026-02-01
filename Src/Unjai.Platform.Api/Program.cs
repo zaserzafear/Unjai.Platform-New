@@ -1,6 +1,7 @@
 using System.Globalization;
 using Asp.Versioning;
 using Scalar.AspNetCore;
+using Unjai.Platform.Api;
 using Unjai.Platform.Api.Endpoints.Extensions;
 using Unjai.Platform.Application.Extensions.Authentication;
 using Unjai.Platform.Application.Helpers;
@@ -8,6 +9,7 @@ using Unjai.Platform.Application.Services.CustomerUsers.Extensions;
 using Unjai.Platform.Infrastructure.Caching.Extensions;
 using Unjai.Platform.Infrastructure.Database.Extensions;
 using Unjai.Platform.Infrastructure.Messaging.Extensions;
+using Unjai.Platform.Infrastructure.RateLimiting.Abstractions;
 using Unjai.Platform.Infrastructure.RateLimiting.Configurations;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 using Unjai.Platform.Infrastructure.Redis.Extensions;
@@ -175,6 +177,7 @@ if (string.IsNullOrWhiteSpace(rateLimitingOptions.Secret))
 }
 
 builder.Services.AddRateLimitingExtension(rateLimitingOptions);
+builder.Services.AddScoped<IMinimalRateLimitResultFactory, RateLimitResultFactory>();
 
 builder.Services.AddCustomerUserExtension();
 

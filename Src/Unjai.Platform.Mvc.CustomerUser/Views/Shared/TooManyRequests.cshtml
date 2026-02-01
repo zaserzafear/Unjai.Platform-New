@@ -1,0 +1,88 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Too Many Requests";
+}
+
+<div class="container" style="max-width: 720px; margin: 4rem auto;">
+    <div style="
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 2.5rem;
+        background-color: #ffffff;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    ">
+        <h1 style="
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #111827;
+        ">
+            Too many requests
+        </h1>
+
+        <p style="
+            font-size: 1rem;
+            color: #4b5563;
+            margin-bottom: 2rem;
+        ">
+            You have sent too many requests in a short period of time.
+            Please wait a moment and try again.
+        </p>
+
+        <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e5e7eb;" />
+
+        <h2 style="
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #111827;
+        ">
+            Request details
+        </h2>
+
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
+            <tbody>
+                <tr>
+                    <td style="padding: 0.5rem 0; color: #6b7280;">HTTP Status</td>
+                    <td style="padding: 0.5rem 0; font-weight: 500;">429</td>
+                </tr>
+                <tr>
+                    <td style="padding: 0.5rem 0; color: #6b7280;">Status Code</td>
+                    <td style="padding: 0.5rem 0; font-weight: 500;">RATE_LIMIT_EXCEEDED</td>
+                </tr>
+                <tr>
+                    <td style="padding: 0.5rem 0; color: #6b7280;">Message</td>
+                    <td style="padding: 0.5rem 0;">
+                        Too many requests. Please try again later.
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 0.5rem 0; color: #6b7280;">Trace ID</td>
+                    <td style="padding: 0.5rem 0; font-family: monospace;">
+                        @System.Diagnostics.Activity.Current?.TraceId
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 0.5rem 0; color: #6b7280;">Server Time (Unix)</td>
+                    <td style="padding: 0.5rem 0; font-family: monospace;">
+                        @DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="margin-top: 2.5rem;">
+            <a href="javascript:location.reload()" style="
+                display: inline-block;
+                padding: 0.6rem 1.2rem;
+                background-color: #2563eb;
+                color: #ffffff;
+                text-decoration: none;
+                border-radius: 6px;
+                font-weight: 500;
+            ">
+                Try again
+            </a>
+        </div>
+    </div>
+</div>

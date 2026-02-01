@@ -20,7 +20,7 @@ public sealed class GetUserEndpoint : IEndpoint
 
             return ApiResponseResults.ToHttpResult(result);
         })
-            .RequireRateLimiting(RateLimitPolicyKeys.GetUser)
+            .EnforceRateLimit(RateLimitPolicyKeys.GetUser)
             .MapToApiVersion(1);
     }
 }
