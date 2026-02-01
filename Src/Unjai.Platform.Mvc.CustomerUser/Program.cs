@@ -17,7 +17,7 @@ using var loggerFactory = LoggerFactory.Create(config =>
     config.AddConfiguration(builder.Configuration.GetSection("Logging"));
 });
 
-var logger = loggerFactory.CreateLogger("Program");
+var logger = loggerFactory.CreateLogger<Program>();
 
 builder.AddServiceDefaults();
 
