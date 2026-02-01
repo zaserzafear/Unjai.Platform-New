@@ -2,6 +2,6 @@
 
 internal static class CustomerUserEndpoints
 {
-    internal const string Base = "users";
-    internal const string Tag = "Users";
+    internal const string Base = "customer-users";
+    internal const string Tag = "CustomerUsers";
 }

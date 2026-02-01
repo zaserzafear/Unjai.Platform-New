@@ -18,17 +18,20 @@ public class HomeController(IHttpClientFactory httpClientFactory) : Controller
         return View();
     }
 
+    [Route("privacy")]
     public IActionResult Privacy()
     {
         return View();
     }
 
+    [Route("error")]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
+    [Route("me")]
     [RequireRateLimiting(RateLimitPolicyKeys.GetUser)]
     public async Task<IActionResult> MeAsync(CancellationToken cancellationToken)
     {
@@ -37,7 +40,7 @@ public class HomeController(IHttpClientFactory httpClientFactory) : Controller
 
         using var request = new HttpRequestMessage(
             HttpMethod.Get,
-            "api/v1/users/123e4567-e89b-12d3-a456-426614174000");
+            "api/v1/customer-users/123e4567-e89b-12d3-a456-426614174000");
 
         using var response = await httpClient.SendAsync(
             request,

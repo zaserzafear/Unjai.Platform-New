@@ -24,6 +24,10 @@ builder.AddServiceDefaults();
 builder.Services.AddHttpContextAccessor();
 
 // Add services to the container.
+builder.Services.Configure<RouteOptions>(options =>
+{
+    options.LowercaseUrls = true;
+});
 builder.Services.AddControllersWithViews();
 
 var jwtSetting = builder.Configuration
@@ -170,4 +174,4 @@ app.MapControllerRoute(
     .WithStaticAssets();
 
 
-app.Run();
+await app.RunAsync();
