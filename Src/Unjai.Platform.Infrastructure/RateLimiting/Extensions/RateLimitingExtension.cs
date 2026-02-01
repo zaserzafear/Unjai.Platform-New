@@ -13,7 +13,8 @@ namespace Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 public static class RateLimitingExtension
 {
     public static void AddRateLimitingExtension(
-        this IServiceCollection services)
+        this IServiceCollection services,
+        RateLimitingOptions rateLimitingOptions)
     {
         services.AddSingleton<RedisRateLimiter>();
         services.AddSingleton<RateLimitEnforcer>();
@@ -23,13 +24,9 @@ public static class RateLimitingExtension
 
         services.AddSingleton<IRateLimitPolicyResolver>(sp =>
         {
-            var options = sp
-                .GetRequiredService<IOptions<RateLimitingOptions>>()
-                .Value;
-
             var policies = new Dictionary<string, RateLimitPolicy>();
 
-            foreach (var (key, policy) in options.Policies)
+            foreach (var (key, policy) in rateLimitingOptions.Policies)
             {
                 policies[key] = new RateLimitPolicy(
                     Name: key,

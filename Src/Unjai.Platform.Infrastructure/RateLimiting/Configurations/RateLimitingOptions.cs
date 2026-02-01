@@ -10,6 +10,20 @@ public sealed class RateLimitingOptions
 
 public sealed class RateLimitPolicyOptions
 {
+    public RateLimitStrategy Strategy { get; set; }
+
+    // common
     public int Limit { get; set; }
     public TimeSpan Window { get; set; }
+
+    // token bucket specific
+    public int? TokensPerPeriod { get; set; }
+    public TimeSpan? ReplenishmentPeriod { get; set; }
+}
+
+public enum RateLimitStrategy
+{
+    FixedWindow,
+    SlidingWindow,
+    TokenBucket
 }

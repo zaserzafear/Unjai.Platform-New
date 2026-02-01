@@ -174,7 +174,7 @@ if (string.IsNullOrWhiteSpace(rateLimitingOptions.Secret))
     }
 }
 
-builder.Services.AddRateLimitingExtension();
+builder.Services.AddRateLimitingExtension(rateLimitingOptions);
 
 builder.Services.AddCustomerUserExtension();
 
