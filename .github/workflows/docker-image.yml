@@ -7,30 +7,43 @@ on:
     branches: ["main"]
 
 jobs:
-  build-api:
+  build:
     runs-on: ubuntu-latest
-    name: Build Web API
+    environment: production
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Build API image
-        run: |
-          docker build \
-            -f Src/Unjai.Platform.Api/Dockerfile \
-            -t harbor-registry.sleeping24hrs.com/unjai/unjai-platform-api:${{ github.sha }} \
-            .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-  build-mvc:
-    runs-on: ubuntu-latest
-    name: Build Web MVC
+      - name: Log into registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    steps:
-      - uses: actions/checkout@v4
+      - name: Build & push API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Src/Unjai.Platform.Api/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ vars.REGISTRY }}/${{ vars.PROJECT }}/unjai/unjai-platform-api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Build MVC image
-        run: |
-          docker build \
-            -f Src/Unjai.Platform.Mvc.CustomerUser/Dockerfile \
-            -t harbor-registry.sleeping24hrs.com/unjai/unjai-platform-mvc-customeruser:${{ github.sha }} \
-            .
+      - name: Build & push MVC image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Src/Unjai.Platform.Mvc.CustomerUser/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ vars.REGISTRY }}/${{ vars.PROJECT }}/unjai/unjai-platform-mvc-customeruser:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
