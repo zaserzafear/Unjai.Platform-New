@@ -7,15 +7,30 @@ on:
     branches: ["main"]
 
 jobs:
-  build:
+  build-api:
     runs-on: ubuntu-latest
+    name: Build Web API
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build Docker image
+      - name: Build API image
         run: |
           docker build \
             -f Src/Unjai.Platform.Api/Dockerfile \
-            -t harbor-registry.sleeping24hrs.com/unjai/unjai-platform-api:$(date +%s) \
+            -t harbor-registry.sleeping24hrs.com/unjai/unjai-platform-api:${{ github.sha }} \
+            .
+
+  build-mvc:
+    runs-on: ubuntu-latest
+    name: Build Web MVC
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build MVC image
+        run: |
+          docker build \
+            -f Src/Unjai.Platform.Mvc.CustomerUser/Dockerfile \
+            -t harbor-registry.sleeping24hrs.com/unjai/unjai-platform-mvc-customeruser:${{ github.sha }} \
             .
