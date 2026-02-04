@@ -2,17 +2,20 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build ./Src --file ./Src/Unjai.Platform.Api/Dockerfile --tag harbor-registry.sleeping24hrs.com:$(date +%s)
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -f Src/Unjai.Platform.Api/Dockerfile \
+            -t harbor-registry.sleeping24hrs.com/unjai/unjai-platform-api:$(date +%s) \
+            .
