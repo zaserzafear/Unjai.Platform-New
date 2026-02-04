@@ -1,4 +1,4 @@
-﻿namespace Unjai.Platform.Application.Extensions.Authentication;
+﻿namespace Unjai.Platform.Infrastructure.Security.Auth.Configurations;
 
 public static class ApiKeyConfig
 {

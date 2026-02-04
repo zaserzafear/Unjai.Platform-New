@@ -1,9 +1,8 @@
 using System.Globalization;
 using Asp.Versioning;
 using Scalar.AspNetCore;
-using Unjai.Platform.Api;
 using Unjai.Platform.Api.Endpoints.Extensions;
-using Unjai.Platform.Application.Extensions.Authentication;
+using Unjai.Platform.Api.RateLimiting;
 using Unjai.Platform.Application.Helpers;
 using Unjai.Platform.Application.Services.CustomerUsers.Extensions;
 using Unjai.Platform.Infrastructure.Caching.Extensions;
@@ -13,6 +12,10 @@ using Unjai.Platform.Infrastructure.RateLimiting.Abstractions;
 using Unjai.Platform.Infrastructure.RateLimiting.Configurations;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 using Unjai.Platform.Infrastructure.Redis.Extensions;
+using Unjai.Platform.Infrastructure.Security.Auth.Configurations;
+using Unjai.Platform.Infrastructure.Security.Auth.Extensions;
+using Unjai.Platform.Infrastructure.Security.Forwarding.Extensions;
+using Unjai.Platform.Infrastructure.Security.TrustedIpSources.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +26,12 @@ using var loggerFactory = LoggerFactory.Create(config =>
 });
 
 var logger = loggerFactory.CreateLogger<Program>();
+
+var trustIpSourceOptions = builder.Configuration
+    .GetSection(TrustIpSourceConfig.Section)
+    .Get<TrustIpSourceOptions>()
+    ?? new TrustIpSourceOptions();
+builder.Services.AddTrustedIpSources(trustIpSourceOptions);
 
 builder.Services.AddApiVersioning(options =>
 {
@@ -183,8 +192,11 @@ builder.Services.AddCustomerUserExtension();
 
 var app = builder.Build();
 
+app.UseTrustedIpSources();
+
+app.UseAuthExtensions();
+
 app.UseOutputCache();
-app.MapDefaultEndpoints();
 
 var apiVersionSetBuilder = app.NewApiVersionSet();
 
@@ -202,6 +214,8 @@ var versionedGroup = app
 
 app.MapEndpoints(versionedGroup);
 
+app.MapDefaultEndpoints();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -217,7 +231,5 @@ if (app.Environment.IsDevelopment())
 
     app.ApplyMigrations();
 }
-
-app.UseAuthExtensions();
 
 await app.RunAsync();

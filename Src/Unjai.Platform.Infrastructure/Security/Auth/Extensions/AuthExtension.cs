@@ -3,10 +3,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Unjai.Platform.Infrastructure.Security.Auth.Configurations;
+using Unjai.Platform.Infrastructure.Security.Auth.Delegates;
 
-namespace Unjai.Platform.Application.Extensions.Authentication;
+namespace Unjai.Platform.Infrastructure.Security.Auth.Extensions;
 
 public static class AuthExtension
 {
@@ -48,7 +49,7 @@ public static class AuthExtension
 
         services.AddAuthorization(options =>
         {
-            options.AddPolicy(ServiceDefaultsExtensions.HealthPolicyName,
+            options.AddPolicy(JwtPolicyConfig.HealthPolicyName,
                 policy => policy.Requirements.Add(new HealthChecksApiKeyRequirement(apiKeyOption.HealthCheck)));
         });
 

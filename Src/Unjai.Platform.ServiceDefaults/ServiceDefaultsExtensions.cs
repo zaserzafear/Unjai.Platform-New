@@ -10,6 +10,7 @@ using Npgsql;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using Unjai.Platform.Infrastructure.Security.Auth.Configurations;
 
 namespace Microsoft.Extensions.Hosting;
 
@@ -20,7 +21,6 @@ public static class ServiceDefaultsExtensions
 {
     private const string HealthEndpointPath = "/health";
     private const string AlivenessEndpointPath = "/alive";
-    public const string HealthPolicyName = "HealthChecks";
 
     public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
@@ -109,11 +109,11 @@ public static class ServiceDefaultsExtensions
     {
         builder.Services.AddRequestTimeouts(
             configure: static timeouts =>
-                timeouts.AddPolicy(HealthPolicyName, TimeSpan.FromSeconds(5)));
+                timeouts.AddPolicy(JwtPolicyConfig.HealthPolicyName, TimeSpan.FromSeconds(5)));
 
         builder.Services.AddOutputCache(
             configureOptions: static caching =>
-                caching.AddPolicy(HealthPolicyName,
+                caching.AddPolicy(JwtPolicyConfig.HealthPolicyName,
                 build: static policy => policy.Expire(TimeSpan.FromSeconds(10))));
 
         builder.Services.AddHealthChecks()
@@ -126,11 +126,11 @@ public static class ServiceDefaultsExtensions
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
         var healthChecks = app.MapGroup("")
-            .RequireAuthorization(HealthPolicyName);
+            .RequireAuthorization(JwtPolicyConfig.HealthPolicyName);
 
         healthChecks
-            .CacheOutput(HealthPolicyName)
-            .WithRequestTimeout(HealthPolicyName);
+            .CacheOutput(JwtPolicyConfig.HealthPolicyName)
+            .WithRequestTimeout(JwtPolicyConfig.HealthPolicyName);
 
         // All health checks must pass for app to be
         // considered ready to accept traffic after starting

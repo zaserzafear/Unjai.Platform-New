@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Options;
-using Unjai.Platform.Application.Extensions.Authentication;
 using Unjai.Platform.Application.Helpers;
 using Unjai.Platform.Infrastructure.Caching.Extensions;
 using Unjai.Platform.Infrastructure.Messaging.Extensions;
@@ -8,8 +7,12 @@ using Unjai.Platform.Infrastructure.RateLimiting.AspNetCore.Delegates;
 using Unjai.Platform.Infrastructure.RateLimiting.Configurations;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 using Unjai.Platform.Infrastructure.Redis.Extensions;
-using Unjai.Platform.Mvc.CustomerUser;
+using Unjai.Platform.Infrastructure.Security.Auth.Configurations;
+using Unjai.Platform.Infrastructure.Security.Auth.Extensions;
+using Unjai.Platform.Infrastructure.Security.Forwarding.Extensions;
+using Unjai.Platform.Infrastructure.Security.TrustedIpSources.Configurations;
 using Unjai.Platform.Mvc.CustomerUser.Configurations;
+using Unjai.Platform.Mvc.CustomerUser.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +27,12 @@ var logger = loggerFactory.CreateLogger<Program>();
 builder.AddServiceDefaults();
 
 builder.Services.AddHttpContextAccessor();
+
+var trustIpSourceOptions = builder.Configuration
+    .GetSection(TrustIpSourceConfig.Section)
+    .Get<TrustIpSourceOptions>()
+    ?? new TrustIpSourceOptions();
+builder.Services.AddTrustedIpSources(trustIpSourceOptions);
 
 // Add services to the container.
 builder.Services.Configure<RouteOptions>(options =>
@@ -153,8 +162,7 @@ builder.Services.AddHttpClient(HttpClientNames.InternalApi, (sp, client) =>
 
 var app = builder.Build();
 
-app.UseOutputCache();
-app.MapDefaultEndpoints();
+app.UseTrustedIpSources();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -169,12 +177,15 @@ app.UseRouting();
 
 app.UseAuthExtensions();
 
+app.UseOutputCache();
+
+app.MapDefaultEndpoints();
+
 app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-
 
 await app.RunAsync();
