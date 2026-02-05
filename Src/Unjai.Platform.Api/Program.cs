@@ -3,7 +3,6 @@ using Asp.Versioning;
 using Scalar.AspNetCore;
 using Unjai.Platform.Api.Endpoints.Extensions;
 using Unjai.Platform.Api.RateLimiting;
-using Unjai.Platform.Application.Helpers;
 using Unjai.Platform.Application.Services.CustomerUsers.Extensions;
 using Unjai.Platform.Infrastructure.Caching.Extensions;
 using Unjai.Platform.Infrastructure.Database.Extensions;
@@ -15,6 +14,7 @@ using Unjai.Platform.Infrastructure.Redis.Extensions;
 using Unjai.Platform.Infrastructure.Security.Auth.Configurations;
 using Unjai.Platform.Infrastructure.Security.Auth.Extensions;
 using Unjai.Platform.Infrastructure.Security.Forwarding.Extensions;
+using Unjai.Platform.Infrastructure.Security.Helpers;
 using Unjai.Platform.Infrastructure.Security.TrustedIpSources.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);

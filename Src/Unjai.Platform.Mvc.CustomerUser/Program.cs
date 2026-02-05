@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Options;
-using Unjai.Platform.Application.Helpers;
 using Unjai.Platform.Infrastructure.Caching.Extensions;
 using Unjai.Platform.Infrastructure.Messaging.Extensions;
 using Unjai.Platform.Infrastructure.RateLimiting.Abstractions;
@@ -10,6 +9,7 @@ using Unjai.Platform.Infrastructure.Redis.Extensions;
 using Unjai.Platform.Infrastructure.Security.Auth.Configurations;
 using Unjai.Platform.Infrastructure.Security.Auth.Extensions;
 using Unjai.Platform.Infrastructure.Security.Forwarding.Extensions;
+using Unjai.Platform.Infrastructure.Security.Helpers;
 using Unjai.Platform.Infrastructure.Security.TrustedIpSources.Configurations;
 using Unjai.Platform.Mvc.CustomerUser.Configurations;
 using Unjai.Platform.Mvc.CustomerUser.RateLimiting;

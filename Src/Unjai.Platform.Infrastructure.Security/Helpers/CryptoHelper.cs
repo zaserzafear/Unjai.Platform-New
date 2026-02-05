@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace Unjai.Platform.Application.Helpers;
+namespace Unjai.Platform.Infrastructure.Security.Helpers;
 
 public static class CryptoHelper
 {

@@ -20,6 +20,7 @@ COPY ["Src/Unjai.Platform.Domain/Unjai.Platform.Domain.csproj", "Src/Unjai.Platf
 COPY ["Src/Unjai.Platform.Extensions.ObjectMapper/Unjai.Platform.Extensions.ObjectMapper.csproj", "Src/Unjai.Platform.Extensions.ObjectMapper/"]
 COPY ["Src/Unjai.Platform.ServiceDefaults/Unjai.Platform.ServiceDefaults.csproj", "Src/Unjai.Platform.ServiceDefaults/"]
 COPY ["Src/Unjai.Platform.Infrastructure/Unjai.Platform.Infrastructure.csproj", "Src/Unjai.Platform.Infrastructure/"]
+COPY ["Src/Unjai.Platform.Infrastructure.Security/Unjai.Platform.Infrastructure.Security.csproj", "Src/Unjai.Platform.Infrastructure.Security/"]
 RUN dotnet restore "./Src/Unjai.Platform.Api/Unjai.Platform.Api.csproj"
 COPY . .
 WORKDIR "/src/Src/Unjai.Platform.Api"
