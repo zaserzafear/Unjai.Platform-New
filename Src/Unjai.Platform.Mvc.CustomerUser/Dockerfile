@@ -18,9 +18,8 @@ COPY ["Src/Unjai.Platform.Application/Unjai.Platform.Application.csproj", "Src/U
 COPY ["Src/Unjai.Platform.Contracts/Unjai.Platform.Contracts.csproj", "Src/Unjai.Platform.Contracts/"]
 COPY ["Src/Unjai.Platform.Domain/Unjai.Platform.Domain.csproj", "Src/Unjai.Platform.Domain/"]
 COPY ["Src/Unjai.Platform.Extensions.ObjectMapper/Unjai.Platform.Extensions.ObjectMapper.csproj", "Src/Unjai.Platform.Extensions.ObjectMapper/"]
-COPY ["Src/Unjai.Platform.ServiceDefaults/Unjai.Platform.ServiceDefaults.csproj", "Src/Unjai.Platform.ServiceDefaults/"]
 COPY ["Src/Unjai.Platform.Infrastructure/Unjai.Platform.Infrastructure.csproj", "Src/Unjai.Platform.Infrastructure/"]
-COPY ["Src/Unjai.Platform.Infrastructure.Security/Unjai.Platform.Infrastructure.Security.csproj", "Src/Unjai.Platform.Infrastructure.Security/"]
+COPY ["Src/Unjai.Platform.ServiceDefaults/Unjai.Platform.ServiceDefaults.csproj", "Src/Unjai.Platform.ServiceDefaults/"]
 RUN dotnet restore "./Src/Unjai.Platform.Mvc.CustomerUser/Unjai.Platform.Mvc.CustomerUser.csproj"
 COPY . .
 WORKDIR "/src/Src/Unjai.Platform.Mvc.CustomerUser"

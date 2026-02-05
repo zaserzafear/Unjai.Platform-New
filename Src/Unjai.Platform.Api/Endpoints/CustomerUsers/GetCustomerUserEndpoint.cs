@@ -1,5 +1,5 @@
 ﻿using Unjai.Platform.Api.Endpoints.Extensions;
-using Unjai.Platform.Application.Models;
+using Unjai.Platform.Api.Models;
 using Unjai.Platform.Application.Services.CustomerUsers.GetCustomerUser;
 using Unjai.Platform.Infrastructure.RateLimiting.Core;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
