@@ -1,5 +1,6 @@
 ﻿using Unjai.Platform.Api.Endpoints.Extensions;
 using Unjai.Platform.Application.Models;
+using Unjai.Platform.Contracts.Models;
 using Unjai.Platform.Infrastructure.RateLimiting.Core;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 

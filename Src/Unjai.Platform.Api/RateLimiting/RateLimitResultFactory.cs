@@ -1,4 +1,5 @@
 ﻿using Unjai.Platform.Application.Models;
+using Unjai.Platform.Contracts.Models;
 using Unjai.Platform.Infrastructure.RateLimiting.Abstractions;
 
 namespace Unjai.Platform.Api.RateLimiting;

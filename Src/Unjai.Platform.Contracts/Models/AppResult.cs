@@ -1,4 +1,4 @@
-﻿namespace Unjai.Platform.Application.Models;
+﻿namespace Unjai.Platform.Contracts.Models;
 
 public sealed class AppResult<T>
 {

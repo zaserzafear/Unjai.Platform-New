@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
-using Unjai.Platform.Application.Models;
 using Unjai.Platform.Contracts.CustomerUsers.Dtos;
+using Unjai.Platform.Contracts.Models;
 using Unjai.Platform.Infrastructure.RateLimiting.AspNetCore.Filters;
 using Unjai.Platform.Infrastructure.RateLimiting.Core;
 using Unjai.Platform.Mvc.CustomerUser.Configurations;

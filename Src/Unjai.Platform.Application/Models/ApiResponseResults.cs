@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
+using Unjai.Platform.Contracts.Models;
 
 namespace Unjai.Platform.Application.Models;
 
