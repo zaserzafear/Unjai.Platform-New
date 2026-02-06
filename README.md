@@ -22,7 +22,7 @@ dotnet tool update --global dotnet-ef
 ### Environment Variable:
 Migrations use a design-time DbContext factory and read the connection string from an environment variable.
 ```bash
-export POSTGRES_CONNECTIONSTRING="Host=localhost;Port=5432;Username=postgres;Password=postgres"
+export POSTGRES_CONNECTIONSTRING='Host=localhost;Port=5432;Username=postgres;Password=postgres'
 ```
 
 ### Add Migration
