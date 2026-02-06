@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace Unjai.Platform.Infrastructure.Database.Extensions;
+namespace Unjai.Platform.Infrastructure.Persistent.Database.Extensions;
 
 public static class PostgresClientExtension
 {

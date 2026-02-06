@@ -12,6 +12,7 @@
     <Project Path="Src/Unjai.Platform.Domain/Unjai.Platform.Domain.csproj" Id="bf4e4921-1056-4ad2-be97-38d15014fff7" />
   </Folder>
   <Folder Name="/04-Infrastructure/">
+    <Project Path="Src/Unjai.Platform.Infrastructure.Persistent/Unjai.Platform.Infrastructure.Persistent.csproj" Id="2bc331c8-f248-4cb6-8dfd-a43df9589a0a" />
     <Project Path="Src/Unjai.Platform.Infrastructure/Unjai.Platform.Infrastructure.csproj" Id="8935d0fc-9d7e-4e68-a6b7-fa919a13e7fe" />
   </Folder>
   <Folder Name="/05-Contracts/">

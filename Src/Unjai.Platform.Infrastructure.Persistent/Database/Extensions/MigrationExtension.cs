@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Unjai.Platform.Infrastructure.Database.Extensions;
+namespace Unjai.Platform.Infrastructure.Persistent.Database.Extensions;
 
 public static class MigrationExtension
 {

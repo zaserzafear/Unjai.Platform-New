@@ -2,21 +2,18 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using Unjai.Platform.Infrastructure.Database;
+using Unjai.Platform.Infrastructure.Persistent.Database;
 
 #nullable disable
 
-namespace Unjai.Platform.Infrastructure.Migrations
+namespace Unjai.Platform.Infrastructure.Persistent.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260125075400_OutboxMessage")]
-    partial class OutboxMessage
+    partial class AppDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

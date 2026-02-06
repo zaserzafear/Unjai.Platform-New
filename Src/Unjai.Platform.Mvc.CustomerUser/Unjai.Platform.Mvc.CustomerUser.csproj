@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Unjai.Platform.Application\Unjai.Platform.Application.csproj" />
+    <ProjectReference Include="..\Unjai.Platform.Contracts\Unjai.Platform.Contracts.csproj" />
     <ProjectReference Include="..\Unjai.Platform.Infrastructure\Unjai.Platform.Infrastructure.csproj" />
     <ProjectReference Include="..\Unjai.Platform.ServiceDefaults\Unjai.Platform.ServiceDefaults.csproj" />
   </ItemGroup>

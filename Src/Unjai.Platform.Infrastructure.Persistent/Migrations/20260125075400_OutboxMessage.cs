@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿#nullable disable
 
-#nullable disable
+using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Unjai.Platform.Infrastructure.Migrations
+namespace Unjai.Platform.Infrastructure.Persistent.Migrations
 {
     /// <inheritdoc />
     public partial class OutboxMessage : Migration

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Unjai.Platform.Domain.Entities.OutboxMessages;
 using Unjai.Platform.Domain.Primitives;
 
-namespace Unjai.Platform.Infrastructure.Database;
+namespace Unjai.Platform.Infrastructure.Persistent.Database;
 
 internal class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {

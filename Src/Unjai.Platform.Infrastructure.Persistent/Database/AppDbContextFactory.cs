@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace Unjai.Platform.Infrastructure.Database;
+namespace Unjai.Platform.Infrastructure.Persistent.Database;
 
 internal sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
 {

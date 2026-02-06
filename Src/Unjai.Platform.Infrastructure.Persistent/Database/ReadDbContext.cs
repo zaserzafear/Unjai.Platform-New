@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Unjai.Platform.Infrastructure.Database;
+namespace Unjai.Platform.Infrastructure.Persistent.Database;
 
 internal sealed class ReadDbContext : AppDbContext
 {

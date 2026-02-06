@@ -9,7 +9,7 @@
     <aside class="account-sidebar">
         <div class="profile-summary">
             <div class="avatar">
-                <img src="https://via.placeholder.com/80" alt="Avatar" />
+                <img src="~/images/avatar-mock.jpg" alt="Avatar" />
             </div>
             <div class="profile-info">
                 <strong>@Model.FullName</strong>
@@ -74,6 +74,22 @@
 </div>
 
 <style>
+    .avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        overflow: hidden;
+        flex-shrink: 0;
+        background: #eee;
+    }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
     .account-container {
         display: flex;
         gap: 24px;
@@ -95,9 +111,9 @@
         margin-bottom: 24px;
     }
 
-    .profile-summary img {
-        border-radius: 50%;
-    }
+        .profile-summary img {
+            border-radius: 50%;
+        }
 
     .menu {
         list-style: none;
@@ -105,27 +121,27 @@
         margin: 0;
     }
 
-    .menu li {
-        margin-bottom: 8px;
-    }
+        .menu li {
+            margin-bottom: 8px;
+        }
 
-    .menu a {
-        display: block;
-        padding: 10px 12px;
-        border-radius: 6px;
-        text-decoration: none;
-        color: #333;
-    }
+        .menu a {
+            display: block;
+            padding: 10px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #333;
+        }
 
-    .menu li.active a,
-    .menu a:hover {
-        background: #f0f4ff;
-        color: #2f5cff;
-    }
+            .menu li.active a,
+            .menu a:hover {
+                background: #f0f4ff;
+                color: #2f5cff;
+            }
 
-    .menu li.logout a {
-        color: #d9534f;
-    }
+        .menu li.logout a {
+            color: #d9534f;
+        }
 
     /* Content */
     .account-content {
@@ -139,15 +155,15 @@
         padding: 24px;
     }
 
-    .card .row {
-        display: flex;
-        margin-bottom: 16px;
-    }
+        .card .row {
+            display: flex;
+            margin-bottom: 16px;
+        }
 
-    .card label {
-        width: 180px;
-        color: #777;
-    }
+        .card label {
+            width: 180px;
+            color: #777;
+        }
 
     .actions {
         margin-top: 24px;

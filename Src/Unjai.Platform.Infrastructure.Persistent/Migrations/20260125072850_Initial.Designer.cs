@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using Unjai.Platform.Infrastructure.Database;
+using Unjai.Platform.Infrastructure.Persistent.Database;
 
 #nullable disable
 
-namespace Unjai.Platform.Infrastructure.Migrations
+namespace Unjai.Platform.Infrastructure.Persistent.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260125072850_Initial")]
