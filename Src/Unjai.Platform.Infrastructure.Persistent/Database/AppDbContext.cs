@@ -1,7 +1,8 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using Unjai.Platform.Domain.Entities.Abstractions;
 using Unjai.Platform.Domain.Entities.OutboxMessages;
-using Unjai.Platform.Domain.Primitives;
+using Unjai.Platform.Domain.Entities.Tenants;
 
 namespace Unjai.Platform.Infrastructure.Persistent.Database;
 
@@ -46,4 +47,5 @@ internal class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(
     }
 
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<Tenant> Tenants => Set<Tenant>();
 }

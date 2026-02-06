@@ -10,5 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Unjai.Platform.Domain\Unjai.Platform.Domain.csproj" />
+    <ProjectReference Include="..\Unjai.Platform.Infrastructure\Unjai.Platform.Infrastructure.csproj" />
   </ItemGroup>
 </Project>

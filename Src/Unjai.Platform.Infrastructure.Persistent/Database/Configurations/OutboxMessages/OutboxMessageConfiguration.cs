@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Unjai.Platform.Domain.Entities.OutboxMessages;
 
-namespace Unjai.Platform.Infrastructure.Persistent.Database.Configurations;
+namespace Unjai.Platform.Infrastructure.Persistent.Database.Configurations.OutboxMessages;
 
 internal sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<OutboxMessage>
 {

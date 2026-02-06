@@ -1,4 +1,6 @@
-﻿namespace Unjai.Platform.Domain.Primitives;
+﻿using Unjai.Platform.Domain.Primitives;
+
+namespace Unjai.Platform.Domain.Entities.Abstractions;
 
 public abstract class EntityBase : DomainEventManager, IEntityBase
 {
