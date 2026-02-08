@@ -1,4 +1,4 @@
-﻿namespace Unjai.Platform.Domain.Entities.Abstractions;
+﻿namespace Unjai.Platform.Domain.Abstractions;
 
 public interface ITenantOwned
 {

@@ -7,12 +7,12 @@ namespace Unjai.Platform.Application.Services.CustomerUsers.GetCustomerUser;
 
 public interface IGetCustomerUserV1
 {
-    Task<AppResult<CustomerUserDto>> Handle(Guid userId, CancellationToken cancellationToken);
+    Task<AppResult<GetCustomerUserReponseDto>> Handle(Guid userId, CancellationToken cancellationToken);
 }
 
 internal sealed class GetCustomerUserV1(ILogger<GetCustomerUserV1> logger) : IGetCustomerUserV1
 {
-    public async Task<AppResult<CustomerUserDto>> Handle(Guid userId, CancellationToken cancellationToken)
+    public async Task<AppResult<GetCustomerUserReponseDto>> Handle(Guid userId, CancellationToken cancellationToken)
     {
         try
         {
@@ -26,7 +26,7 @@ internal sealed class GetCustomerUserV1(ILogger<GetCustomerUserV1> logger) : IGe
                 userId
             );
 
-            return AppResult<CustomerUserDto>.Fail(
+            return AppResult<GetCustomerUserReponseDto>.Fail(
                 httpStatus: 404,
                 statusCode: "CUSTOMER_USER_NOT_FOUND",
                 message: ex.Message
@@ -40,7 +40,7 @@ internal sealed class GetCustomerUserV1(ILogger<GetCustomerUserV1> logger) : IGe
                 userId
             );
 
-            return AppResult<CustomerUserDto>.Fail(
+            return AppResult<GetCustomerUserReponseDto>.Fail(
                 httpStatus: 500,
                 statusCode: "INTERNAL_SERVER_ERROR",
                 message: ex.Message

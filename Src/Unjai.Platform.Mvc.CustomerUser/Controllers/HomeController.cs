@@ -50,7 +50,7 @@ public class HomeController(IHttpClientFactory httpClientFactory) : Controller
             HttpCompletionOption.ResponseHeadersRead,
             cancellationToken);
 
-        var body = await response.Content.ReadFromJsonAsync<ApiResponse<CustomerUserDto>>(
+        var body = await response.Content.ReadFromJsonAsync<ApiResponse<GetCustomerUserReponseDto>>(
         cancellationToken: cancellationToken);
 
         var model = new MeViewModel

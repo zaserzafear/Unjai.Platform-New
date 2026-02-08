@@ -9,11 +9,15 @@ public sealed class AppResult<T>
     public T? Data { get; init; }
     public long ServerUnixTime { get; init; }
 
-    public static AppResult<T> Ok(T data, string statusCode = "SUCCESS", string message = "")
+    public static AppResult<T> Ok(
+        int httpStatus = 200,
+        string statusCode = "SUCCESS",
+        string message = "",
+        T? data = default)
         => new()
         {
             Success = true,
-            HttpStatus = 200,
+            HttpStatus = httpStatus,
             StatusCode = statusCode,
             Message = message,
             Data = data,

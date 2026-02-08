@@ -2,11 +2,11 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Unjai.Platform.Domain.Entities.Tenants;
 
-namespace Unjai.Platform.Infrastructure.Persistent.Database.Configurations.Tenants;
+namespace Unjai.Platform.Infrastructure.Persistent.Database.Configurations;
 
-internal sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
+internal sealed class TenantConfiguration : BaseEntityConfiguration<Tenant>
 {
-    public void Configure(EntityTypeBuilder<Tenant> entity)
+    public override void Configure(EntityTypeBuilder<Tenant> entity)
     {
         entity.ToTable("tenants");
 
@@ -37,17 +37,6 @@ internal sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
             .IsRequired()
             .HasDefaultValue(true);
 
-        entity.Property(o => o.IsDeleted)
-            .HasColumnName("is_deleted")
-            .IsRequired()
-            .HasDefaultValue(false);
-
-        entity.Property(o => o.CreatedAt)
-            .HasColumnName("created_at")
-            .IsRequired();
-
-        entity.Property(o => o.UpdatedAt)
-            .HasColumnName("updated_at")
-            .IsRequired();
+        base.Configure(entity);
     }
 }

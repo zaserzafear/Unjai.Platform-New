@@ -1,4 +1,4 @@
-﻿namespace Unjai.Platform.Domain.Entities.OutboxMessages;
+﻿namespace Unjai.Platform.Infrastructure.Persistent.Outbox;
 
 public sealed class OutboxMessage
 {

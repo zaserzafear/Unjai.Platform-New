@@ -4,4 +4,7 @@
     <ProjectReference Include="..\Unjai.Platform.Domain\Unjai.Platform.Domain.csproj" />
     <ProjectReference Include="..\Unjai.Platform.Extensions.ObjectMapper\Unjai.Platform.Extensions.ObjectMapper.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Services\Tenants\Exceptions\" />
+  </ItemGroup>
 </Project>
