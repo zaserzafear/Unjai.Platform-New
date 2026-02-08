@@ -7,12 +7,15 @@ namespace Unjai.Platform.Application.Services.Tenants.GetTenant;
 
 public interface IGetTenantAllV1
 {
-    Task<AppResult<IReadOnlyList<GetTenantResponseDto>>> Handle(int page, int pageSize, CancellationToken cancellationToken);
+    Task<AppResult<IReadOnlyList<GetTenantResponseDto>>> Handle(int page, int pageSize, CancellationToken ct);
 }
 
-internal sealed class GetTenantAllV1(ILogger<GetTenantAllV1> logger, ITenantRepository repository) : IGetTenantAllV1
+internal sealed class GetTenantAllV1(
+    ILogger<GetTenantAllV1> logger,
+    ITenantRepository repository
+    ) : IGetTenantAllV1
 {
-    public async Task<AppResult<IReadOnlyList<GetTenantResponseDto>>> Handle(int page, int pageSize, CancellationToken cancellationToken)
+    public async Task<AppResult<IReadOnlyList<GetTenantResponseDto>>> Handle(int page, int pageSize, CancellationToken ct)
     {
         if (pageSize is < 1 or > 100)
         {
@@ -34,7 +37,7 @@ internal sealed class GetTenantAllV1(ILogger<GetTenantAllV1> logger, ITenantRepo
 
         try
         {
-            var result = await repository.GetAllAsync(page, pageSize, cancellationToken);
+            var result = await repository.GetAllAsync(page, pageSize, ct);
 
             if (result.Count == 0)
             {

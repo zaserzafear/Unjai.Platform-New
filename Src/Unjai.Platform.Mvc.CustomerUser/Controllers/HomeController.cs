@@ -36,7 +36,7 @@ public class HomeController(IHttpClientFactory httpClientFactory) : Controller
 
     [Route("me")]
     [EnforceRateLimit(RateLimitPolicyKeys.GetUser)]
-    public async Task<IActionResult> MeAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> MeAsync(CancellationToken ct)
     {
         var httpClient = httpClientFactory.CreateClient(
             HttpClientNames.InternalApi);
@@ -48,10 +48,10 @@ public class HomeController(IHttpClientFactory httpClientFactory) : Controller
         using var response = await httpClient.SendAsync(
             request,
             HttpCompletionOption.ResponseHeadersRead,
-            cancellationToken);
+            ct);
 
         var body = await response.Content.ReadFromJsonAsync<ApiResponse<GetCustomerUserReponseDto>>(
-        cancellationToken: cancellationToken);
+        cancellationToken: ct);
 
         var model = new MeViewModel
         {

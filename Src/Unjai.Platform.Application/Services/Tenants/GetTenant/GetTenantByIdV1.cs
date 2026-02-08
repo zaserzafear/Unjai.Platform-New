@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.Logging;
 using Unjai.Platform.Application.Repositories.Tenants;
 using Unjai.Platform.Contracts.Models;
 using Unjai.Platform.Contracts.Tenants.Dtos;
@@ -7,18 +8,30 @@ namespace Unjai.Platform.Application.Services.Tenants.GetTenant;
 
 public interface IGetTenantByIdV1
 {
-    Task<AppResult<GetTenantResponseDto>> Handle(Guid id, CancellationToken cancellationToken);
+    Task<AppResult<GetTenantResponseDto>> Handle(Guid id, CancellationToken ct);
 }
 
-internal sealed class GetTenantByIdV1(ILogger<GetTenantByIdV1> logger, ITenantRepository repository) : IGetTenantByIdV1
+internal sealed class GetTenantByIdV1(
+    ILogger<GetTenantByIdV1> logger,
+    ITenantRepository repository,
+    HybridCache cache)
+    : IGetTenantByIdV1
 {
-    public async Task<AppResult<GetTenantResponseDto>> Handle(Guid id, CancellationToken cancellationToken)
+    public async Task<AppResult<GetTenantResponseDto>> Handle(Guid id, CancellationToken ct)
     {
         try
         {
-            var result = await repository.GetByIdAsync(id, cancellationToken);
+            var cacheKey = TenantCacheKey.GetById(id);
 
-            if (result is null)
+            var tenant = await cache.GetOrCreateAsync(
+                cacheKey,
+                async ct =>
+                {
+                    return await repository.GetByIdAsync(id, ct);
+                },
+                cancellationToken: ct);
+
+            if (tenant is null)
             {
                 return AppResult<GetTenantResponseDto>.Fail(
                     httpStatus: 404,
@@ -29,12 +42,12 @@ internal sealed class GetTenantByIdV1(ILogger<GetTenantByIdV1> logger, ITenantRe
             else
             {
                 var response = new GetTenantResponseDto(
-                    result.Id,
-                    result.Code,
-                    result.Name,
-                    result.IsActive,
-                    result.CreatedAt,
-                    result.UpdatedAt
+                    tenant.Id,
+                    tenant.Code,
+                    tenant.Name,
+                    tenant.IsActive,
+                    tenant.CreatedAt,
+                    tenant.UpdatedAt
                 );
 
                 return AppResult<GetTenantResponseDto>.Ok(

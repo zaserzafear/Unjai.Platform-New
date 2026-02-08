@@ -2,42 +2,28 @@
 using Unjai.Platform.Application.Repositories.Tenants;
 using Unjai.Platform.Contracts.Models;
 using Unjai.Platform.Contracts.Tenants.Dtos;
+using Unjai.Platform.Domain.Abstractions;
+using Unjai.Platform.Infrastructure.Messaging.Redis;
 
 namespace Unjai.Platform.Application.Services.Tenants.UpdateTenant;
 
 public interface IUpdateTenantV1
 {
-    public Task<AppResult<object>> Handle(Guid id, UpdateTenantRequestDto request, CancellationToken cancellationToken);
+    public Task<AppResult<object>> Handle(Guid id, UpdateTenantRequestDto request, CancellationToken ct);
 }
 
-internal sealed class UpdateTenantV1(ILogger<UpdateTenantV1> logger, ITenantRepository repository) : IUpdateTenantV1
+internal sealed class UpdateTenantV1(
+    ILogger<UpdateTenantV1> logger,
+    IUnitOfWork unitOfWork,
+    ITenantRepository repository,
+    IDistributedNotificationPublisher distributedNotification)
+    : IUpdateTenantV1
 {
-    public async Task<AppResult<object>> Handle(Guid id, UpdateTenantRequestDto request, CancellationToken cancellationToken)
+    public async Task<AppResult<object>> Handle(Guid id, UpdateTenantRequestDto request, CancellationToken ct)
     {
         try
         {
-            var errors = new List<CreateTenantRequestValidationErrorDto>();
-
-            var nameExists = await repository.ExistsByNameAsync(request.Name, cancellationToken);
-            if (nameExists)
-            {
-                errors.Add(new CreateTenantRequestValidationErrorDto(
-                    Code: "TENANT_NAME_ALREADY_EXISTS",
-                    Message: $"Tenant with name '{request.Name}' already exists."
-                ));
-            }
-
-            if (errors.Count > 0)
-            {
-                return AppResult<object>.Fail(
-                    httpStatus: 409,
-                    statusCode: "TENANT_VALIDATION_FAILED",
-                    message: "Tenant validation failed.",
-                    data: errors
-                );
-            }
-
-            var entity = await repository.GetByIdAsync(id, cancellationToken);
+            var entity = await repository.GetByIdAsync(id, ct);
             if (entity is null)
             {
                 return AppResult<object>.Fail(
@@ -49,7 +35,11 @@ internal sealed class UpdateTenantV1(ILogger<UpdateTenantV1> logger, ITenantRepo
 
             entity.Name = request.Name;
 
-            await repository.UpdateAsync(entity, cancellationToken);
+            repository.Update(entity);
+            await unitOfWork.SaveChangesAsync(ct);
+
+            var cacheKey = TenantCacheKey.GetById(id);
+            await distributedNotification.NotifyCacheInvalidationAsync(cacheKey);
 
             return AppResult<object>.Ok(
                 httpStatus: 200,

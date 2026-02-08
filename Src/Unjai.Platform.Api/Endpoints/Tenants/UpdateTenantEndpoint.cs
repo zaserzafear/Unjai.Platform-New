@@ -19,9 +19,9 @@ public sealed class UpdateTenantEndpoint : IEndpoint
             Guid id,
             UpdateTenantRequestDto request,
             IUpdateTenantV1 useCase,
-            CancellationToken cancellationToken) =>
+            CancellationToken ct) =>
         {
-            var result = await useCase.Handle(id, request, cancellationToken);
+            var result = await useCase.Handle(id, request, ct);
 
             return ApiResponseResults.ToHttpResult(result);
         })

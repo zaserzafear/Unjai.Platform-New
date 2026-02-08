@@ -18,12 +18,12 @@ public sealed class GetTenantEndpoints : IEndpoint
             int? page,
             int? pageSize,
             IGetTenantAllV1 useCase,
-            CancellationToken cancellationToken) =>
+            CancellationToken ct) =>
         {
             var safePage = page.GetValueOrDefault(1);
             var safePageSize = pageSize.GetValueOrDefault(10);
 
-            var result = await useCase.Handle(safePage, safePageSize, cancellationToken);
+            var result = await useCase.Handle(safePage, safePageSize, ct);
 
             return ApiResponseResults.ToHttpResult(result);
         })
@@ -33,9 +33,9 @@ public sealed class GetTenantEndpoints : IEndpoint
         group.MapGet("{id:guid}", async (
             Guid id,
             IGetTenantByIdV1 useCase,
-            CancellationToken cancellationToken) =>
+            CancellationToken ct) =>
         {
-            var result = await useCase.Handle(id, cancellationToken);
+            var result = await useCase.Handle(id, ct);
 
             return ApiResponseResults.ToHttpResult(result);
         })
