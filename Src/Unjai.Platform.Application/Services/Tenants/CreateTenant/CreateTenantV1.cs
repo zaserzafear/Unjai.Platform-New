@@ -54,7 +54,7 @@ internal sealed class CreateTenantV1(ILogger<CreateTenantV1> logger, ITenantRepo
                 Name = request.Name,
             };
 
-            var result = await repository.Create(entity, cancellationToken);
+            var result = await repository.CreateAsync(entity, cancellationToken);
             if (result is not null)
             {
                 return AppResult<object>.Ok(

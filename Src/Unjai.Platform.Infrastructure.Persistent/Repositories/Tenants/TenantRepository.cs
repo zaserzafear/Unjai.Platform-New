@@ -7,7 +7,7 @@ namespace Unjai.Platform.Infrastructure.Persistent.Repositories.Tenants;
 
 internal sealed class TenantRepository(WriteDbContext writeDb, ReadDbContext readDb) : ITenantRepository
 {
-    public async Task<Tenant?> Create(Tenant tenant, CancellationToken cancellationToken)
+    public async Task<Tenant?> CreateAsync(Tenant tenant, CancellationToken cancellationToken)
     {
         await writeDb.Tenants.AddAsync(tenant, cancellationToken);
         await writeDb.SaveChangesAsync(cancellationToken);
@@ -26,7 +26,7 @@ internal sealed class TenantRepository(WriteDbContext writeDb, ReadDbContext rea
             .AnyAsync(t => t.Name == name, cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Tenant>> GetAll(int page, int pageSize, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<Tenant>> GetAllAsync(int page, int pageSize, CancellationToken cancellationToken)
     {
         return await readDb.Tenants
             .OrderBy(t => t.CreatedAt)
@@ -42,5 +42,21 @@ internal sealed class TenantRepository(WriteDbContext writeDb, ReadDbContext rea
                 UpdatedAt = t.UpdatedAt,
             })
             .ToListAsync(cancellationToken);
+    }
+
+    public Task<Tenant> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return readDb.Tenants
+            .Where(t => t.Id == id)
+            .Select(t => new Tenant
+            {
+                Id = t.Id,
+                Code = t.Code,
+                Name = t.Name,
+                IsActive = t.IsActive,
+                CreatedAt = t.CreatedAt,
+                UpdatedAt = t.UpdatedAt,
+            })
+            .FirstOrDefaultAsync(cancellationToken)!;
     }
 }
