@@ -1,6 +1,6 @@
 ﻿namespace Unjai.Platform.Infrastructure.Messaging.Redis;
 
-internal interface IDistributedNotificationPublisher
+public interface IDistributedNotificationPublisher
 {
     Task NotifyCacheInvalidationAsync(string key);
 

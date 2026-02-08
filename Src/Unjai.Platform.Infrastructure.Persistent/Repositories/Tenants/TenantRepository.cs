@@ -1,12 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Hybrid;
 using Unjai.Platform.Application.Repositories.Tenants;
 using Unjai.Platform.Domain.Entities.Tenants;
+using Unjai.Platform.Infrastructure.Messaging.Redis;
 using Unjai.Platform.Infrastructure.Persistent.Database;
 
 namespace Unjai.Platform.Infrastructure.Persistent.Repositories.Tenants;
 
-internal sealed class TenantRepository(WriteDbContext writeDb, ReadDbContext readDb) : ITenantRepository
+internal sealed class TenantRepository(
+    WriteDbContext writeDb,
+    ReadDbContext readDb,
+    HybridCache cache,
+    IDistributedNotificationPublisher notificationPublisher)
+    : ITenantRepository
 {
+    private static string CacheKeyById(Guid id) => $"TENANT_BY_ID_{id}";
+
     public async Task<Tenant?> CreateAsync(Tenant tenant, CancellationToken cancellationToken)
     {
         await writeDb.Tenants.AddAsync(tenant, cancellationToken);
@@ -44,19 +53,34 @@ internal sealed class TenantRepository(WriteDbContext writeDb, ReadDbContext rea
             .ToListAsync(cancellationToken);
     }
 
-    public Task<Tenant> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<Tenant?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return readDb.Tenants
-            .Where(t => t.Id == id)
-            .Select(t => new Tenant
-            {
-                Id = t.Id,
-                Code = t.Code,
-                Name = t.Name,
-                IsActive = t.IsActive,
-                CreatedAt = t.CreatedAt,
-                UpdatedAt = t.UpdatedAt,
-            })
-            .FirstOrDefaultAsync(cancellationToken)!;
+        var cacheKey = CacheKeyById(id);
+
+        return await cache.GetOrCreateAsync(cacheKey, async ct =>
+                await readDb.Tenants
+                    .Where(t => t.Id == id)
+                    .Select(t => new Tenant
+                    {
+                        Id = t.Id,
+                        Code = t.Code,
+                        Name = t.Name,
+                        IsActive = t.IsActive,
+                        CreatedAt = t.CreatedAt,
+                        UpdatedAt = t.UpdatedAt,
+                    })
+                    .FirstOrDefaultAsync(ct),
+                    cancellationToken: cancellationToken);
+    }
+
+    public async Task<Tenant> UpdateAsync(Tenant tenant, CancellationToken cancellationToken)
+    {
+        writeDb.Tenants.Update(tenant);
+        await writeDb.SaveChangesAsync(cancellationToken);
+
+        var cacheKey = CacheKeyById(tenant.Id);
+        await notificationPublisher.NotifyCacheInvalidationAsync(cacheKey);
+
+        return tenant;
     }
 }

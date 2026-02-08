@@ -29,8 +29,7 @@ internal sealed class TenantConfiguration : BaseEntityConfiguration<Tenant>
             .IsRequired()
             .HasMaxLength(200);
 
-        entity.HasIndex(o => o.Name)
-            .IsUnique();
+        entity.HasIndex(o => o.Name);
 
         entity.Property(o => o.IsActive)
             .HasColumnName("is_active")

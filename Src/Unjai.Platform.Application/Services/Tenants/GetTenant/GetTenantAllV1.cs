@@ -65,12 +65,16 @@ internal sealed class GetTenantAllV1(ILogger<GetTenantAllV1> logger, ITenantRepo
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while retrieving tenants.");
+            logger.LogError(
+                ex,
+                "An error occurred while retrieving tenants. Page: {Page}, PageSize: {PageSize}",
+                page,
+                pageSize);
 
             return AppResult<IReadOnlyList<GetTenantResponseDto>>.Fail(
                 httpStatus: 500,
                 statusCode: "INTERNAL_SERVER_ERROR",
-                message: ex.Message
+                message: "An unexpected error occurred while retrieving tenants."
             );
         }
     }

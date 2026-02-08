@@ -23,7 +23,7 @@ internal sealed class GetTenantByIdV1(ILogger<GetTenantByIdV1> logger, ITenantRe
                 return AppResult<GetTenantResponseDto>.Fail(
                     httpStatus: 404,
                     statusCode: "TENANTS_NOT_FOUND",
-                    message: "No tenants found."
+                    message: "Tenant not found"
                 );
             }
             else
@@ -47,12 +47,15 @@ internal sealed class GetTenantByIdV1(ILogger<GetTenantByIdV1> logger, ITenantRe
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while retrieving tenants.");
+            logger.LogError(
+                ex,
+                "An error occurred while retrieving tenant with id '{TenantId}'",
+                id);
 
             return AppResult<GetTenantResponseDto>.Fail(
                 httpStatus: 500,
                 statusCode: "INTERNAL_SERVER_ERROR",
-                message: ex.Message
+                message: "An unexpected error occurred while retrieving tenant."
             );
         }
     }
