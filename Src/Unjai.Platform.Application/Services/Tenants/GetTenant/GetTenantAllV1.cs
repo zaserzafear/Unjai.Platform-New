@@ -5,14 +5,17 @@ using Unjai.Platform.Contracts.Tenants.Dtos;
 
 namespace Unjai.Platform.Application.Services.Tenants.GetTenant;
 
-public interface IGetTenantV1
+public interface IGetTenantAllV1
 {
-    Task<AppResult<IReadOnlyList<GetTenantResponseDto>>> Handle(int page, int pageSize, CancellationToken cancellationToken);
+    Task<AppResult<IReadOnlyList<GetTenantResponseDto>>> Handle(int page, int pageSize, CancellationToken ct);
 }
 
-internal sealed class GetTenantV1(ILogger<GetTenantV1> logger, ITenantRepository repository) : IGetTenantV1
+internal sealed class GetTenantAllV1(
+    ILogger<GetTenantAllV1> logger,
+    ITenantRepository repository
+    ) : IGetTenantAllV1
 {
-    public async Task<AppResult<IReadOnlyList<GetTenantResponseDto>>> Handle(int page, int pageSize, CancellationToken cancellationToken)
+    public async Task<AppResult<IReadOnlyList<GetTenantResponseDto>>> Handle(int page, int pageSize, CancellationToken ct)
     {
         if (pageSize is < 1 or > 100)
         {
@@ -34,7 +37,7 @@ internal sealed class GetTenantV1(ILogger<GetTenantV1> logger, ITenantRepository
 
         try
         {
-            var result = await repository.GetAll(page, pageSize, cancellationToken);
+            var result = await repository.GetAllAsync(page, pageSize, ct);
 
             if (result.Count == 0)
             {
@@ -65,12 +68,16 @@ internal sealed class GetTenantV1(ILogger<GetTenantV1> logger, ITenantRepository
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while retrieving tenants.");
+            logger.LogError(
+                ex,
+                "An error occurred while retrieving tenants. Page: {Page}, PageSize: {PageSize}",
+                page,
+                pageSize);
 
             return AppResult<IReadOnlyList<GetTenantResponseDto>>.Fail(
                 httpStatus: 500,
                 statusCode: "INTERNAL_SERVER_ERROR",
-                message: ex.Message
+                message: "An unexpected error occurred while retrieving tenants."
             );
         }
     }

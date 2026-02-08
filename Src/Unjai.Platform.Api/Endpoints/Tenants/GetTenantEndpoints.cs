@@ -15,12 +15,27 @@ public sealed class GetTenantEndpoints : IEndpoint
             .WithTags(TenantEndpoints.Tag);
 
         group.MapGet("", async (
-            int page,
-            int pageSize,
-            IGetTenantV1 useCase,
-            CancellationToken cancellationToken) =>
+            int? page,
+            int? pageSize,
+            IGetTenantAllV1 useCase,
+            CancellationToken ct) =>
         {
-            var result = await useCase.Handle(page, pageSize, cancellationToken);
+            var safePage = page.GetValueOrDefault(1);
+            var safePageSize = pageSize.GetValueOrDefault(10);
+
+            var result = await useCase.Handle(safePage, safePageSize, ct);
+
+            return ApiResponseResults.ToHttpResult(result);
+        })
+        .EnforceRateLimit(RateLimitPolicyKeys.Default)
+        .MapToApiVersion(1);
+
+        group.MapGet("{id:guid}", async (
+            Guid id,
+            IGetTenantByIdV1 useCase,
+            CancellationToken ct) =>
+        {
+            var result = await useCase.Handle(id, ct);
 
             return ApiResponseResults.ToHttpResult(result);
         })

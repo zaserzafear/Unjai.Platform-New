@@ -5,30 +5,16 @@ using Unjai.Platform.Infrastructure.Persistent.Database;
 
 namespace Unjai.Platform.Infrastructure.Persistent.Repositories.Tenants;
 
-internal sealed class TenantRepository(WriteDbContext writeDb, ReadDbContext readDb) : ITenantRepository
+internal sealed class TenantRepository(
+    WriteDbContext writeDb,
+    ReadDbContext readDb)
+    : ITenantRepository
 {
-    public async Task<Tenant?> Create(Tenant tenant, CancellationToken cancellationToken)
-    {
-        await writeDb.Tenants.AddAsync(tenant, cancellationToken);
-        await writeDb.SaveChangesAsync(cancellationToken);
-        return tenant;
-    }
+    public Task CreateAsync(Tenant tenant, CancellationToken ct)
+        => writeDb.Tenants.AddAsync(tenant, ct).AsTask();
 
-    public async Task<bool> ExistsByCodeAsync(string code, CancellationToken cancellationToken)
-    {
-        return await readDb.Tenants
-            .AnyAsync(t => t.Code == code, cancellationToken);
-    }
-
-    public async Task<bool> ExistsByNameAsync(string name, CancellationToken cancellationToken)
-    {
-        return await readDb.Tenants
-            .AnyAsync(t => t.Name == name, cancellationToken);
-    }
-
-    public async Task<IReadOnlyList<Tenant>> GetAll(int page, int pageSize, CancellationToken cancellationToken)
-    {
-        return await readDb.Tenants
+    public Task<List<Tenant>> GetAllAsync(int page, int pageSize, CancellationToken ct)
+        => readDb.Tenants
             .OrderBy(t => t.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
@@ -41,6 +27,25 @@ internal sealed class TenantRepository(WriteDbContext writeDb, ReadDbContext rea
                 CreatedAt = t.CreatedAt,
                 UpdatedAt = t.UpdatedAt,
             })
-            .ToListAsync(cancellationToken);
-    }
+            .ToListAsync(ct);
+
+    public Task<bool> ExistsByCodeAsync(string code, CancellationToken ct)
+        => readDb.Tenants.AnyAsync(t => t.Code == code, ct);
+
+    public Task<Tenant?> GetByIdAsync(Guid id, CancellationToken ct)
+        => readDb.Tenants
+            .Where(t => t.Id == id)
+            .Select(t => new Tenant
+            {
+                Id = t.Id,
+                Code = t.Code,
+                Name = t.Name,
+                IsActive = t.IsActive,
+                CreatedAt = t.CreatedAt,
+                UpdatedAt = t.UpdatedAt,
+            })
+            .FirstOrDefaultAsync(ct);
+
+    public void Update(Tenant tenant)
+        => writeDb.Tenants.Update(tenant);
 }

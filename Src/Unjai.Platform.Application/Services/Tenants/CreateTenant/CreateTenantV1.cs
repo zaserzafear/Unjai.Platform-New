@@ -2,39 +2,32 @@
 using Unjai.Platform.Application.Repositories.Tenants;
 using Unjai.Platform.Contracts.Models;
 using Unjai.Platform.Contracts.Tenants.Dtos;
+using Unjai.Platform.Domain.Abstractions;
 using Unjai.Platform.Domain.Entities.Tenants;
 
 namespace Unjai.Platform.Application.Services.Tenants.CreateTenant;
 
 public interface ICreateTenantV1
 {
-    public Task<AppResult<object>> Handle(CreateTenantRequestDto request, CancellationToken cancellationToken);
+    public Task<AppResult<object>> Handle(CreateTenantRequestDto request, CancellationToken ct);
 }
 
-internal sealed class CreateTenantV1(ILogger<CreateTenantV1> logger, ITenantRepository repository) : ICreateTenantV1
+internal sealed class CreateTenantV1(
+    ILogger<CreateTenantV1> logger,
+    IUnitOfWork unitOfWork,
+    ITenantRepository repository) : ICreateTenantV1
 {
-    public async Task<AppResult<object>> Handle(CreateTenantRequestDto request, CancellationToken cancellationToken)
+    public async Task<AppResult<object>> Handle(CreateTenantRequestDto request, CancellationToken ct)
     {
         try
         {
-            var codeExists = await repository.ExistsByCodeAsync(request.Code, cancellationToken);
-            var nameExists = await repository.ExistsByNameAsync(request.Name, cancellationToken);
-
             var errors = new List<CreateTenantRequestValidationErrorDto>();
 
-            if (codeExists)
+            if (await repository.ExistsByCodeAsync(request.Code, ct))
             {
-                errors.Add(new CreateTenantRequestValidationErrorDto(
+                errors.Add(new(
                     Code: "TENANT_CODE_ALREADY_EXISTS",
                     Message: $"Tenant with code '{request.Code}' already exists."
-                ));
-            }
-
-            if (nameExists)
-            {
-                errors.Add(new CreateTenantRequestValidationErrorDto(
-                    Code: "TENANT_NAME_ALREADY_EXISTS",
-                    Message: $"Tenant with name '{request.Name}' already exists."
                 ));
             }
 
@@ -48,29 +41,20 @@ internal sealed class CreateTenantV1(ILogger<CreateTenantV1> logger, ITenantRepo
                 );
             }
 
-            var entity = new Tenant
+            var tenant = new Tenant
             {
                 Code = request.Code,
-                Name = request.Name,
+                Name = request.Name
             };
 
-            var result = await repository.Create(entity, cancellationToken);
-            if (result is not null)
-            {
-                return AppResult<object>.Ok(
-                    httpStatus: 201,
-                    statusCode: "TENANT_CREATED",
-                    message: "Tenant created successfully."
-                );
-            }
-            else
-            {
-                return AppResult<object>.Fail(
-                    httpStatus: 500,
-                    statusCode: "TENANT_CREATION_FAILED",
-                    message: "Failed to create tenant."
-                );
-            }
+            await repository.CreateAsync(tenant, ct);
+            await unitOfWork.SaveChangesAsync(ct);
+
+            return AppResult<object>.Ok(
+                httpStatus: 201,
+                statusCode: "TENANT_CREATED",
+                message: "Tenant created successfully."
+            );
         }
         catch (Exception ex)
         {

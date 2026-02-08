@@ -12,6 +12,8 @@ public static class PostgresClientExtension
         string readConnectionString,
         string writeConnectionString)
     {
+        services.AddUnitOfWork();
+
         AddHealthChecks(
             services,
             defaultConnectionString,

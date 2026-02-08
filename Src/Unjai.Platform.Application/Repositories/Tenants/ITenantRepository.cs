@@ -4,8 +4,9 @@ namespace Unjai.Platform.Application.Repositories.Tenants;
 
 public interface ITenantRepository
 {
-    Task<bool> ExistsByCodeAsync(string code, CancellationToken cancellationToken);
-    Task<bool> ExistsByNameAsync(string name, CancellationToken cancellationToken);
-    Task<Tenant?> Create(Tenant tenant, CancellationToken cancellationToken);
-    Task<IReadOnlyList<Tenant>> GetAll(int page, int pageSize, CancellationToken cancellationToken);
+    Task CreateAsync(Tenant tenant, CancellationToken ct);
+    Task<List<Tenant>> GetAllAsync(int page, int pageSize, CancellationToken ct);
+    Task<bool> ExistsByCodeAsync(string code, CancellationToken ct);
+    Task<Tenant?> GetByIdAsync(Guid id, CancellationToken ct);
+    void Update(Tenant tenant);
 }

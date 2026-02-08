@@ -9,12 +9,12 @@ internal class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(
 {
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
-
         SoftDeleteConvention.Apply(modelBuilder);
 
         modelBuilder.ApplyConfigurationsFromAssembly(
             typeof(AppDbContext).Assembly);
+
+        base.OnModelCreating(modelBuilder);
     }
 
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
