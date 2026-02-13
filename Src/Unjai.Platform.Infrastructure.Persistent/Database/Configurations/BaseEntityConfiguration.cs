@@ -10,6 +10,13 @@ internal abstract class BaseEntityConfiguration<TEntity>
 {
     public virtual void Configure(EntityTypeBuilder<TEntity> builder)
     {
+        // ---------- PK ----------
+        builder.HasKey(o => o.Id);
+
+        builder.Property(e => e.Id)
+               .HasColumnName("id")
+               .HasDefaultValueSql("uuidv7()");
+
         // ---------- Soft delete ----------
         builder.Property(e => e.IsDeleted)
                .HasColumnName("is_deleted")

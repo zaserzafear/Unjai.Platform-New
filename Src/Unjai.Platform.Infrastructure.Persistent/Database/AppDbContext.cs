@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Unjai.Platform.Domain.Entities.Tenants;
+using Unjai.Platform.Domain.Entities.TenantsAdmin;
 using Unjai.Platform.Infrastructure.Persistent.Database.Conventions;
 using Unjai.Platform.Infrastructure.Persistent.Outbox;
 
@@ -19,4 +20,5 @@ internal class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(
 
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
     public DbSet<Tenant> Tenants => Set<Tenant>();
+    public DbSet<TenantAdmin> TenantAdmins => Set<TenantAdmin>();
 }

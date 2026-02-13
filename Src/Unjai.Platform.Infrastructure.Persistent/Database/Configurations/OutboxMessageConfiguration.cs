@@ -4,7 +4,8 @@ using Unjai.Platform.Infrastructure.Persistent.Outbox;
 
 namespace Unjai.Platform.Infrastructure.Persistent.Database.Configurations;
 
-internal sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<OutboxMessage>
+internal sealed class OutboxMessageConfiguration
+    : IEntityTypeConfiguration<OutboxMessage>
 {
     public void Configure(EntityTypeBuilder<OutboxMessage> entity)
     {

@@ -4,17 +4,12 @@ using Unjai.Platform.Domain.Entities.Tenants;
 
 namespace Unjai.Platform.Infrastructure.Persistent.Database.Configurations;
 
-internal sealed class TenantConfiguration : BaseEntityConfiguration<Tenant>
+internal sealed class TenantConfiguration
+    : BaseEntityConfiguration<Tenant>
 {
     public override void Configure(EntityTypeBuilder<Tenant> entity)
     {
         entity.ToTable("tenants");
-
-        entity.HasKey(o => o.Id);
-
-        entity.Property(o => o.Id)
-            .HasColumnName("id")
-            .HasDefaultValueSql("uuidv7()");
 
         entity.Property(o => o.Code)
             .HasColumnName("code")

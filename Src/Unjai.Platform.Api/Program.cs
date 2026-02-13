@@ -5,6 +5,7 @@ using Unjai.Platform.Api.Endpoints.Extensions;
 using Unjai.Platform.Api.Extensions;
 using Unjai.Platform.Api.RateLimiting;
 using Unjai.Platform.Infrastructure.Caching.Extensions;
+using Unjai.Platform.Infrastructure.Persistent;
 using Unjai.Platform.Infrastructure.Persistent.Database.Extensions;
 using Unjai.Platform.Infrastructure.RateLimiting.Abstractions;
 using Unjai.Platform.Infrastructure.RateLimiting.Configurations;
@@ -229,5 +230,7 @@ if (app.Environment.IsDevelopment())
 
     app.ApplyMigrations();
 }
+
+await TenantsAdminSeeder.SeedAsync(app.Services);
 
 await app.RunAsync();
