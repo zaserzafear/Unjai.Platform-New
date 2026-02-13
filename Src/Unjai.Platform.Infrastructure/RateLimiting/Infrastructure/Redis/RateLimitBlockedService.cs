@@ -3,7 +3,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
-using Unjai.Platform.Infrastructure.Messaging.Redis;
+using Unjai.Platform.Infrastructure.RateLimiting.Context;
 
 namespace Unjai.Platform.Infrastructure.RateLimiting.Infrastructure.Redis;
 

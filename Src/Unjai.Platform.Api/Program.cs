@@ -5,7 +5,6 @@ using Unjai.Platform.Api.Endpoints.Extensions;
 using Unjai.Platform.Api.Extensions;
 using Unjai.Platform.Api.RateLimiting;
 using Unjai.Platform.Infrastructure.Caching.Extensions;
-using Unjai.Platform.Infrastructure.Messaging.Extensions;
 using Unjai.Platform.Infrastructure.Persistent.Database.Extensions;
 using Unjai.Platform.Infrastructure.RateLimiting.Abstractions;
 using Unjai.Platform.Infrastructure.RateLimiting.Configurations;
@@ -159,7 +158,6 @@ else
 }
 
 builder.Services.AddCachingExtension();
-builder.Services.AddRedisMessagingExtension();
 
 var rateLimitingOptions =
     builder.Configuration

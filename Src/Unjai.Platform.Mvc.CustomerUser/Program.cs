@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Options;
 using Unjai.Platform.Infrastructure.Caching.Extensions;
-using Unjai.Platform.Infrastructure.Messaging.Extensions;
 using Unjai.Platform.Infrastructure.RateLimiting.Abstractions;
 using Unjai.Platform.Infrastructure.RateLimiting.AspNetCore.Delegates;
 using Unjai.Platform.Infrastructure.RateLimiting.Configurations;
@@ -99,7 +98,6 @@ else
 }
 
 builder.Services.AddCachingExtension();
-builder.Services.AddRedisMessagingExtension();
 
 var rateLimitingOptions =
     builder.Configuration

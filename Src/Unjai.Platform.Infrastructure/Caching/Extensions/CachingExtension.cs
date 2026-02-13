@@ -17,6 +17,7 @@ public static class CachingExtension
             };
         });
 
+        services.AddSingleton<ICacheInvalidationPublisherService, CacheInvalidationPublisherService>();
         services.AddHostedService<CacheInvalidationService>();
     }
 }

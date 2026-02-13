@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using StackExchange.Redis;
-using Unjai.Platform.Infrastructure.Messaging.Redis;
+using Unjai.Platform.Infrastructure.RateLimiting.Abstractions;
 using Unjai.Platform.Infrastructure.RateLimiting.Configurations;
 
 namespace Unjai.Platform.Infrastructure.RateLimiting.Infrastructure.Redis;
@@ -8,7 +8,7 @@ namespace Unjai.Platform.Infrastructure.RateLimiting.Infrastructure.Redis;
 internal sealed class RedisRateLimiter(
     IConnectionMultiplexer multiplexer,
     IMemoryCache cache,
-    IDistributedNotificationPublisher publisher)
+    IRateLimitBlockedPublisherService rateLimitBlocked)
 {
     private readonly IDatabase _redis = multiplexer.GetDatabase();
 
@@ -245,7 +245,7 @@ internal sealed class RedisRateLimiter(
             ? TimeSpan.FromSeconds(ttlSeconds.Value)
             : fallback;
 
-        await publisher.NotifyRateLimitBlockedAsync(key, retryAfter);
+        await rateLimitBlocked.NotifyRateLimitBlockedAsync(key, retryAfter);
     }
 
     #endregion
