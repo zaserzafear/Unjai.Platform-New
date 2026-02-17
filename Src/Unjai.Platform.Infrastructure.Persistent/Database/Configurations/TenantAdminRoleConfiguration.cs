@@ -28,5 +28,7 @@ internal sealed class TenantAdminRoleConfiguration
             .HasColumnName("name")
             .IsRequired()
             .HasMaxLength(100);
+
+        entity.HasData(TenantAdminRoleSeed.GetSeedData());
     }
 }

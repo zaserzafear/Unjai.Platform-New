@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Unjai.Platform.Domain.Entities.TenantsAdmin;
+using Unjai.Platform.Domain.Entities.TenantsAdminRole;
 using Unjai.Platform.Infrastructure.Persistent.Database;
 using Unjai.Platform.Infrastructure.Security.Helpers;
 
@@ -13,12 +14,14 @@ public static class TenantsAdminSeeder
     {
         using var scope = services.CreateScope();
 
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var db = scope.ServiceProvider.GetRequiredService<WriteDbContext>();
         var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>()
             .CreateLogger(typeof(TenantsAdminSeeder));
 
         bool hasAdmin = await db.TenantAdmins
-            .AnyAsync(x => !x.IsDeleted);
+            .AsNoTracking()
+            .IgnoreQueryFilters()
+            .AnyAsync();
 
         if (hasAdmin)
             return;
@@ -30,6 +33,7 @@ public static class TenantsAdminSeeder
         {
             Username = "admin",
             PasswordHash = passwordHash,
+            RoleId = (int)TenantAdminRoleCode.SuperAdmin
         };
 
         db.TenantAdmins.Add(admin);
