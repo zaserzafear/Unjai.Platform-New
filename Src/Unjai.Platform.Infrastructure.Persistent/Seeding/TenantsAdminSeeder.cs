@@ -6,7 +6,7 @@ using Unjai.Platform.Domain.Entities.TenantsAdminRole;
 using Unjai.Platform.Infrastructure.Persistent.Database;
 using Unjai.Platform.Infrastructure.Security.Helpers;
 
-namespace Unjai.Platform.Infrastructure.Persistent;
+namespace Unjai.Platform.Infrastructure.Persistent.Seeding;
 
 public static class TenantsAdminSeeder
 {
