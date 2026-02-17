@@ -21,7 +21,10 @@ internal sealed class CacheInvalidationService(
         {
             string key = value.ToString();
 
-            logger.LogInformation("Received invalidation for key: {Key}", key);
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation("Received invalidation for key: {Key}", key);
+            }
 
             var task = hybridCache.RemoveAsync(key, stoppingToken);
 

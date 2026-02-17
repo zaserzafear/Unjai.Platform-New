@@ -17,6 +17,9 @@ internal sealed class CacheInvalidationPublisherService(
 
         await subscriber.PublishAsync(CacheInvalidationChannel, new RedisValue(key));
 
-        logger.LogInformation("Published invalidation for key: {Key}", key);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation("Published invalidation for key: {Key}", key);
+        }
     }
 }

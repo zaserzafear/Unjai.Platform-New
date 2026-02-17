@@ -28,9 +28,12 @@ internal sealed class RedisRateLimitBlockedPublisherService(
             RateLimitChannel,
             JsonSerializer.Serialize(payload));
 
-        logger.LogInformation(
-            "Published rate-limit block for key: {Key}, ttl: {Ttl}s",
-            key,
-            payload.TtlSeconds);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "Published rate-limit block for key: {Key}, ttl: {Ttl}s",
+                key,
+                payload.TtlSeconds);
+        }
     }
 }

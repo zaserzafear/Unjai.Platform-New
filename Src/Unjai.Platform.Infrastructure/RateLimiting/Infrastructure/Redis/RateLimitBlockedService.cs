@@ -27,9 +27,12 @@ internal sealed class RateLimitBlockedService(
             string key = payload.Key;
             TimeSpan retryAfter = TimeSpan.FromSeconds(payload.TtlSeconds);
 
-            logger.LogInformation("Received rate-limit block for key: {Key}, ttl: {Ttl}s",
-                key,
-                payload.TtlSeconds);
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation("Received rate-limit block for key: {Key}, ttl: {Ttl}s",
+                    key,
+                    payload.TtlSeconds);
+            }
 
             cache.Set(key, true, retryAfter);
         });

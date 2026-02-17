@@ -50,10 +50,14 @@ if (string.IsNullOrWhiteSpace(jwtSetting.Secret))
     if (builder.Environment.IsDevelopment())
     {
         jwtSetting.Secret = CryptoHelper.GenerateSecret(64);
-        logger.LogCritical(
-            "SECURITY WARNING (DEV ONLY): Jwt:Secret was auto-generated. " +
-            "COPY THIS VALUE AND STORE IT SECURELY. Value={Secret}",
-            jwtSetting.Secret);
+
+        if (logger.IsEnabled(LogLevel.Critical))
+        {
+            logger.LogCritical(
+                "SECURITY WARNING (DEV ONLY): Jwt:Secret was auto-generated. " +
+                "COPY THIS VALUE AND STORE IT SECURELY. Value={Secret}",
+                jwtSetting.Secret);
+        }
     }
     else
     {
@@ -71,10 +75,14 @@ if (string.IsNullOrWhiteSpace(apiKeyOption.HealthCheck))
     if (builder.Environment.IsDevelopment())
     {
         apiKeyOption.HealthCheck = CryptoHelper.GenerateSecret(32);
-        logger.LogCritical(
-            "SECURITY WARNING (DEV ONLY): ApiKeys:HealthCheck was auto-generated. " +
-            "COPY THIS VALUE AND STORE IT SECURELY. Value={ApiKey}",
-            apiKeyOption.HealthCheck);
+
+        if (logger.IsEnabled(LogLevel.Critical))
+        {
+            logger.LogCritical(
+                "SECURITY WARNING (DEV ONLY): ApiKeys:HealthCheck was auto-generated. " +
+                "COPY THIS VALUE AND STORE IT SECURELY. Value={ApiKey}",
+                apiKeyOption.HealthCheck);
+        }
     }
     else
     {
@@ -111,10 +119,13 @@ if (string.IsNullOrWhiteSpace(rateLimitingOptions.Secret))
     {
         rateLimitingOptions.Secret = CryptoHelper.GenerateSecret(64);
 
-        logger.LogCritical(
-            "SECURITY WARNING (DEV ONLY): RateLimiting:Secret was auto-generated. " +
-            "COPY THIS VALUE AND STORE IT SECURELY. Value={Secret}",
-            rateLimitingOptions.Secret);
+        if (logger.IsEnabled(LogLevel.Critical))
+        {
+            logger.LogCritical(
+                "SECURITY WARNING (DEV ONLY): RateLimiting:Secret was auto-generated. " +
+                "COPY THIS VALUE AND STORE IT SECURELY. Value={Secret}",
+                rateLimitingOptions.Secret);
+        }
     }
     else
     {
