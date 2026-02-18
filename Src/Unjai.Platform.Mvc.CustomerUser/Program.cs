@@ -44,43 +44,23 @@ var jwtSetting = builder.Configuration
     .Get<JwtSettings>()
     ?? throw new InvalidOperationException("Jwt configuration missing");
 
-if (string.IsNullOrWhiteSpace(jwtSetting.Secret))
-{
-    if (builder.Environment.IsDevelopment())
-    {
-        jwtSetting.Secret = CryptoHelper.GenerateSecret(64);
-
-        if (logger.IsEnabled(LogLevel.Critical))
-        {
-            logger.LogCritical(
-                "SECURITY WARNING (DEV ONLY): Jwt:Secret was auto-generated. " +
-                "COPY THIS VALUE AND STORE IT SECURELY. Value={Secret}",
-                jwtSetting.Secret);
-        }
-    }
-    else
-    {
-        throw new InvalidOperationException("Jwt:Secret must be configured in production.");
-    }
-}
-
-var apiKeyOption = builder.Configuration
+var apiKeyOptions = builder.Configuration
     .GetSection(ApiKeyConfig.Section)
     .Get<ApiKeyOptions>()
     ?? new ApiKeyOptions();
 
-if (string.IsNullOrWhiteSpace(apiKeyOption.HealthCheck))
+if (string.IsNullOrWhiteSpace(apiKeyOptions.HealthCheck))
 {
     if (builder.Environment.IsDevelopment())
     {
-        apiKeyOption.HealthCheck = CryptoHelper.GenerateSecret(32);
+        apiKeyOptions.HealthCheck = CryptoHelper.GenerateSecret(32);
 
         if (logger.IsEnabled(LogLevel.Critical))
         {
             logger.LogCritical(
                 "SECURITY WARNING (DEV ONLY): ApiKeys:HealthCheck was auto-generated. " +
                 "COPY THIS VALUE AND STORE IT SECURELY. Value={ApiKey}",
-                apiKeyOption.HealthCheck);
+                apiKeyOptions.HealthCheck);
         }
     }
     else
@@ -89,7 +69,7 @@ if (string.IsNullOrWhiteSpace(apiKeyOption.HealthCheck))
     }
 }
 
-builder.Services.AddAuthExtensions(jwtSetting, apiKeyOption);
+builder.Services.AddAuthExtensions(jwtSetting, apiKeyOptions);
 
 var redisConnectionString =
     builder.Configuration.GetConnectionString("Redis");
