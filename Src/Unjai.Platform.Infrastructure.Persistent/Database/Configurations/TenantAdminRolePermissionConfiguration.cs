@@ -28,5 +28,7 @@ internal sealed class TenantAdminRolePermissionConfiguration
             .WithMany()
             .HasForeignKey(x => x.PermissionId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        entity.HasData(TenantAdminRolePermissionSeed.GetSeedData());
     }
 }
