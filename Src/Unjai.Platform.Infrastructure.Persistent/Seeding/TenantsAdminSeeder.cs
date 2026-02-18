@@ -33,6 +33,7 @@ public static class TenantsAdminSeeder
         {
             Username = "admin",
             PasswordHash = passwordHash,
+            IsActive = true,
             RoleId = (int)TenantAdminRoleCode.SuperAdmin
         };
 
