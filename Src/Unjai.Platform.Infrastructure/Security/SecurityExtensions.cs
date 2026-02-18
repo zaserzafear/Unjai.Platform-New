@@ -3,14 +3,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Unjai.Platform.Infrastructure.Security.Auth.Configurations;
-using Unjai.Platform.Infrastructure.Security.Auth.Delegates;
+using Unjai.Platform.Infrastructure.Security.Authentication.ApiKey;
+using Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
+using Unjai.Platform.Infrastructure.Security.Authentication.Policies;
 
-namespace Unjai.Platform.Infrastructure.Security.Auth.Extensions;
+namespace Unjai.Platform.Infrastructure.Security;
 
-public static class AuthExtension
+public static class SecurityExtensions
 {
-    public static void AddAuthExtensions(this IServiceCollection services, JwtSetting jwtSetting, ApiKeyOption apiKeyOption)
+    public static void AddAuthExtensions(this IServiceCollection services, JwtSettings jwtSetting, ApiKeyOptions apiKeyOption)
     {
         services.AddAuthentication(options =>
         {

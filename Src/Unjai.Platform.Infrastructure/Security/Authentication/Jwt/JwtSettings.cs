@@ -1,6 +1,6 @@
-﻿namespace Unjai.Platform.Infrastructure.Security.Auth.Configurations;
+﻿namespace Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
 
-public sealed class JwtSetting
+public sealed class JwtSettings
 {
     public string Issuer { get; set; } = string.Empty;
     public string Audience { get; set; } = string.Empty;

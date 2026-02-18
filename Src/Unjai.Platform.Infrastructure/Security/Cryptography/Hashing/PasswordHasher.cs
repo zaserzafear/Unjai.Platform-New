@@ -1,4 +1,4 @@
-﻿namespace Unjai.Platform.Infrastructure.Security.Helpers;
+﻿namespace Unjai.Platform.Infrastructure.Security.Cryptography.Hashing;
 
 public static class PasswordHasher
 {

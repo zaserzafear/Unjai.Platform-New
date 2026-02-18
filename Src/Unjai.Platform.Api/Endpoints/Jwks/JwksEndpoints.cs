@@ -1,5 +1,5 @@
 ﻿using Unjai.Platform.Api.Endpoints.Extensions;
-using Unjai.Platform.Infrastructure.Security.Auth;
+using Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
 
 namespace Unjai.Platform.Api.Endpoints.Jwks;
 

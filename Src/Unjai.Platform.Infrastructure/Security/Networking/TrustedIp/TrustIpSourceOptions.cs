@@ -1,4 +1,4 @@
-﻿namespace Unjai.Platform.Infrastructure.Security.TrustedIpSources.Configurations;
+﻿namespace Unjai.Platform.Infrastructure.Security.Networking.TrustedIp;
 
 public class TrustIpSourceOptions
 {

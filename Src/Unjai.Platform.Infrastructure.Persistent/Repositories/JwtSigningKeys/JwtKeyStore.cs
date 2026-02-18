@@ -2,8 +2,8 @@
 using Microsoft.IdentityModel.Tokens;
 using Unjai.Platform.Domain.Entities.JwtSigningKeys;
 using Unjai.Platform.Infrastructure.Persistent.Database;
-using Unjai.Platform.Infrastructure.Security.Auth;
-using Unjai.Platform.Infrastructure.Security.Helpers;
+using Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
+using Unjai.Platform.Infrastructure.Security.Cryptography.Ecdsa;
 
 namespace Unjai.Platform.Infrastructure.Persistent.Repositories.JwtSigningKeys;
 

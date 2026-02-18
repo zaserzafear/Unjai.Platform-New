@@ -10,7 +10,7 @@ using Npgsql;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
-using Unjai.Platform.Infrastructure.Security.Auth.Configurations;
+using Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
 
 namespace Microsoft.Extensions.Hosting;
 

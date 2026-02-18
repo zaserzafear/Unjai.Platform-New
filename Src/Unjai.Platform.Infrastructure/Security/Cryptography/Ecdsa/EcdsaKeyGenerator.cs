@@ -3,7 +3,7 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Unjai.Platform.Domain.Entities.JwtSigningKeys;
 
-namespace Unjai.Platform.Infrastructure.Security.Helpers;
+namespace Unjai.Platform.Infrastructure.Security.Cryptography.Ecdsa;
 
 public static class EcdsaKeyGenerator
 {

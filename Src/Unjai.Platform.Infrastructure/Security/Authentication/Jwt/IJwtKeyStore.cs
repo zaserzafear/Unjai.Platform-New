@@ -1,7 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using Unjai.Platform.Domain.Entities.JwtSigningKeys;
 
-namespace Unjai.Platform.Infrastructure.Security.Auth;
+namespace Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
 
 public interface IJwtKeyStore
 {

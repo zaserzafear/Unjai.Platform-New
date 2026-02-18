@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Unjai.Platform.Domain.Entities.JwtSigningKeys;
-using Unjai.Platform.Infrastructure.Security.Auth;
+using Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
 
 namespace Unjai.Platform.Infrastructure.Persistent.Repositories.JwtSigningKeys;
 

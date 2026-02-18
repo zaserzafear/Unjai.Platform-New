@@ -4,11 +4,11 @@ using Unjai.Platform.Infrastructure.RateLimiting.AspNetCore.Delegates;
 using Unjai.Platform.Infrastructure.RateLimiting.Configurations;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 using Unjai.Platform.Infrastructure.Redis.Extensions;
-using Unjai.Platform.Infrastructure.Security.Auth.Configurations;
-using Unjai.Platform.Infrastructure.Security.Auth.Extensions;
-using Unjai.Platform.Infrastructure.Security.Forwarding.Extensions;
-using Unjai.Platform.Infrastructure.Security.Helpers;
-using Unjai.Platform.Infrastructure.Security.TrustedIpSources.Configurations;
+using Unjai.Platform.Infrastructure.Security;
+using Unjai.Platform.Infrastructure.Security.Authentication.ApiKey;
+using Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
+using Unjai.Platform.Infrastructure.Security.Cryptography;
+using Unjai.Platform.Infrastructure.Security.Networking.TrustedIp;
 using Unjai.Platform.Mvc.CustomerUser.Configurations;
 using Unjai.Platform.Mvc.CustomerUser.RateLimiting;
 
@@ -41,7 +41,7 @@ builder.Services.AddControllersWithViews();
 
 var jwtSetting = builder.Configuration
     .GetSection(JwtSettingConfig.Section)
-    .Get<JwtSetting>()
+    .Get<JwtSettings>()
     ?? throw new InvalidOperationException("Jwt configuration missing");
 
 if (string.IsNullOrWhiteSpace(jwtSetting.Secret))
@@ -66,8 +66,8 @@ if (string.IsNullOrWhiteSpace(jwtSetting.Secret))
 
 var apiKeyOption = builder.Configuration
     .GetSection(ApiKeyConfig.Section)
-    .Get<ApiKeyOption>()
-    ?? new ApiKeyOption();
+    .Get<ApiKeyOptions>()
+    ?? new ApiKeyOptions();
 
 if (string.IsNullOrWhiteSpace(apiKeyOption.HealthCheck))
 {

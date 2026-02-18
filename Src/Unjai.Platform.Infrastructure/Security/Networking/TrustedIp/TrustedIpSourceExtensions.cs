@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.DependencyInjection;
-using Unjai.Platform.Infrastructure.Security.TrustedIpSources.Configurations;
 
-namespace Unjai.Platform.Infrastructure.Security.Forwarding.Extensions;
+namespace Unjai.Platform.Infrastructure.Security.Networking.TrustedIp;
 
 public static class TrustedIpSourceExtensions
 {

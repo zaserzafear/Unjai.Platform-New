@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using Unjai.Platform.Domain.Entities.TenantsAdmin;
 using Unjai.Platform.Domain.Entities.TenantsAdminRole;
 using Unjai.Platform.Infrastructure.Persistent.Database;
-using Unjai.Platform.Infrastructure.Security.Helpers;
+using Unjai.Platform.Infrastructure.Security.Cryptography.Hashing;
 
 namespace Unjai.Platform.Infrastructure.Persistent.Seeding;
 
