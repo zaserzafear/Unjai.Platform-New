@@ -2,20 +2,19 @@
 
 public static class TenantAdminRoleSeed
 {
-    public static IEnumerable<TenantAdminRole> GetSeedData()
-    {
-        yield return new TenantAdminRole
+    public static TenantAdminRole[] GetSeedData() =>
+    [
+        new TenantAdminRole
         {
-            Id = (int)TenantAdminRoleCode.SuperAdmin,
+            Id = (int) TenantAdminRoleCode.SuperAdmin,
             Code = TenantAdminRoleCode.SuperAdmin.ToString().ToUpperInvariant(),
             Name = "Super Admin"
-        };
-
-        yield return new TenantAdminRole
+        },
+        new TenantAdminRole
         {
             Id = (int)TenantAdminRoleCode.Admin,
             Code = TenantAdminRoleCode.Admin.ToString().ToUpperInvariant(),
             Name = "Admin"
-        };
-    }
+        }
+    ];
 }
