@@ -1,5 +1,7 @@
 using System.Globalization;
+using System.Security.Cryptography;
 using Asp.Versioning;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Unjai.Platform.Api.Endpoints.Extensions;
 using Unjai.Platform.Api.Extensions;
@@ -11,6 +13,7 @@ using Unjai.Platform.Infrastructure.RateLimiting.Abstractions;
 using Unjai.Platform.Infrastructure.RateLimiting.Configurations;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 using Unjai.Platform.Infrastructure.Redis.Extensions;
+using Unjai.Platform.Infrastructure.Security.Auth;
 using Unjai.Platform.Infrastructure.Security.Auth.Configurations;
 using Unjai.Platform.Infrastructure.Security.Auth.Extensions;
 using Unjai.Platform.Infrastructure.Security.Forwarding.Extensions;
@@ -207,6 +210,34 @@ app.UseTrustedIpSources();
 app.UseAuthExtensions();
 
 app.UseOutputCache();
+
+app.MapGet("/.well-known/jwks.json", async (IJwtKeyStore keyStore) =>
+{
+    var keys = keyStore.GetAllPublicKeys();
+
+    var jwks = new
+    {
+        keys = keys.Select(k =>
+        {
+            using var ecdsa = ECDsa.Create();
+            ecdsa.ImportFromPem(k.PublicKeyPem);
+            var p = ecdsa.ExportParameters(false);
+
+            return new
+            {
+                kty = "EC",
+                crv = "P-256",
+                x = Base64UrlEncoder.Encode(p.Q.X),
+                y = Base64UrlEncoder.Encode(p.Q.Y),
+                alg = "ES256",
+                kid = k.KeyId,
+                use = "sig"
+            };
+        })
+    };
+
+    return Results.Ok(jwks);
+});
 
 var apiVersionSetBuilder = app.NewApiVersionSet();
 

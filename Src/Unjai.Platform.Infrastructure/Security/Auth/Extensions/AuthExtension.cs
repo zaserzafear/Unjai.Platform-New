@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,14 +22,24 @@ public static class AuthExtension
             {
                 RoleClaimType = jwtSetting.RoleClaimType,
 
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSetting.Secret)),
                 ValidateIssuer = true,
                 ValidIssuer = jwtSetting.Issuer,
+
                 ValidateAudience = true,
                 ValidAudience = jwtSetting.Audience,
+
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.FromSeconds(jwtSetting.ClockSkew),
+
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) =>
+                {
+                    using var scope = services.BuildServiceProvider().CreateScope();
+                    var keyStore = scope.ServiceProvider.GetRequiredService<IJwtKeyStore>();
+                    var securityKeys = keyStore.GetAllSecurityKeys();
+
+                    return securityKeys;
+                }
             };
 
             options.Events = new JwtBearerEvents

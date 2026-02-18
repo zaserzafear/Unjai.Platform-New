@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
+using Unjai.Platform.Application.Abstractions.Caching;
 
 namespace Unjai.Platform.Infrastructure.Caching.Services;
 

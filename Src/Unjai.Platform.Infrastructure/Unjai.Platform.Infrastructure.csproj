@@ -7,4 +7,9 @@
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />
     <PackageReference Include="StackExchange.Redis" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Unjai.Platform.Application\Unjai.Platform.Application.csproj" />
+    <ProjectReference Include="..\Unjai.Platform.Domain\Unjai.Platform.Domain.csproj" />
+  </ItemGroup>
 </Project>

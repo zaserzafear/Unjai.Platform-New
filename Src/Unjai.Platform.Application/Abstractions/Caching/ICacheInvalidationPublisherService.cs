@@ -1,4 +1,4 @@
-﻿namespace Unjai.Platform.Infrastructure.Caching.Services;
+﻿namespace Unjai.Platform.Application.Abstractions.Caching;
 
 public interface ICacheInvalidationPublisherService
 {
