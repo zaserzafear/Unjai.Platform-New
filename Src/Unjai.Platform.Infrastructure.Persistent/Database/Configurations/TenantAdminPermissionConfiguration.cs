@@ -28,5 +28,7 @@ internal sealed class TenantAdminPermissionConfiguration
 
         entity.HasIndex(x => x.Code)
             .IsUnique();
+
+        entity.HasData(TenantAdminPermissionSeed.GetSeedData());
     }
 }
