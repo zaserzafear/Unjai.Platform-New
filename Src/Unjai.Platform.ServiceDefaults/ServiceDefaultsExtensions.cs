@@ -33,7 +33,13 @@ public static class ServiceDefaultsExtensions
         builder.Services.ConfigureHttpClientDefaults(http =>
         {
             // Turn on resilience by default
-            http.AddStandardResilienceHandler();
+            http.AddStandardResilienceHandler(options =>
+            {
+                options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(60);
+                options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(30);
+                options.Retry.MaxRetryAttempts = 3;
+                options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(90);
+            });
 
             // Turn on service discovery by default
             http.AddServiceDiscovery();
