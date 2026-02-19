@@ -45,7 +45,17 @@ internal sealed class JwtKeyStore(WriteDbContext dbContext) : IJwtKeyStore
 
     public void RotateKey()
     {
-        var newKey = EcdsaKeyGenerator.Create();
+        var ecdsaKey = EcdsaKeyGenerator.Create();
+
+        var newKey = new JwtSigningKey
+        {
+            KeyId = ecdsaKey.kid,
+            PrivateKeyPem = ecdsaKey.privatePem,
+            PublicKeyPem = ecdsaKey.publicPem,
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddDays(7),
+        };
 
         var activeKey = dbContext.JwtSigningKeys.AsNoTracking().SingleOrDefault(x => x.IsActive);
 

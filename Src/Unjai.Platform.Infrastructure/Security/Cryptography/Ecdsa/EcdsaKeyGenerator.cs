@@ -1,13 +1,12 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using Unjai.Platform.Domain.Entities.JwtSigningKeys;
 
 namespace Unjai.Platform.Infrastructure.Security.Cryptography.Ecdsa;
 
 public static class EcdsaKeyGenerator
 {
-    public static JwtSigningKey Create()
+    public static (string privatePem, string publicPem, string kid) Create()
     {
         using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
@@ -15,14 +14,7 @@ public static class EcdsaKeyGenerator
         var publicPem = ecdsa.ExportSubjectPublicKeyInfoPem();
         var kid = GenerateKid(ecdsa);
 
-        return new JwtSigningKey
-        {
-            KeyId = kid,
-            PrivateKeyPem = privatePem,
-            PublicKeyPem = publicPem,
-            IsActive = true,
-            CreatedAt = DateTime.UtcNow
-        };
+        return (privatePem, publicPem, kid);
     }
 
     private static string GenerateKid(ECDsa ecdsa)

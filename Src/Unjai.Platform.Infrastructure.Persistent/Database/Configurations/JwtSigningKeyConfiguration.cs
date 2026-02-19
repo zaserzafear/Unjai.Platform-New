@@ -37,5 +37,8 @@ internal sealed class JwtSigningKeyConfiguration
               .HasColumnName("created_at")
               .HasDefaultValueSql("NOW()")
               .ValueGeneratedOnAdd();
+
+        entity.Property(e => e.ExpiresAt)
+              .HasColumnName("expires_at");
     }
 }
