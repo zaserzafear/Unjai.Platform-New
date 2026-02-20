@@ -38,7 +38,7 @@ internal sealed class UpdateTenantV1(
             repository.Update(entity);
             await unitOfWork.SaveChangesAsync(ct);
 
-            var cacheKey = TenantCacheKey.GetById(id);
+            var cacheKey = TenantCacheKeys.GetById(id);
             await cacheInvalidation.NotifyCacheInvalidationAsync(cacheKey);
 
             return AppResult<object>.Ok(

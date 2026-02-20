@@ -21,7 +21,7 @@ internal sealed class GetTenantByIdV1(
     {
         try
         {
-            var cacheKey = TenantCacheKey.GetById(id);
+            var cacheKey = TenantCacheKeys.GetById(id);
 
             var tenant = await cache.GetOrCreateAsync(
                 cacheKey,

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Unjai.Platform.Application.Services.JwtKeyStores;
 using Unjai.Platform.Infrastructure.Security.Authentication.ApiKey;
 using Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
 using Unjai.Platform.Infrastructure.Security.Authentication.Policies;
@@ -36,8 +37,10 @@ public static class SecurityExtensions
                 IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) =>
                 {
                     using var scope = services.BuildServiceProvider().CreateScope();
-                    var keyStore = scope.ServiceProvider.GetRequiredService<IJwtKeyStore>();
-                    var securityKeys = keyStore.GetAllSecurityKeys();
+                    var keyStore = scope.ServiceProvider.GetRequiredService<IJwtKeyStoreService>();
+                    var publicKeys = keyStore.GetAllPublicKeysAsync().Result;
+
+                    var securityKeys = publicKeys.Select(x => x.ToSecurityKey());
 
                     return securityKeys;
                 }

@@ -6,6 +6,7 @@ using Scalar.AspNetCore;
 using Unjai.Platform.Api.Endpoints.Extensions;
 using Unjai.Platform.Api.Extensions;
 using Unjai.Platform.Api.RateLimiting;
+using Unjai.Platform.Application.Services.JwtKeyStores;
 using Unjai.Platform.Infrastructure.Caching.Extensions;
 using Unjai.Platform.Infrastructure.Persistent.Database.Extensions;
 using Unjai.Platform.Infrastructure.Persistent.Seeding;
@@ -190,9 +191,10 @@ app.UseAuthExtensions();
 
 app.UseOutputCache();
 
-app.MapGet("/.well-known/jwks.json", async (IJwtKeyStore keyStore) =>
+app.MapGet("/.well-known/jwks.json", async (
+    IJwtKeyStoreService keyStore) =>
 {
-    var keys = keyStore.GetAllPublicKeys();
+    var keys = await keyStore.GetAllPublicKeysAsync();
 
     var jwks = new
     {

@@ -1,5 +1,5 @@
 ﻿using Unjai.Platform.Api.Endpoints.Extensions;
-using Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
+using Unjai.Platform.Application.Services.JwtKeyStores;
 
 namespace Unjai.Platform.Api.Endpoints.Jwks;
 
@@ -15,10 +15,10 @@ public sealed class JwksEndpoints : IEndpoint
             .WithTags(Tag);
 
         group.MapPost("rotate", async (
-            IJwtKeyStore keyStore,
+            IJwtKeyStoreService keyStore,
             CancellationToken ct) =>
         {
-            keyStore.RotateKey();
+            await keyStore.RotateKeyAsync(TimeSpan.FromDays(7), ct);
             return Results.NoContent();
         });
     }
