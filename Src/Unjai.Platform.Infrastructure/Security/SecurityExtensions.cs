@@ -42,20 +42,7 @@ public static class SecurityExtensions
 
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKeyResolver = (token, securityToken, kid, parameters) =>
-                {
-                    return parameters.IssuerSigningKeys;
-                }
-            };
-
-            options.Events = new JwtBearerEvents
-            {
-                OnMessageReceived = context =>
-                {
-                    if (context.Request.Cookies.TryGetValue("AccessToken", out var token))
-                        context.Token = token;
-
-                    return Task.CompletedTask;
-                },
+                    parameters.IssuerSigningKeys?.Where(k => k.KeyId == kid)
             };
         });
 
