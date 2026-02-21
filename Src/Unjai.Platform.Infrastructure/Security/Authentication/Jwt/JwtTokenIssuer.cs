@@ -1,12 +1,12 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
-using Unjai.Platform.Application.Repositories.JwtKeyStores;
+using Unjai.Platform.Application.Services.JwtKeyStores;
 using Unjai.Platform.Infrastructure.Security.Cryptography.Ecdsa;
 
 namespace Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
 
-public sealed class JwtTokenIssuer(IJwtKeyStoreRepository keyStore)
+public sealed class JwtTokenIssuer(IJwtKeyStoreService keyStore)
 {
     public string IssueToken(IEnumerable<Claim> claims)
     {

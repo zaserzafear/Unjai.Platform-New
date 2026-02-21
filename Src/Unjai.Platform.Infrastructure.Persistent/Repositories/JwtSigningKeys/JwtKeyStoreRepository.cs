@@ -1,4 +1,5 @@
-﻿using Unjai.Platform.Application.Repositories.JwtKeyStores;
+﻿using Microsoft.EntityFrameworkCore;
+using Unjai.Platform.Application.Repositories.JwtKeyStores;
 using Unjai.Platform.Domain.Entities.JwtSigningKeys;
 using Unjai.Platform.Infrastructure.Persistent.Database;
 
@@ -23,13 +24,13 @@ internal sealed class JwtKeyStoreRepository(
             .SingleOrDefault(x => x.IsActive && x.ExpiresAt > now);
     }
 
-    public IEnumerable<JwtSigningKey> GetAllNotExpiredKeys()
+    public async Task<IEnumerable<JwtSigningKey>> GetAllNotExpiredKeysAsync(CancellationToken ct)
     {
         var now = DateTime.UtcNow;
 
-        return readDbContext.JwtSigningKeys
+        return await readDbContext.JwtSigningKeys
             .Where(x => x.ExpiresAt > now)
-            .ToList();
+            .ToListAsync(ct);
     }
 
     public JwtSigningKey Update(JwtSigningKey jwtSigningKey)

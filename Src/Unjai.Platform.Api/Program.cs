@@ -194,7 +194,7 @@ app.UseOutputCache();
 app.MapGet("/.well-known/jwks.json", async (
     IJwtKeyStoreService keyStore) =>
 {
-    var keys = await keyStore.GetAllPublicKeysAsync();
+    var keys = keyStore.GetAllPublicKeys();
 
     var jwks = new
     {

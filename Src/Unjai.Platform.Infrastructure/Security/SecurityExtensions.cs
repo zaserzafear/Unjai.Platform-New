@@ -41,15 +41,9 @@ public static class SecurityExtensions
                 ClockSkew = TimeSpan.FromSeconds(jwtSetting.ClockSkew),
 
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) =>
+                IssuerSigningKeyResolver = (token, securityToken, kid, parameters) =>
                 {
-                    using var scope = services.BuildServiceProvider().CreateScope();
-                    var keyStore = scope.ServiceProvider.GetRequiredService<IJwtKeyStoreService>();
-                    var publicKeys = keyStore.GetAllPublicKeysAsync().Result;
-
-                    var securityKeys = publicKeys.Select(x => x.ToSecurityKey());
-
-                    return securityKeys;
+                    return parameters.IssuerSigningKeys;
                 }
             };
 
@@ -57,15 +51,24 @@ public static class SecurityExtensions
             {
                 OnMessageReceived = context =>
                 {
-                    if (context.Request.Cookies.ContainsKey("AccessToken"))
-                    {
-                        context.Token = context.Request.Cookies["AccessToken"];
-                    }
+                    if (context.Request.Cookies.TryGetValue("AccessToken", out var token))
+                        context.Token = token;
 
                     return Task.CompletedTask;
-                }
+                },
             };
         });
+
+        services.PostConfigure<JwtBearerOptions>(
+            JwtBearerDefaults.AuthenticationScheme,
+            async options =>
+            {
+                var provider = services
+                .BuildServiceProvider()
+                .GetRequiredService<IJwtKeyStoreService>();
+
+                options.TokenValidationParameters.IssuerSigningKeys = provider.GetAllPublicKeys().Select(k => k.ToPublicKey());
+            });
 
         services.AddAuthorization(options =>
         {

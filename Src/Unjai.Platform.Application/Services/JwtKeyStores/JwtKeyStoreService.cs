@@ -10,7 +10,8 @@ namespace Unjai.Platform.Application.Services.JwtKeyStores;
 
 public interface IJwtKeyStoreService
 {
-    Task<IEnumerable<JwtSigningKey>> GetAllPublicKeysAsync();
+    JwtSigningKey? GetActiveNotExpiredKey();
+    IEnumerable<JwtSigningKey> GetAllPublicKeys();
     Task RotateKeyAsync(TimeSpan keyLifetime, CancellationToken ct);
 }
 
@@ -23,18 +24,23 @@ internal sealed class JwtKeyStoreService(
     IEcdsaKeyGenerator ecdsaKeyGenerator)
     : IJwtKeyStoreService
 {
-    public async Task<IEnumerable<JwtSigningKey>> GetAllPublicKeysAsync()
+    public JwtSigningKey? GetActiveNotExpiredKey() => throw new NotImplementedException();
+
+    public IEnumerable<JwtSigningKey> GetAllPublicKeys()
     {
         try
         {
             var cacheKey = JwtKeyStoreCacheKeys.GetAllPublicKeys;
 
-            var publicKeys = await cache.GetOrCreateAsync(
-                cacheKey,
-                async ct =>
-                {
-                    return repository.GetAllNotExpiredKeys();
-                });
+            var publicKeys = cache.GetOrCreateAsync(
+                    cacheKey,
+                    async ct =>
+                    {
+                        return await repository.GetAllNotExpiredKeysAsync(ct);
+                    })
+                .AsTask()
+                .GetAwaiter()
+                .GetResult();
 
             return publicKeys;
         }

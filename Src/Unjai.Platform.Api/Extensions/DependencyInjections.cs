@@ -11,12 +11,13 @@ public static class DependencyInjections
 {
     public static IServiceCollection AddDependencyInjections(this IServiceCollection services)
     {
-        services.AddCustomerUserServiceExtension();
-        services.AddTenantServiceExtension();
-        services.AddTenantRepositoryExtensions();
         services.AddJwtKeyStoreExtension();
         services.AddJwtSigningKeyRepositoryExtensions();
         services.AddSecurityExtensions();
+
+        services.AddCustomerUserServiceExtension();
+        services.AddTenantServiceExtension();
+        services.AddTenantRepositoryExtensions();
 
         return services;
     }

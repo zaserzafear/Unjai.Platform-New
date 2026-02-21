@@ -6,6 +6,6 @@ public interface IJwtKeyStoreRepository
 {
     Task<JwtSigningKey> AddAsync(JwtSigningKey jwtSigningKey);
     JwtSigningKey? GetActiveNotExpiredKey();
-    public IEnumerable<JwtSigningKey> GetAllNotExpiredKeys();
+    Task<IEnumerable<JwtSigningKey>> GetAllNotExpiredKeysAsync(CancellationToken ct);
     JwtSigningKey Update(JwtSigningKey jwtSigningKey);
 }
