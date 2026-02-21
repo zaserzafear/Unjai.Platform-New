@@ -3,15 +3,22 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Unjai.Platform.Application.Abstractions.Cryptography.Ecdsa;
 using Unjai.Platform.Application.Services.JwtKeyStores;
 using Unjai.Platform.Infrastructure.Security.Authentication.ApiKey;
 using Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
 using Unjai.Platform.Infrastructure.Security.Authentication.Policies;
+using Unjai.Platform.Infrastructure.Security.Cryptography.Ecdsa;
 
 namespace Unjai.Platform.Infrastructure.Security;
 
 public static class SecurityExtensions
 {
+    public static void AddSecurityExtensions(this IServiceCollection services)
+    {
+        services.AddSingleton<IEcdsaKeyGenerator, EcdsaKeyGenerator>();
+    }
+
     public static void AddAuthExtensions(this IServiceCollection services, JwtSettings jwtSetting, ApiKeyOptions apiKeyOption)
     {
         services.AddAuthentication(options =>

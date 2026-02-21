@@ -1,12 +1,13 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using Unjai.Platform.Application.Abstractions.Cryptography.Ecdsa;
 
 namespace Unjai.Platform.Infrastructure.Security.Cryptography.Ecdsa;
 
-public static class EcdsaKeyGenerator
+internal sealed class EcdsaKeyGenerator : IEcdsaKeyGenerator
 {
-    public static (string privatePem, string publicPem, string kid) Create()
+    public (string privatePem, string publicPem, string kid) Create()
     {
         using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 

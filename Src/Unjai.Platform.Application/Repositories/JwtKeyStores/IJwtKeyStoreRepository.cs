@@ -4,8 +4,8 @@ namespace Unjai.Platform.Application.Repositories.JwtKeyStores;
 
 public interface IJwtKeyStoreRepository
 {
-    void Add(JwtSigningKey key);
-    JwtSigningKey GetActiveKey();
-    IEnumerable<JwtSigningKey> GetAllPublicKeys();
-    void RotateKey(TimeSpan keyLifetime);
+    Task<JwtSigningKey> AddAsync(JwtSigningKey jwtSigningKey);
+    JwtSigningKey? GetActiveNotExpiredKey();
+    public IEnumerable<JwtSigningKey> GetAllNotExpiredKeys();
+    JwtSigningKey Update(JwtSigningKey jwtSigningKey);
 }

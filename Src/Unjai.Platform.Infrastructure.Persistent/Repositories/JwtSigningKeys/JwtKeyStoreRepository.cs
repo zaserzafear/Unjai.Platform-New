@@ -1,68 +1,41 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Unjai.Platform.Application.Repositories.JwtKeyStores;
+﻿using Unjai.Platform.Application.Repositories.JwtKeyStores;
 using Unjai.Platform.Domain.Entities.JwtSigningKeys;
 using Unjai.Platform.Infrastructure.Persistent.Database;
-using Unjai.Platform.Infrastructure.Security.Cryptography.Ecdsa;
 
 namespace Unjai.Platform.Infrastructure.Persistent.Repositories.JwtSigningKeys;
 
-internal sealed class JwtKeyStoreRepository(WriteDbContext dbContext) : IJwtKeyStoreRepository
+internal sealed class JwtKeyStoreRepository(
+    WriteDbContext writeDbContext,
+    ReadDbContext readDbContext) : IJwtKeyStoreRepository
 {
-    public void Add(JwtSigningKey key)
+    public async Task<JwtSigningKey> AddAsync(JwtSigningKey jwtSigningKey)
     {
-        dbContext.JwtSigningKeys.Add(key);
-        dbContext.SaveChanges();
+        await writeDbContext.JwtSigningKeys.AddAsync(jwtSigningKey);
+
+        return jwtSigningKey;
     }
 
-    public JwtSigningKey GetActiveKey()
+    public JwtSigningKey? GetActiveNotExpiredKey()
     {
         var now = DateTime.UtcNow;
 
-        var key = dbContext.JwtSigningKeys
-            .AsNoTracking()
+        return readDbContext.JwtSigningKeys
             .SingleOrDefault(x => x.IsActive && x.ExpiresAt > now);
-
-        if (key == null)
-            throw new InvalidOperationException("No active JWT signing key available.");
-
-        return key;
     }
 
-    public IEnumerable<JwtSigningKey> GetAllPublicKeys()
+    public IEnumerable<JwtSigningKey> GetAllNotExpiredKeys()
     {
         var now = DateTime.UtcNow;
 
-        return dbContext.JwtSigningKeys
-            .AsNoTracking()
+        return readDbContext.JwtSigningKeys
             .Where(x => x.ExpiresAt > now)
             .ToList();
     }
 
-    public void RotateKey(TimeSpan keyLifetime)
+    public JwtSigningKey Update(JwtSigningKey jwtSigningKey)
     {
-        var now = DateTime.UtcNow;
+        writeDbContext.JwtSigningKeys.Update(jwtSigningKey);
 
-        var activeKey = dbContext.JwtSigningKeys
-            .SingleOrDefault(x => x.IsActive);
-
-        if (activeKey != null)
-        {
-            activeKey.IsActive = false;
-            dbContext.JwtSigningKeys.Update(activeKey);
-        }
-
-        var ecdsaKey = EcdsaKeyGenerator.Create();
-
-        var newKey = new JwtSigningKey
-        {
-            KeyId = ecdsaKey.kid,
-            PrivateKeyPem = ecdsaKey.privatePem,
-            PublicKeyPem = ecdsaKey.publicPem,
-            IsActive = true,
-            CreatedAt = DateTime.UtcNow,
-            ExpiresAt = now.Add(keyLifetime),
-        };
-
-        dbContext.JwtSigningKeys.Add(newKey);
+        return jwtSigningKey;
     }
 }

@@ -3,6 +3,7 @@ using Unjai.Platform.Application.Services.CustomerUsers.Extensions;
 using Unjai.Platform.Application.Services.Tenants.Extensions;
 using Unjai.Platform.Infrastructure.Persistent.Repositories.JwtSigningKeys;
 using Unjai.Platform.Infrastructure.Persistent.Repositories.Tenants;
+using Unjai.Platform.Infrastructure.Security;
 
 namespace Unjai.Platform.Api.Extensions;
 
@@ -15,6 +16,7 @@ public static class DependencyInjections
         services.AddTenantRepositoryExtensions();
         services.AddJwtKeyStoreExtension();
         services.AddJwtSigningKeyRepositoryExtensions();
+        services.AddSecurityExtensions();
 
         return services;
     }

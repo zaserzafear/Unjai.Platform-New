@@ -10,7 +10,9 @@ public sealed class JwtTokenIssuer(IJwtKeyStoreRepository keyStore)
 {
     public string IssueToken(IEnumerable<Claim> claims)
     {
-        var key = keyStore.GetActiveKey();
+        var key = keyStore.GetActiveNotExpiredKey()
+            ?? throw new InvalidOperationException(
+                "No active, non-expired JWT signing key found.");
 
         var credentials = new SigningCredentials(
             key.ToPrivateKey(),

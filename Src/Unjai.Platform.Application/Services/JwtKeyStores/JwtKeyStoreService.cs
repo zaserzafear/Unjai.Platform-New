@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
 using Unjai.Platform.Application.Abstractions.Caching;
+using Unjai.Platform.Application.Abstractions.Cryptography.Ecdsa;
 using Unjai.Platform.Application.Repositories.JwtKeyStores;
 using Unjai.Platform.Domain.Abstractions;
 using Unjai.Platform.Domain.Entities.JwtSigningKeys;
@@ -18,7 +19,8 @@ internal sealed class JwtKeyStoreService(
     IUnitOfWork unitOfWork,
     IJwtKeyStoreRepository repository,
     ICacheInvalidationPublisherService cacheInvalidation,
-    HybridCache cache)
+    HybridCache cache,
+    IEcdsaKeyGenerator ecdsaKeyGenerator)
     : IJwtKeyStoreService
 {
     public async Task<IEnumerable<JwtSigningKey>> GetAllPublicKeysAsync()
@@ -31,7 +33,7 @@ internal sealed class JwtKeyStoreService(
                 cacheKey,
                 async ct =>
                 {
-                    return repository.GetAllPublicKeys();
+                    return repository.GetAllNotExpiredKeys();
                 });
 
             return publicKeys;
@@ -47,17 +49,40 @@ internal sealed class JwtKeyStoreService(
     {
         try
         {
-            var activeKey = repository.GetActiveKey();
+            var now = DateTime.UtcNow;
 
-            var cacheKeyAllPublicKeys = JwtKeyStoreCacheKeys.GetAllPublicKeys;
-            var cacheKeyActiveKey = JwtKeyStoreCacheKeys.GetByKid(activeKey.KeyId);
+            var activeKey = repository.GetActiveNotExpiredKey();
 
-            repository.RotateKey(keyLifetime);
+            if (activeKey is not null)
+            {
+                activeKey.IsActive = false;
+                repository.Update(activeKey);
+            }
+
+            var (privatePem, publicPem, kid) = ecdsaKeyGenerator.Create();
+
+            var newKey = new JwtSigningKey
+            {
+                KeyId = kid,
+                PrivateKeyPem = privatePem,
+                PublicKeyPem = publicPem,
+                IsActive = true,
+                CreatedAt = now,
+                ExpiresAt = now.Add(keyLifetime),
+            };
+
+            await repository.AddAsync(newKey);
 
             await unitOfWork.SaveChangesAsync(ct);
 
-            await cacheInvalidation.NotifyCacheInvalidationAsync(cacheKeyAllPublicKeys);
-            await cacheInvalidation.NotifyCacheInvalidationAsync(cacheKeyActiveKey);
+            await cacheInvalidation.NotifyCacheInvalidationAsync(
+                JwtKeyStoreCacheKeys.GetAllPublicKeys);
+
+            if (activeKey is not null)
+            {
+                await cacheInvalidation.NotifyCacheInvalidationAsync(
+                    JwtKeyStoreCacheKeys.GetByKid(activeKey.KeyId));
+            }
         }
         catch (Exception ex)
         {
