@@ -14,16 +14,8 @@ public static class PasswordHasher
             workFactor: WorkFactor);
     }
 
-    public static bool Verify(string plainPassword, string passwordHash)
-    {
-        if (string.IsNullOrWhiteSpace(plainPassword))
-            return false;
-
-        if (string.IsNullOrWhiteSpace(passwordHash))
-            return false;
-
-        return BCrypt.Net.BCrypt.Verify(
-            plainPassword,
-            passwordHash);
-    }
+    public static bool Verify(string plainPassword, string passwordHash) =>
+        !string.IsNullOrEmpty(plainPassword) &&
+        !string.IsNullOrEmpty(passwordHash) &&
+        BCrypt.Net.BCrypt.Verify(plainPassword, passwordHash);
 }

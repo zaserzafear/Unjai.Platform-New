@@ -18,7 +18,7 @@ public sealed class UpdateTenantEndpoint : IEndpoint
         group.MapPut("{id:guid}", async (
             Guid id,
             UpdateTenantRequestDto request,
-            IUpdateTenantV1 useCase,
+            UpdateTenantV1 useCase,
             CancellationToken ct) =>
         {
             var result = await useCase.Handle(id, request, ct);

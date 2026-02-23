@@ -5,12 +5,7 @@ using Unjai.Platform.Contracts.Models;
 
 namespace Unjai.Platform.Application.Services.CustomerUsers.GetCustomerUser;
 
-public interface IGetCustomerUserV1
-{
-    Task<AppResult<GetCustomerUserReponseDto>> Handle(Guid userId, CancellationToken ct);
-}
-
-internal sealed class GetCustomerUserV1(ILogger<GetCustomerUserV1> logger) : IGetCustomerUserV1
+public sealed class GetCustomerUserV1(ILogger<GetCustomerUserV1> logger)
 {
     public async Task<AppResult<GetCustomerUserReponseDto>> Handle(Guid userId, CancellationToken ct)
     {

@@ -17,7 +17,7 @@ public sealed class GetTenantEndpoints : IEndpoint
         group.MapGet("", async (
             int? page,
             int? pageSize,
-            IGetTenantAllV1 useCase,
+            GetTenantAllV1 useCase,
             CancellationToken ct) =>
         {
             var safePage = page.GetValueOrDefault(1);
@@ -32,7 +32,7 @@ public sealed class GetTenantEndpoints : IEndpoint
 
         group.MapGet("{id:guid}", async (
             Guid id,
-            IGetTenantByIdV1 useCase,
+            GetTenantByIdV1 useCase,
             CancellationToken ct) =>
         {
             var result = await useCase.Handle(id, ct);

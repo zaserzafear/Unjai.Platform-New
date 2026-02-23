@@ -14,7 +14,7 @@
 //            .MapGroup(CustomerUserEndpoints.Base)
 //            .WithTags(CustomerUserEndpoints.Tag);
 
-//        group.MapGet("{id:guid}", async (Guid id, IGetCustomerUserV1 useCase, CancellationToken cancellationToken = default) =>
+//        group.MapGet("{id:guid}", async (Guid id, GetCustomerUserV1 useCase, CancellationToken cancellationToken = default) =>
 //        {
 //            var result = await useCase.Handle(id, cancellationToken);
 

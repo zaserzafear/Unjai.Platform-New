@@ -9,19 +9,22 @@ internal sealed class JwtKeyStoreRepository(
     WriteDbContext writeDbContext,
     ReadDbContext readDbContext) : IJwtKeyStoreRepository
 {
-    public async Task<JwtSigningKey> AddAsync(JwtSigningKey jwtSigningKey)
+    public async Task<JwtSigningKey> CreateAsync(JwtSigningKey jwtSigningKey)
     {
         await writeDbContext.JwtSigningKeys.AddAsync(jwtSigningKey);
 
         return jwtSigningKey;
     }
 
-    public JwtSigningKey? GetActiveNotExpiredKey()
+    public async Task<JwtSigningKey?> GetActiveNotExpiredKey(CancellationToken ct)
     {
         var now = DateTime.UtcNow;
 
-        return readDbContext.JwtSigningKeys
-            .SingleOrDefault(x => x.IsActive && x.ExpiresAt > now);
+        return await readDbContext.JwtSigningKeys
+            .SingleAsync(
+            x => x.IsActive &&
+            x.ExpiresAt > now,
+            ct);
     }
 
     public async Task<IEnumerable<JwtSigningKey>> GetAllNotExpiredKeysAsync(CancellationToken ct)

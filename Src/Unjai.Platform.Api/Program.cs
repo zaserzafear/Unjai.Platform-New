@@ -192,7 +192,7 @@ app.UseAuthExtensions();
 app.UseOutputCache();
 
 app.MapGet("/.well-known/jwks.json", async (
-    IJwtKeyStoreService keyStore) =>
+    JwtKeyStoreService keyStore) =>
 {
     var keys = keyStore.GetAllPublicKeys();
 
@@ -254,6 +254,6 @@ if (app.Environment.IsDevelopment())
     app.ApplyMigrations();
 }
 
-await TenantsAdminSeeder.SeedAsync(app.Services);
+await TenantsAdminSeeder.SeedAsync(app.Services, app.Lifetime.ApplicationStopping);
 
 await app.RunAsync();

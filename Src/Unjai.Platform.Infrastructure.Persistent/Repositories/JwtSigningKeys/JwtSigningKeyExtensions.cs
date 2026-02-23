@@ -5,7 +5,7 @@ namespace Unjai.Platform.Infrastructure.Persistent.Repositories.JwtSigningKeys;
 
 public static class JwtSigningKeyExtensions
 {
-    public static void AddJwtSigningKeyRepositoryExtensions(this IServiceCollection services)
+    public static void AddJwtSigningKeyRepository(this IServiceCollection services)
     {
         services.AddScoped<IJwtKeyStoreRepository, JwtKeyStoreRepository>();
     }

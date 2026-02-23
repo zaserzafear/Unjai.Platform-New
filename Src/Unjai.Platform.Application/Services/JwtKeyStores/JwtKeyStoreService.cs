@@ -8,23 +8,34 @@ using Unjai.Platform.Domain.Entities.JwtSigningKeys;
 
 namespace Unjai.Platform.Application.Services.JwtKeyStores;
 
-public interface IJwtKeyStoreService
-{
-    JwtSigningKey? GetActiveNotExpiredKey();
-    IEnumerable<JwtSigningKey> GetAllPublicKeys();
-    Task RotateKeyAsync(TimeSpan keyLifetime, CancellationToken ct);
-}
-
-internal sealed class JwtKeyStoreService(
+public sealed class JwtKeyStoreService(
     ILogger<JwtKeyStoreService> logger,
     IUnitOfWork unitOfWork,
     IJwtKeyStoreRepository repository,
     ICacheInvalidationPublisherService cacheInvalidation,
     HybridCache cache,
     IEcdsaKeyGenerator ecdsaKeyGenerator)
-    : IJwtKeyStoreService
 {
-    public JwtSigningKey? GetActiveNotExpiredKey() => throw new NotImplementedException();
+    public async Task<JwtSigningKey?> GetActiveNotExpiredKey()
+    {
+        try
+        {
+            var cacheKey = JwtKeyStoreCacheKeys.GetActiveKeys;
+            var activeKey = await cache.GetOrCreateAsync(
+                    cacheKey,
+                    async ct =>
+                    {
+                        return await repository.GetActiveNotExpiredKey(ct);
+                    });
+            return activeKey;
+
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to retrieve the active JWT signing key from the repository.");
+            throw;
+        }
+    }
 
     public IEnumerable<JwtSigningKey> GetAllPublicKeys()
     {
@@ -57,7 +68,7 @@ internal sealed class JwtKeyStoreService(
         {
             var now = DateTime.UtcNow;
 
-            var activeKey = repository.GetActiveNotExpiredKey();
+            var activeKey = await repository.GetActiveNotExpiredKey(ct);
 
             if (activeKey is not null)
             {
@@ -77,7 +88,7 @@ internal sealed class JwtKeyStoreService(
                 ExpiresAt = now.Add(keyLifetime),
             };
 
-            await repository.AddAsync(newKey);
+            await repository.CreateAsync(newKey);
 
             await unitOfWork.SaveChangesAsync(ct);
 
@@ -86,6 +97,9 @@ internal sealed class JwtKeyStoreService(
 
             if (activeKey is not null)
             {
+                await cacheInvalidation.NotifyCacheInvalidationAsync(
+                    JwtKeyStoreCacheKeys.GetActiveKeys);
+
                 await cacheInvalidation.NotifyCacheInvalidationAsync(
                     JwtKeyStoreCacheKeys.GetByKid(activeKey.KeyId));
             }

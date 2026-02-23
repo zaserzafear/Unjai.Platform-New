@@ -1,27 +1,25 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Unjai.Platform.Application.Repositories.TenantAdmins;
+using Unjai.Platform.Domain.Abstractions;
 using Unjai.Platform.Domain.Entities.TenantsAdmin;
 using Unjai.Platform.Domain.Entities.TenantsAdminRole;
-using Unjai.Platform.Infrastructure.Persistent.Database;
 using Unjai.Platform.Infrastructure.Security.Cryptography.Hashing;
 
 namespace Unjai.Platform.Infrastructure.Persistent.Seeding;
 
 public static class TenantsAdminSeeder
 {
-    public static async Task SeedAsync(IServiceProvider services)
+    public static async Task SeedAsync(IServiceProvider services, CancellationToken ct)
     {
         using var scope = services.CreateScope();
 
-        var db = scope.ServiceProvider.GetRequiredService<WriteDbContext>();
         var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>()
             .CreateLogger(typeof(TenantsAdminSeeder));
+        var repository = scope.ServiceProvider.GetRequiredService<ITenantAdminRepository>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-        bool hasAdmin = await db.TenantAdmins
-            .AsNoTracking()
-            .IgnoreQueryFilters()
-            .AnyAsync();
+        bool hasAdmin = await repository.HasDefaultAdminAsync(ct);
 
         if (hasAdmin)
             return;
@@ -37,8 +35,8 @@ public static class TenantsAdminSeeder
             RoleId = (int)TenantAdminRoleCode.SuperAdmin
         };
 
-        db.TenantAdmins.Add(admin);
-        await db.SaveChangesAsync();
+        await repository.CreateAsync(admin, ct);
+        await unitOfWork.SaveChangesAsync(ct);
 
         logger.LogWarning(
             "Initial tenants admin created. Username: admin , Password: {Password}", password);

@@ -5,13 +5,13 @@ using Unjai.Platform.Application.Services.Tenants.UpdateTenant;
 
 namespace Unjai.Platform.Application.Services.Tenants.Extensions;
 
-public static class TenantExtension
+public static class TenantExtensions
 {
     public static void AddTenantServiceExtension(this IServiceCollection Services)
     {
-        Services.AddScoped<ICreateTenantV1, CreateTenantV1>();
-        Services.AddScoped<IGetTenantAllV1, GetTenantAllV1>();
-        Services.AddScoped<IGetTenantByIdV1, GetTenantByIdV1>();
-        Services.AddScoped<IUpdateTenantV1, UpdateTenantV1>();
+        Services.AddScoped<CreateTenantV1>();
+        Services.AddScoped<GetTenantAllV1>();
+        Services.AddScoped<GetTenantByIdV1>();
+        Services.AddScoped<UpdateTenantV1>();
     }
 }

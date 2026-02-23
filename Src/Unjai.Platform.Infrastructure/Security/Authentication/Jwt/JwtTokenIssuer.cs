@@ -6,11 +6,11 @@ using Unjai.Platform.Infrastructure.Security.Cryptography.Ecdsa;
 
 namespace Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
 
-public sealed class JwtTokenIssuer(IJwtKeyStoreService keyStore)
+public sealed class JwtTokenIssuer(JwtKeyStoreService keyStore)
 {
-    public string IssueToken(IEnumerable<Claim> claims)
+    public async Task<string> IssueToken(IEnumerable<Claim> claims)
     {
-        var key = keyStore.GetActiveNotExpiredKey()
+        var key = await keyStore.GetActiveNotExpiredKey()
             ?? throw new InvalidOperationException(
                 "No active, non-expired JWT signing key found.");
 

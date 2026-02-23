@@ -17,7 +17,7 @@ public sealed class CreateTenantEndpoints : IEndpoint
 
         group.MapPost("", async (
             CreateTenantRequestDto request,
-            ICreateTenantV1 useCase,
+            CreateTenantV1 useCase,
             CancellationToken ct) =>
         {
             var result = await useCase.Handle(request, ct);

@@ -15,7 +15,7 @@ public sealed class JwksEndpoints : IEndpoint
             .WithTags(Tag);
 
         group.MapPost("rotate", async (
-            IJwtKeyStoreService keyStore,
+            JwtKeyStoreService keyStore,
             CancellationToken ct) =>
         {
             await keyStore.RotateKeyAsync(TimeSpan.FromDays(7), ct);

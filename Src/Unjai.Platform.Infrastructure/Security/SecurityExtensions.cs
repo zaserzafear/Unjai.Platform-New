@@ -52,7 +52,7 @@ public static class SecurityExtensions
             {
                 var provider = services
                 .BuildServiceProvider()
-                .GetRequiredService<IJwtKeyStoreService>();
+                .GetRequiredService<JwtKeyStoreService>();
 
                 options.TokenValidationParameters.IssuerSigningKeys = provider.GetAllPublicKeys().Select(k => k.ToPublicKey());
             });

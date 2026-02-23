@@ -7,6 +7,6 @@ public static class CustomerUserExtension
 {
     public static void AddCustomerUserServiceExtension(this IServiceCollection Services)
     {
-        Services.AddScoped<IGetCustomerUserV1, GetCustomerUserV1>();
+        Services.AddScoped<GetCustomerUserV1>();
     }
 }
