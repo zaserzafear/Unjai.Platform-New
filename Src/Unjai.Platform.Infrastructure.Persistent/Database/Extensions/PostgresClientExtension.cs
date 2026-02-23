@@ -55,9 +55,6 @@ public static class PostgresClientExtension
         string defaultConnectionString,
         string writeConnectionString)
     {
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseNpgsql(writeConnectionString));
-
         services.AddDbContext<ReadDbContext>(options =>
             options
                 .UseNpgsql(

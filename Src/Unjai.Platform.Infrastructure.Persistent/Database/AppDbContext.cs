@@ -7,14 +7,20 @@ using Unjai.Platform.Infrastructure.Persistent.Outbox;
 
 namespace Unjai.Platform.Infrastructure.Persistent.Database;
 
-internal class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+internal class AppDbContext<TContext> : DbContext
+    where TContext : DbContext
 {
+    protected AppDbContext(DbContextOptions<TContext> options)
+        : base(options)
+    {
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         SoftDeleteConvention.Apply(modelBuilder);
 
         modelBuilder.ApplyConfigurationsFromAssembly(
-            typeof(AppDbContext).Assembly);
+            typeof(AppDbContext<>).Assembly);
 
         base.OnModelCreating(modelBuilder);
     }

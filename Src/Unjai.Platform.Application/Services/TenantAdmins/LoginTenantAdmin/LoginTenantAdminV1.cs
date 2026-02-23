@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Unjai.Platform.Application.Abstractions.Security.Authentication;
 using Unjai.Platform.Application.Repositories.TenantAdmins;
 using Unjai.Platform.Contracts.Models;
 using Unjai.Platform.Contracts.TenantAdmins.Dtos;
@@ -7,7 +8,8 @@ namespace Unjai.Platform.Application.Services.TenantAdmins.LoginTenantAdmin;
 
 public sealed class LoginTenantAdminV1(
      ILogger<LoginTenantAdminV1> logger,
-     ITenantAdminRepository repository)
+     ITenantAdminRepository repository,
+     ITokenProvider jwtTokenIssuer)
 {
     public async Task<AppResult<LoginTenantAdminResponseDto>> Handle(LoginTenantAdminRequestDto request, CancellationToken ct)
     {
@@ -22,10 +24,14 @@ public sealed class LoginTenantAdminV1(
                     message: "Invalid username or password."
                 );
             }
+
+            var accessToken = await jwtTokenIssuer.IssueAccessToken(tenantAdmin, ct);
+
             return AppResult<LoginTenantAdminResponseDto>.Ok(
                 httpStatus: 200,
                 statusCode: "LOGIN_SUCCESSFUL",
-                message: "Tenant admin logged in successfully."
+                message: "Tenant admin logged in successfully.",
+                data: new LoginTenantAdminResponseDto(accessToken.token, accessToken.expires, string.Empty)
             );
         }
         catch (Exception ex)

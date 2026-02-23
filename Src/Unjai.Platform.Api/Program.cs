@@ -73,37 +73,40 @@ builder.Services.AddHttpContextAccessor();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-var jwtSetting = builder.Configuration
-    .GetSection(JwtSettingConfig.Section)
-    .Get<JwtSettings>()
-    ?? throw new InvalidOperationException("Jwt configuration missing");
-
-var apiKeyOptions = builder.Configuration
-    .GetSection(ApiKeyConfig.Section)
-    .Get<Unjai.Platform.Infrastructure.Security.Authentication.ApiKey.ApiKeyOptions>()
-    ?? new Unjai.Platform.Infrastructure.Security.Authentication.ApiKey.ApiKeyOptions();
-
-if (string.IsNullOrWhiteSpace(apiKeyOptions.HealthCheck))
-{
-    if (builder.Environment.IsDevelopment())
+builder.Services.AddAuthExtensions(
+    jwt =>
     {
-        apiKeyOptions.HealthCheck = CryptoHelper.GenerateSecret(32);
+        builder.Configuration
+            .GetSection(JwtSettingConfig.Section)
+            .Bind(jwt);
+    },
+    api =>
+    {
+        builder.Configuration
+            .GetSection(ApiKeyConfig.Section)
+            .Bind(api);
 
-        if (logger.IsEnabled(LogLevel.Critical))
+        if (string.IsNullOrWhiteSpace(api.HealthCheck))
         {
-            logger.LogCritical(
-                "SECURITY WARNING (DEV ONLY): ApiKeys:HealthCheck was auto-generated. " +
-                "COPY THIS VALUE AND STORE IT SECURELY. Value={ApiKey}",
-                apiKeyOptions.HealthCheck);
-        }
-    }
-    else
-    {
-        throw new InvalidOperationException("ApiKeys:HealthCheck must be configured in production.");
-    }
-}
+            if (builder.Environment.IsDevelopment())
+            {
+                api.HealthCheck = CryptoHelper.GenerateSecret(32);
 
-builder.Services.AddAuthExtensions(jwtSetting, apiKeyOptions);
+                if (logger.IsEnabled(LogLevel.Critical))
+                {
+                    logger.LogCritical(
+                    "SECURITY WARNING (DEV ONLY): ApiKeys:HealthCheck was auto-generated. " +
+                    "COPY THIS VALUE AND STORE IT SECURELY. Value={ApiKey}",
+                    api.HealthCheck);
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    "ApiKeys:HealthCheck must be configured in production.");
+            }
+        }
+    });
 
 var dbPrimary = builder.Configuration.GetConnectionString("UnjaiDb");
 
@@ -191,31 +194,38 @@ app.UseAuthExtensions();
 
 app.UseOutputCache();
 
-app.MapGet("/.well-known/jwks.json", async (
+app.MapGet("/.well-known/openid-configuration", () =>
+{
+    return Results.Ok(new
+    {
+        issuer = "https://auth.yourdomain.com",
+        jwks_uri = "https://auth.yourdomain.com/.well-known/jwks.json"
+    });
+});
+
+app.MapGet("/.well-known/jwks.json", (
     JwtKeyStoreService keyStore) =>
 {
     var keys = keyStore.GetAllPublicKeys();
 
-    var jwks = new
-    {
-        keys = keys.Select(k =>
-        {
-            using var ecdsa = ECDsa.Create();
-            ecdsa.ImportFromPem(k.PublicKeyPem);
-            var p = ecdsa.ExportParameters(false);
+    var jwks = new JsonWebKeySet();
 
-            return new
-            {
-                kty = "EC",
-                crv = "P-256",
-                x = Base64UrlEncoder.Encode(p.Q.X),
-                y = Base64UrlEncoder.Encode(p.Q.Y),
-                alg = "ES256",
-                kid = k.KeyId,
-                use = "sig"
-            };
-        })
-    };
+    foreach (var k in keys)
+    {
+        using var ecdsa = ECDsa.Create();
+        ecdsa.ImportFromPem(k.PublicKeyPem);
+
+        var securityKey = new ECDsaSecurityKey(ecdsa)
+        {
+            KeyId = k.KeyId
+        };
+
+        var jwk = JsonWebKeyConverter.ConvertFromECDsaSecurityKey(securityKey);
+        jwk.Use = "sig";
+        jwk.Alg = SecurityAlgorithms.EcdsaSha256;
+
+        jwks.Keys.Add(jwk);
+    }
 
     return Results.Ok(jwks);
 });

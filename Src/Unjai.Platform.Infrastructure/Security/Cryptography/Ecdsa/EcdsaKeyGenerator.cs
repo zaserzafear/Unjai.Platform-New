@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using Unjai.Platform.Application.Abstractions.Cryptography.Ecdsa;
+using Unjai.Platform.Application.Abstractions.Security.Cryptography.Ecdsa;
 
 namespace Unjai.Platform.Infrastructure.Security.Cryptography.Ecdsa;
 

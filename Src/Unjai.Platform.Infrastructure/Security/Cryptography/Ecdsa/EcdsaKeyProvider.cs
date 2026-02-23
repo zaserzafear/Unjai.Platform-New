@@ -4,27 +4,35 @@ using Unjai.Platform.Domain.Entities.JwtSigningKeys;
 
 namespace Unjai.Platform.Infrastructure.Security.Cryptography.Ecdsa;
 
-public static class EcdsaExtensions
+public sealed class EcdsaKeyProvider
 {
-    public static SecurityKey ToPrivateKey(this JwtSigningKey key)
-    {
-        using var ecdsa = ECDsa.Create();
-        ecdsa.ImportFromPem(key.PrivateKeyPem);
+    private readonly ECDsa ecdsa;
 
+    public EcdsaKeyProvider()
+    {
+        ecdsa = ECDsa.Create();
+    }
+
+    public SecurityKey ToPrivateKey(JwtSigningKey key)
+    {
+        ecdsa.ImportFromPem(key.PrivateKeyPem);
         return new ECDsaSecurityKey(ecdsa)
         {
             KeyId = key.KeyId
         };
     }
 
-    public static SecurityKey ToPublicKey(this JwtSigningKey key)
+    public ECDsaSecurityKey ToPublicKey(JwtSigningKey key)
     {
-        using var ecdsa = ECDsa.Create();
         ecdsa.ImportFromPem(key.PublicKeyPem);
-
         return new ECDsaSecurityKey(ecdsa)
         {
             KeyId = key.KeyId
         };
+    }
+
+    public void Dispose()
+    {
+        ecdsa?.Dispose();
     }
 }

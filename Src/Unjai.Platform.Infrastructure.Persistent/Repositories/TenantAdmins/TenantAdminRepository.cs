@@ -28,7 +28,16 @@ internal sealed class TenantAdminRepository(WriteDbContext writeDbContext, ReadD
     {
         var tenantAdmin = await readDbContext
             .TenantAdmins
-            .SingleOrDefaultAsync(x => x.Username == username, ct);
+            .Where(t => t.Username == username)
+            .Select(x => new TenantAdmin
+            {
+                Id = x.Id,
+                Username = x.Username,
+                PasswordHash = x.PasswordHash,
+                RoleId = x.RoleId,
+                Role = x.Role
+            })
+            .SingleOrDefaultAsync(ct);
 
         if (tenantAdmin == null)
         {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
 using Unjai.Platform.Application.Abstractions.Caching;
-using Unjai.Platform.Application.Abstractions.Cryptography.Ecdsa;
+using Unjai.Platform.Application.Abstractions.Security.Cryptography.Ecdsa;
 using Unjai.Platform.Application.Repositories.JwtKeyStores;
 using Unjai.Platform.Domain.Abstractions;
 using Unjai.Platform.Domain.Entities.JwtSigningKeys;

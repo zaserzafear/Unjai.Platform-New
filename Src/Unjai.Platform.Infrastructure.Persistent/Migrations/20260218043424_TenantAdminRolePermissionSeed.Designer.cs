@@ -11,7 +11,7 @@ using Unjai.Platform.Infrastructure.Persistent.Database;
 
 namespace Unjai.Platform.Infrastructure.Persistent.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(WriteDbContext))]
     [Migration("20260218043424_TenantAdminRolePermissionSeed")]
     partial class TenantAdminRolePermissionSeed
     {

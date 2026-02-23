@@ -1,4 +1,4 @@
-﻿namespace Unjai.Platform.Application.Abstractions.Cryptography.Ecdsa;
+﻿namespace Unjai.Platform.Application.Abstractions.Security.Cryptography.Ecdsa;
 
 public interface IEcdsaKeyGenerator
 {

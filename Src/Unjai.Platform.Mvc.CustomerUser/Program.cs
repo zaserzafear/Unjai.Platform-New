@@ -39,37 +39,40 @@ builder.Services.Configure<RouteOptions>(options =>
 });
 builder.Services.AddControllersWithViews();
 
-var jwtSetting = builder.Configuration
-    .GetSection(JwtSettingConfig.Section)
-    .Get<JwtSettings>()
-    ?? throw new InvalidOperationException("Jwt configuration missing");
-
-var apiKeyOptions = builder.Configuration
-    .GetSection(ApiKeyConfig.Section)
-    .Get<ApiKeyOptions>()
-    ?? new ApiKeyOptions();
-
-if (string.IsNullOrWhiteSpace(apiKeyOptions.HealthCheck))
-{
-    if (builder.Environment.IsDevelopment())
+builder.Services.AddAuthExtensions(
+    jwt =>
     {
-        apiKeyOptions.HealthCheck = CryptoHelper.GenerateSecret(32);
+        builder.Configuration
+            .GetSection(JwtSettingConfig.Section)
+            .Bind(jwt);
+    },
+    api =>
+    {
+        builder.Configuration
+            .GetSection(ApiKeyConfig.Section)
+            .Bind(api);
 
-        if (logger.IsEnabled(LogLevel.Critical))
+        if (string.IsNullOrWhiteSpace(api.HealthCheck))
         {
-            logger.LogCritical(
-                "SECURITY WARNING (DEV ONLY): ApiKeys:HealthCheck was auto-generated. " +
-                "COPY THIS VALUE AND STORE IT SECURELY. Value={ApiKey}",
-                apiKeyOptions.HealthCheck);
-        }
-    }
-    else
-    {
-        throw new InvalidOperationException("ApiKeys:HealthCheck must be configured in production.");
-    }
-}
+            if (builder.Environment.IsDevelopment())
+            {
+                api.HealthCheck = CryptoHelper.GenerateSecret(32);
 
-builder.Services.AddAuthExtensions(jwtSetting, apiKeyOptions);
+                if (logger.IsEnabled(LogLevel.Critical))
+                {
+                    logger.LogCritical(
+                    "SECURITY WARNING (DEV ONLY): ApiKeys:HealthCheck was auto-generated. " +
+                    "COPY THIS VALUE AND STORE IT SECURELY. Value={ApiKey}",
+                    api.HealthCheck);
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    "ApiKeys:HealthCheck must be configured in production.");
+            }
+        }
+    });
 
 var redisConnectionString =
     builder.Configuration.GetConnectionString("Redis");

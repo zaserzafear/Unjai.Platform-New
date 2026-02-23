@@ -10,7 +10,7 @@ using Unjai.Platform.Infrastructure.Persistent.Database;
 
 namespace Unjai.Platform.Infrastructure.Persistent.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(WriteDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
