@@ -16,17 +16,17 @@ public sealed class JwtKeyStoreService(
     HybridCache cache,
     IEcdsaKeyGenerator ecdsaKeyGenerator)
 {
-    public async Task<JwtSigningKey?> GetActiveNotExpiredKey()
+    public async Task<JwtSigningKey?> GetActiveNotExpiredKey(CancellationToken ct)
     {
         try
         {
             var cacheKey = JwtKeyStoreCacheKeys.GetActiveKeys;
             var activeKey = await cache.GetOrCreateAsync(
-                    cacheKey,
-                    async ct =>
+                cacheKey,
+                async ct =>
                     {
                         return await repository.GetActiveNotExpiredKey(ct);
-                    });
+                    }, cancellationToken: ct);
             return activeKey;
 
         }
@@ -44,11 +44,11 @@ public sealed class JwtKeyStoreService(
             var cacheKey = JwtKeyStoreCacheKeys.GetAllPublicKeys;
 
             var publicKeys = cache.GetOrCreateAsync(
-                    cacheKey,
-                    async ct =>
-                    {
-                        return await repository.GetAllNotExpiredKeysAsync(ct);
-                    })
+                cacheKey,
+                async ct =>
+                {
+                    return await repository.GetAllNotExpiredKeysAsync(ct);
+                })
                 .AsTask()
                 .GetAwaiter()
                 .GetResult();

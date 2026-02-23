@@ -21,7 +21,7 @@ internal sealed class JwtKeyStoreRepository(
         var now = DateTime.UtcNow;
 
         return await readDbContext.JwtSigningKeys
-            .SingleAsync(
+            .SingleOrDefaultAsync(
             x => x.IsActive &&
             x.ExpiresAt > now,
             ct);

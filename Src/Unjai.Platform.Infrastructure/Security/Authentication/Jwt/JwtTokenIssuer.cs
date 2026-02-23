@@ -8,9 +8,9 @@ namespace Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
 
 public sealed class JwtTokenIssuer(JwtKeyStoreService keyStore)
 {
-    public async Task<string> IssueToken(IEnumerable<Claim> claims)
+    public async Task<string> IssueToken(IEnumerable<Claim> claims, CancellationToken ct)
     {
-        var key = await keyStore.GetActiveNotExpiredKey()
+        var key = await keyStore.GetActiveNotExpiredKey(ct)
             ?? throw new InvalidOperationException(
                 "No active, non-expired JWT signing key found.");
 
