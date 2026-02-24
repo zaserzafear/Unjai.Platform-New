@@ -95,11 +95,11 @@ public sealed class JwtKeyStoreService(
             await cacheInvalidation.NotifyCacheInvalidationAsync(
                 JwtKeyStoreCacheKeys.GetAllPublicKeys);
 
+            await cacheInvalidation.NotifyCacheInvalidationAsync(
+                JwtKeyStoreCacheKeys.GetActiveKeys);
+
             if (activeKey is not null)
             {
-                await cacheInvalidation.NotifyCacheInvalidationAsync(
-                    JwtKeyStoreCacheKeys.GetActiveKeys);
-
                 await cacheInvalidation.NotifyCacheInvalidationAsync(
                     JwtKeyStoreCacheKeys.GetByKid(activeKey.KeyId));
             }
