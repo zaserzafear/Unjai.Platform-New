@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Unjai.Platform.Application.Abstractions.Security.Authentication;
 using Unjai.Platform.Application.Services.JwtKeyStores;
 using Unjai.Platform.Domain.Entities.TenantsAdmin;
+using Unjai.Platform.Domain.Security.Principals;
 using Unjai.Platform.Infrastructure.Security.Cryptography.Ecdsa;
 
 namespace Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
@@ -23,7 +24,8 @@ internal sealed class TokenProvider(
             {
                 new Claim(jwtSettingsValue.SubClaimType, entity.Id.ToString()),
                 new Claim(jwtSettingsValue.NameClaimType, entity.Username),
-                new Claim(jwtSettingsValue.RoleClaimType, entity.Role.Code)
+                new Claim(jwtSettingsValue.RoleClaimType, entity.Role.Code),
+                new Claim(SecurityClaimTypes.PrincipalType, PrincipalType.TenantAdmin),
             };
 
         return await IssuerToken(claims, jwtSettingsValue, ct);
