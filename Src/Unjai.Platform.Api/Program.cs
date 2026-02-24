@@ -12,6 +12,7 @@ using Unjai.Platform.Infrastructure.Persistent.Database.Extensions;
 using Unjai.Platform.Infrastructure.Persistent.Seeding;
 using Unjai.Platform.Infrastructure.RateLimiting.Abstractions;
 using Unjai.Platform.Infrastructure.RateLimiting.Configurations;
+using Unjai.Platform.Infrastructure.RateLimiting.Core;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 using Unjai.Platform.Infrastructure.Redis.Extensions;
 using Unjai.Platform.Infrastructure.Security;
@@ -201,7 +202,7 @@ app.MapGet("/.well-known/openid-configuration", () =>
         issuer = "https://auth.yourdomain.com",
         jwks_uri = "https://auth.yourdomain.com/.well-known/jwks.json"
     });
-});
+}).EnforceRateLimit(RateLimitPolicyKeys.Default);
 
 app.MapGet("/.well-known/jwks.json", (
     JwtKeyStoreService keyStore) =>
@@ -228,7 +229,7 @@ app.MapGet("/.well-known/jwks.json", (
     }
 
     return Results.Ok(jwks);
-});
+}).EnforceRateLimit(RateLimitPolicyKeys.Default);
 
 var apiVersionSetBuilder = app.NewApiVersionSet();
 
