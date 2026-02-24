@@ -1,6 +1,7 @@
 ﻿using Unjai.Platform.Api.Endpoints.Extensions;
 using Unjai.Platform.Api.Models;
 using Unjai.Platform.Application.Services.Tenants.GetTenant;
+using Unjai.Platform.Domain.Entities.TenantsAdminPermission;
 using Unjai.Platform.Infrastructure.RateLimiting.Core;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 
@@ -27,8 +28,9 @@ public sealed class GetTenantEndpoints : IEndpoint
 
             return ApiResponseResults.ToHttpResult(result);
         })
-        .EnforceRateLimit(RateLimitPolicyKeys.Default)
-        .MapToApiVersion(1);
+            .RequireAuthorization(TenantAdminPermissionCode.ReadTenants.ToString().ToUpperInvariant())
+            .EnforceRateLimit(RateLimitPolicyKeys.Default)
+            .MapToApiVersion(1);
 
         group.MapGet("{id:guid}", async (
             Guid id,
@@ -39,7 +41,8 @@ public sealed class GetTenantEndpoints : IEndpoint
 
             return ApiResponseResults.ToHttpResult(result);
         })
-        .EnforceRateLimit(RateLimitPolicyKeys.Default)
-        .MapToApiVersion(1);
+            .RequireAuthorization(TenantAdminPermissionCode.ReadTenants.ToString().ToUpperInvariant())
+            .EnforceRateLimit(RateLimitPolicyKeys.Default)
+            .MapToApiVersion(1);
     }
 }

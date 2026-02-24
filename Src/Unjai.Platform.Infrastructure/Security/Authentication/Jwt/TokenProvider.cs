@@ -1,4 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -24,7 +25,7 @@ internal sealed class TokenProvider(
             {
                 new Claim(jwtSettingsValue.SubClaimType, entity.Id.ToString()),
                 new Claim(jwtSettingsValue.NameClaimType, entity.Username),
-                new Claim(jwtSettingsValue.RoleClaimType, entity.Role.Code),
+                new Claim(jwtSettingsValue.RoleClaimType, entity.RoleId.ToString(CultureInfo.InvariantCulture)),
                 new Claim(SecurityClaimTypes.PrincipalType, PrincipalType.TenantAdmin),
             };
 

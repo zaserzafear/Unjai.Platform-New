@@ -35,7 +35,6 @@ internal sealed class TenantAdminRepository(WriteDbContext writeDbContext, ReadD
                 Username = x.Username,
                 PasswordHash = x.PasswordHash,
                 RoleId = x.RoleId,
-                Role = x.Role
             })
             .SingleOrDefaultAsync(ct);
 

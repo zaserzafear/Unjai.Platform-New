@@ -41,11 +41,11 @@ var apiProject = builder.AddProject<Projects.Unjai_Platform_Api>("unjai-platform
     .WithEnvironment("ApiKeys__HealthCheck", apiKeyHealthCheck)
     .WithEnvironment("RateLimiting__Secret", rateLimitingSecret);
 
-builder.AddProject<Projects.Unjai_Platform_Mvc_CustomerUser>("unjai-platform-mvc-customeruser")
-    .WithReference(redis).WaitFor(redis)
-    .WithReference(apiProject)
-    .WithEnvironment("Jwt__Secret", jwtSecret)
-    .WithEnvironment("ApiKeys__HealthCheck", apiKeyHealthCheck)
-    .WithEnvironment("RateLimiting__Secret", rateLimitingSecret);
+//builder.AddProject<Projects.Unjai_Platform_Mvc_CustomerUser>("unjai-platform-mvc-customeruser")
+//    .WithReference(redis).WaitFor(redis)
+//    .WithReference(apiProject)
+//    .WithEnvironment("Jwt__Secret", jwtSecret)
+//    .WithEnvironment("ApiKeys__HealthCheck", apiKeyHealthCheck)
+//    .WithEnvironment("RateLimiting__Secret", rateLimitingSecret);
 
 builder.Build().Run();

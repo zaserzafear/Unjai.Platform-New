@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 
-namespace Unjai.Platform.Infrastructure.Security.Authentication.Policies;
+namespace Unjai.Platform.Infrastructure.Security.Authentication.Policies.HealthChecks;
 
 internal sealed class HealthChecksApiKeyRequirement : IAuthorizationRequirement
 {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 
-namespace Unjai.Platform.Infrastructure.Security.Authentication.Policies;
+namespace Unjai.Platform.Infrastructure.Security.Authentication.Policies.HealthChecks;
 
 internal sealed class HealthChecksApiKeyHandler : AuthorizationHandler<HealthChecksApiKeyRequirement>
 {
@@ -12,7 +12,9 @@ internal sealed class HealthChecksApiKeyHandler : AuthorizationHandler<HealthChe
         _apiKey = apiKey;
     }
 
-    protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, HealthChecksApiKeyRequirement requirement)
+    protected override Task HandleRequirementAsync(
+        AuthorizationHandlerContext context,
+        HealthChecksApiKeyRequirement requirement)
     {
         var httpContext = (context.Resource as DefaultHttpContext)!;
 

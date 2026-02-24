@@ -6,9 +6,11 @@ using Microsoft.IdentityModel.Tokens;
 using Unjai.Platform.Application.Abstractions.Security.Authentication;
 using Unjai.Platform.Application.Abstractions.Security.Cryptography.Ecdsa;
 using Unjai.Platform.Application.Services.JwtKeyStores;
+using Unjai.Platform.Domain.Entities.TenantsAdminPermission;
 using Unjai.Platform.Infrastructure.Security.Authentication.ApiKey;
 using Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
-using Unjai.Platform.Infrastructure.Security.Authentication.Policies;
+using Unjai.Platform.Infrastructure.Security.Authentication.Policies.HealthChecks;
+using Unjai.Platform.Infrastructure.Security.Authentication.Policies.TenantAdmins;
 using Unjai.Platform.Infrastructure.Security.Cryptography.Ecdsa;
 
 namespace Unjai.Platform.Infrastructure.Security;
@@ -56,6 +58,8 @@ public static class SecurityExtensions
                 IssuerSigningKeyResolver = (token, securityToken, kid, parameters) =>
                     parameters.IssuerSigningKeys?.Where(k => k.KeyId == kid)
             };
+
+            options.MapInboundClaims = false;
         });
 
         services.PostConfigure<JwtBearerOptions>(
@@ -78,10 +82,34 @@ public static class SecurityExtensions
         services.AddAuthorization(options =>
         {
             options.AddPolicy(JwtPolicyConfig.HealthPolicyName,
-                policy => policy.Requirements.Add(new HealthChecksApiKeyRequirement(_apiKeyOption.HealthCheck)));
+                policy => policy.Requirements.Add(
+                    new HealthChecksApiKeyRequirement(
+                        _apiKeyOption.HealthCheck)));
+
+            options.AddPolicy(TenantAdminPermissionCode.ReadTenants.ToString().ToUpperInvariant(), policy =>
+                policy.Requirements.Add(
+                    new TenantAdminPermissionRequirement(
+                        (int)TenantAdminPermissionCode.ReadTenants)));
+
+            options.AddPolicy(TenantAdminPermissionCode.CreateTenants.ToString().ToUpperInvariant(), policy =>
+                policy.Requirements.Add(
+                    new TenantAdminPermissionRequirement(
+                        (int)TenantAdminPermissionCode.CreateTenants)));
+
+            options.AddPolicy(TenantAdminPermissionCode.UpdateTenants.ToString().ToUpperInvariant(), policy =>
+                policy.Requirements.Add(
+                    new TenantAdminPermissionRequirement(
+                        (int)TenantAdminPermissionCode.UpdateTenants)));
+
+            options.AddPolicy(TenantAdminPermissionCode.DeleteTenants.ToString().ToUpperInvariant(), policy =>
+                policy.Requirements.Add(
+                    new TenantAdminPermissionRequirement(
+                        (int)TenantAdminPermissionCode.DeleteTenants)));
         });
 
         services.AddSingleton<IAuthorizationHandler>(new HealthChecksApiKeyHandler(_apiKeyOption.HealthCheck));
+
+        services.AddScoped<IAuthorizationHandler, TenantAdminPermissionHandler>();
     }
 
     public static WebApplication UseAuthExtensions(this WebApplication app)
