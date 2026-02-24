@@ -19,6 +19,7 @@ public static class RateLimitingExtension
         services.AddSingleton<RateLimitEnforcer>();
         services.AddTransient<RateLimitContextHandler>();
 
+        services.AddSingleton<IRateLimitBlockedPublisherService, RedisRateLimitBlockedPublisherService>();
         services.AddHostedService<RateLimitBlockedService>();
 
         services.AddSingleton<IRateLimitPolicyResolver>(sp =>

@@ -7,15 +7,10 @@ using Unjai.Platform.Domain.Entities.Tenants;
 
 namespace Unjai.Platform.Application.Services.Tenants.CreateTenant;
 
-public interface ICreateTenantV1
-{
-    public Task<AppResult<object>> Handle(CreateTenantRequestDto request, CancellationToken ct);
-}
-
-internal sealed class CreateTenantV1(
+public sealed class CreateTenantV1(
     ILogger<CreateTenantV1> logger,
     IUnitOfWork unitOfWork,
-    ITenantRepository repository) : ICreateTenantV1
+    ITenantRepository repository)
 {
     public async Task<AppResult<object>> Handle(CreateTenantRequestDto request, CancellationToken ct)
     {

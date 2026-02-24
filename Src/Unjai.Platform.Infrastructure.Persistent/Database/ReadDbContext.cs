@@ -2,9 +2,11 @@
 
 namespace Unjai.Platform.Infrastructure.Persistent.Database;
 
-internal sealed class ReadDbContext : AppDbContext
+internal sealed class ReadDbContext
+    : AppDbContext<ReadDbContext>
 {
-    public ReadDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    public ReadDbContext(DbContextOptions<ReadDbContext> options)
+        : base(options)
     {
     }
 }

@@ -1,16 +1,14 @@
 using Microsoft.Extensions.Options;
-using Unjai.Platform.Infrastructure.Caching.Extensions;
-using Unjai.Platform.Infrastructure.Messaging.Extensions;
 using Unjai.Platform.Infrastructure.RateLimiting.Abstractions;
 using Unjai.Platform.Infrastructure.RateLimiting.AspNetCore.Delegates;
 using Unjai.Platform.Infrastructure.RateLimiting.Configurations;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 using Unjai.Platform.Infrastructure.Redis.Extensions;
-using Unjai.Platform.Infrastructure.Security.Auth.Configurations;
-using Unjai.Platform.Infrastructure.Security.Auth.Extensions;
-using Unjai.Platform.Infrastructure.Security.Forwarding.Extensions;
-using Unjai.Platform.Infrastructure.Security.Helpers;
-using Unjai.Platform.Infrastructure.Security.TrustedIpSources.Configurations;
+using Unjai.Platform.Infrastructure.Security;
+using Unjai.Platform.Infrastructure.Security.Authentication.ApiKey;
+using Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
+using Unjai.Platform.Infrastructure.Security.Cryptography;
+using Unjai.Platform.Infrastructure.Security.Networking.TrustedIp;
 using Unjai.Platform.Mvc.CustomerUser.Configurations;
 using Unjai.Platform.Mvc.CustomerUser.RateLimiting;
 
@@ -41,49 +39,40 @@ builder.Services.Configure<RouteOptions>(options =>
 });
 builder.Services.AddControllersWithViews();
 
-var jwtSetting = builder.Configuration
-    .GetSection(JwtSettingConfig.Section)
-    .Get<JwtSetting>()
-    ?? throw new InvalidOperationException("Jwt configuration missing");
-
-if (string.IsNullOrWhiteSpace(jwtSetting.Secret))
-{
-    if (builder.Environment.IsDevelopment())
+builder.Services.AddAuthExtensions(
+    jwt =>
     {
-        jwtSetting.Secret = CryptoHelper.GenerateSecret(64);
-        logger.LogCritical(
-            "SECURITY WARNING (DEV ONLY): Jwt:Secret was auto-generated. " +
-            "COPY THIS VALUE AND STORE IT SECURELY. Value={Secret}",
-            jwtSetting.Secret);
-    }
-    else
+        builder.Configuration
+            .GetSection(JwtSettingConfig.Section)
+            .Bind(jwt);
+    },
+    api =>
     {
-        throw new InvalidOperationException("Jwt:Secret must be configured in production.");
-    }
-}
+        builder.Configuration
+            .GetSection(ApiKeyConfig.Section)
+            .Bind(api);
 
-var apiKeyOption = builder.Configuration
-    .GetSection(ApiKeyConfig.Section)
-    .Get<ApiKeyOption>()
-    ?? new ApiKeyOption();
+        if (string.IsNullOrWhiteSpace(api.HealthCheck))
+        {
+            if (builder.Environment.IsDevelopment())
+            {
+                api.HealthCheck = CryptoHelper.GenerateSecret(32);
 
-if (string.IsNullOrWhiteSpace(apiKeyOption.HealthCheck))
-{
-    if (builder.Environment.IsDevelopment())
-    {
-        apiKeyOption.HealthCheck = CryptoHelper.GenerateSecret(32);
-        logger.LogCritical(
-            "SECURITY WARNING (DEV ONLY): ApiKeys:HealthCheck was auto-generated. " +
-            "COPY THIS VALUE AND STORE IT SECURELY. Value={ApiKey}",
-            apiKeyOption.HealthCheck);
-    }
-    else
-    {
-        throw new InvalidOperationException("ApiKeys:HealthCheck must be configured in production.");
-    }
-}
-
-builder.Services.AddAuthExtensions(jwtSetting, apiKeyOption);
+                if (logger.IsEnabled(LogLevel.Critical))
+                {
+                    logger.LogCritical(
+                    "SECURITY WARNING (DEV ONLY): ApiKeys:HealthCheck was auto-generated. " +
+                    "COPY THIS VALUE AND STORE IT SECURELY. Value={ApiKey}",
+                    api.HealthCheck);
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    "ApiKeys:HealthCheck must be configured in production.");
+            }
+        }
+    });
 
 var redisConnectionString =
     builder.Configuration.GetConnectionString("Redis");
@@ -98,9 +87,6 @@ else
     builder.Services.AddRedisConnection(redisConnectionString);
 }
 
-builder.Services.AddCachingExtension();
-builder.Services.AddRedisMessagingExtension();
-
 var rateLimitingOptions =
     builder.Configuration
         .GetSection(RateLimitingConfig.Section)
@@ -113,10 +99,13 @@ if (string.IsNullOrWhiteSpace(rateLimitingOptions.Secret))
     {
         rateLimitingOptions.Secret = CryptoHelper.GenerateSecret(64);
 
-        logger.LogCritical(
-            "SECURITY WARNING (DEV ONLY): RateLimiting:Secret was auto-generated. " +
-            "COPY THIS VALUE AND STORE IT SECURELY. Value={Secret}",
-            rateLimitingOptions.Secret);
+        if (logger.IsEnabled(LogLevel.Critical))
+        {
+            logger.LogCritical(
+                "SECURITY WARNING (DEV ONLY): RateLimiting:Secret was auto-generated. " +
+                "COPY THIS VALUE AND STORE IT SECURELY. Value={Secret}",
+                rateLimitingOptions.Secret);
+        }
     }
     else
     {

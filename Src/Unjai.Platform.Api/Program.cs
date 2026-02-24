@@ -1,21 +1,25 @@
 using System.Globalization;
+using System.Security.Cryptography;
 using Asp.Versioning;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Unjai.Platform.Api.Endpoints.Extensions;
 using Unjai.Platform.Api.Extensions;
 using Unjai.Platform.Api.RateLimiting;
+using Unjai.Platform.Application.Services.JwtKeyStores;
 using Unjai.Platform.Infrastructure.Caching.Extensions;
-using Unjai.Platform.Infrastructure.Messaging.Extensions;
 using Unjai.Platform.Infrastructure.Persistent.Database.Extensions;
+using Unjai.Platform.Infrastructure.Persistent.Seeding;
 using Unjai.Platform.Infrastructure.RateLimiting.Abstractions;
 using Unjai.Platform.Infrastructure.RateLimiting.Configurations;
+using Unjai.Platform.Infrastructure.RateLimiting.Core;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 using Unjai.Platform.Infrastructure.Redis.Extensions;
-using Unjai.Platform.Infrastructure.Security.Auth.Configurations;
-using Unjai.Platform.Infrastructure.Security.Auth.Extensions;
-using Unjai.Platform.Infrastructure.Security.Forwarding.Extensions;
-using Unjai.Platform.Infrastructure.Security.Helpers;
-using Unjai.Platform.Infrastructure.Security.TrustedIpSources.Configurations;
+using Unjai.Platform.Infrastructure.Security;
+using Unjai.Platform.Infrastructure.Security.Authentication.ApiKey;
+using Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
+using Unjai.Platform.Infrastructure.Security.Cryptography;
+using Unjai.Platform.Infrastructure.Security.Networking.TrustedIp;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,49 +74,40 @@ builder.Services.AddHttpContextAccessor();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-var jwtSetting = builder.Configuration
-    .GetSection(JwtSettingConfig.Section)
-    .Get<JwtSetting>()
-    ?? throw new InvalidOperationException("Jwt configuration missing");
-
-if (string.IsNullOrWhiteSpace(jwtSetting.Secret))
-{
-    if (builder.Environment.IsDevelopment())
+builder.Services.AddAuthExtensions(
+    jwt =>
     {
-        jwtSetting.Secret = CryptoHelper.GenerateSecret(64);
-        logger.LogCritical(
-            "SECURITY WARNING (DEV ONLY): Jwt:Secret was auto-generated. " +
-            "COPY THIS VALUE AND STORE IT SECURELY. Value={Secret}",
-            jwtSetting.Secret);
-    }
-    else
+        builder.Configuration
+            .GetSection(JwtSettingConfig.Section)
+            .Bind(jwt);
+    },
+    api =>
     {
-        throw new InvalidOperationException("Jwt:Secret must be configured in production.");
-    }
-}
+        builder.Configuration
+            .GetSection(ApiKeyConfig.Section)
+            .Bind(api);
 
-var apiKeyOption = builder.Configuration
-    .GetSection(ApiKeyConfig.Section)
-    .Get<ApiKeyOption>()
-    ?? new ApiKeyOption();
+        if (string.IsNullOrWhiteSpace(api.HealthCheck))
+        {
+            if (builder.Environment.IsDevelopment())
+            {
+                api.HealthCheck = CryptoHelper.GenerateSecret(32);
 
-if (string.IsNullOrWhiteSpace(apiKeyOption.HealthCheck))
-{
-    if (builder.Environment.IsDevelopment())
-    {
-        apiKeyOption.HealthCheck = CryptoHelper.GenerateSecret(32);
-        logger.LogCritical(
-            "SECURITY WARNING (DEV ONLY): ApiKeys:HealthCheck was auto-generated. " +
-            "COPY THIS VALUE AND STORE IT SECURELY. Value={ApiKey}",
-            apiKeyOption.HealthCheck);
-    }
-    else
-    {
-        throw new InvalidOperationException("ApiKeys:HealthCheck must be configured in production.");
-    }
-}
-
-builder.Services.AddAuthExtensions(jwtSetting, apiKeyOption);
+                if (logger.IsEnabled(LogLevel.Critical))
+                {
+                    logger.LogCritical(
+                    "SECURITY WARNING (DEV ONLY): ApiKeys:HealthCheck was auto-generated. " +
+                    "COPY THIS VALUE AND STORE IT SECURELY. Value={ApiKey}",
+                    api.HealthCheck);
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    "ApiKeys:HealthCheck must be configured in production.");
+            }
+        }
+    });
 
 var dbPrimary = builder.Configuration.GetConnectionString("UnjaiDb");
 
@@ -159,7 +154,6 @@ else
 }
 
 builder.Services.AddCachingExtension();
-builder.Services.AddRedisMessagingExtension();
 
 var rateLimitingOptions =
     builder.Configuration
@@ -173,10 +167,13 @@ if (string.IsNullOrWhiteSpace(rateLimitingOptions.Secret))
     {
         rateLimitingOptions.Secret = CryptoHelper.GenerateSecret(64);
 
-        logger.LogCritical(
-            "SECURITY WARNING (DEV ONLY): RateLimiting:Secret was auto-generated. " +
-            "COPY THIS VALUE AND STORE IT SECURELY. Value={Secret}",
-            rateLimitingOptions.Secret);
+        if (logger.IsEnabled(LogLevel.Critical))
+        {
+            logger.LogCritical(
+                "SECURITY WARNING (DEV ONLY): RateLimiting:Secret was auto-generated. " +
+                "COPY THIS VALUE AND STORE IT SECURELY. Value={Secret}",
+                rateLimitingOptions.Secret);
+        }
     }
     else
     {
@@ -197,6 +194,42 @@ app.UseTrustedIpSources();
 app.UseAuthExtensions();
 
 app.UseOutputCache();
+
+app.MapGet("/.well-known/openid-configuration", () =>
+{
+    return Results.Ok(new
+    {
+        issuer = "https://auth.yourdomain.com",
+        jwks_uri = "https://auth.yourdomain.com/.well-known/jwks.json"
+    });
+}).EnforceRateLimit(RateLimitPolicyKeys.Default);
+
+app.MapGet("/.well-known/jwks.json", (
+    JwtKeyStoreService keyStore) =>
+{
+    var keys = keyStore.GetAllPublicKeys();
+
+    var jwks = new JsonWebKeySet();
+
+    foreach (var k in keys)
+    {
+        using var ecdsa = ECDsa.Create();
+        ecdsa.ImportFromPem(k.PublicKeyPem);
+
+        var securityKey = new ECDsaSecurityKey(ecdsa)
+        {
+            KeyId = k.KeyId
+        };
+
+        var jwk = JsonWebKeyConverter.ConvertFromECDsaSecurityKey(securityKey);
+        jwk.Use = "sig";
+        jwk.Alg = SecurityAlgorithms.EcdsaSha256;
+
+        jwks.Keys.Add(jwk);
+    }
+
+    return Results.Ok(jwks);
+}).EnforceRateLimit(RateLimitPolicyKeys.Default);
 
 var apiVersionSetBuilder = app.NewApiVersionSet();
 
@@ -231,5 +264,7 @@ if (app.Environment.IsDevelopment())
 
     app.ApplyMigrations();
 }
+
+await TenantsAdminSeeder.SeedAsync(app.Services, app.Lifetime.ApplicationStopping);
 
 await app.RunAsync();

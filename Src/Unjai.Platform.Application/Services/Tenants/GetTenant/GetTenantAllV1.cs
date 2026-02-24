@@ -5,15 +5,10 @@ using Unjai.Platform.Contracts.Tenants.Dtos;
 
 namespace Unjai.Platform.Application.Services.Tenants.GetTenant;
 
-public interface IGetTenantAllV1
-{
-    Task<AppResult<IReadOnlyList<GetTenantResponseDto>>> Handle(int page, int pageSize, CancellationToken ct);
-}
-
-internal sealed class GetTenantAllV1(
+public sealed class GetTenantAllV1(
     ILogger<GetTenantAllV1> logger,
     ITenantRepository repository
-    ) : IGetTenantAllV1
+    )
 {
     public async Task<AppResult<IReadOnlyList<GetTenantResponseDto>>> Handle(int page, int pageSize, CancellationToken ct)
     {

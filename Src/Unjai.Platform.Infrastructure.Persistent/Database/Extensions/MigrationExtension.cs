@@ -12,7 +12,7 @@ public static class MigrationExtension
 
         using IServiceScope scope = app.ApplicationServices.CreateScope();
 
-        ApplyMigration<AppDbContext>(scope);
+        ApplyMigration<WriteDbContext>(scope);
     }
 
     private static void ApplyMigration<TDbContext>(IServiceScope scope)

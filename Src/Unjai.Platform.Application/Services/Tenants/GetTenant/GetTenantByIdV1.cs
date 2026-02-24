@@ -6,22 +6,16 @@ using Unjai.Platform.Contracts.Tenants.Dtos;
 
 namespace Unjai.Platform.Application.Services.Tenants.GetTenant;
 
-public interface IGetTenantByIdV1
-{
-    Task<AppResult<GetTenantResponseDto>> Handle(Guid id, CancellationToken ct);
-}
-
-internal sealed class GetTenantByIdV1(
+public sealed class GetTenantByIdV1(
     ILogger<GetTenantByIdV1> logger,
     ITenantRepository repository,
     HybridCache cache)
-    : IGetTenantByIdV1
 {
     public async Task<AppResult<GetTenantResponseDto>> Handle(Guid id, CancellationToken ct)
     {
         try
         {
-            var cacheKey = TenantCacheKey.GetById(id);
+            var cacheKey = TenantCacheKeys.GetById(id);
 
             var tenant = await cache.GetOrCreateAsync(
                 cacheKey,

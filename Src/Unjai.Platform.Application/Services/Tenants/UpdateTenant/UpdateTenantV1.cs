@@ -1,23 +1,17 @@
 ﻿using Microsoft.Extensions.Logging;
+using Unjai.Platform.Application.Abstractions.Caching;
 using Unjai.Platform.Application.Repositories.Tenants;
 using Unjai.Platform.Contracts.Models;
 using Unjai.Platform.Contracts.Tenants.Dtos;
 using Unjai.Platform.Domain.Abstractions;
-using Unjai.Platform.Infrastructure.Messaging.Redis;
 
 namespace Unjai.Platform.Application.Services.Tenants.UpdateTenant;
 
-public interface IUpdateTenantV1
-{
-    public Task<AppResult<object>> Handle(Guid id, UpdateTenantRequestDto request, CancellationToken ct);
-}
-
-internal sealed class UpdateTenantV1(
+public sealed class UpdateTenantV1(
     ILogger<UpdateTenantV1> logger,
     IUnitOfWork unitOfWork,
     ITenantRepository repository,
-    IDistributedNotificationPublisher distributedNotification)
-    : IUpdateTenantV1
+    ICacheInvalidationPublisherService cacheInvalidation)
 {
     public async Task<AppResult<object>> Handle(Guid id, UpdateTenantRequestDto request, CancellationToken ct)
     {
@@ -38,8 +32,8 @@ internal sealed class UpdateTenantV1(
             repository.Update(entity);
             await unitOfWork.SaveChangesAsync(ct);
 
-            var cacheKey = TenantCacheKey.GetById(id);
-            await distributedNotification.NotifyCacheInvalidationAsync(cacheKey);
+            var cacheKey = TenantCacheKeys.GetById(id);
+            await cacheInvalidation.NotifyCacheInvalidationAsync(cacheKey);
 
             return AppResult<object>.Ok(
                 httpStatus: 200,
