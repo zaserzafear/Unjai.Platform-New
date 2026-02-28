@@ -1,16 +1,15 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Unjai.Platform.Infrastructure.Persistent.Database.Extensions;
 
-public static class MigrationExtension
+public static class MigrationExtensions
 {
-    public static void ApplyMigrations(this IApplicationBuilder app)
+    public static void ApplyMigrations(this IServiceProvider services)
     {
-        ArgumentNullException.ThrowIfNull(app);
+        ArgumentNullException.ThrowIfNull(services);
 
-        using IServiceScope scope = app.ApplicationServices.CreateScope();
+        using var scope = services.CreateScope();
 
         ApplyMigration<WriteDbContext>(scope);
     }
@@ -18,8 +17,7 @@ public static class MigrationExtension
     private static void ApplyMigration<TDbContext>(IServiceScope scope)
         where TDbContext : DbContext
     {
-        using TDbContext context = scope.ServiceProvider.GetRequiredService<TDbContext>();
-
+        var context = scope.ServiceProvider.GetRequiredService<TDbContext>();
         context.Database.Migrate();
     }
 }

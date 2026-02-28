@@ -9,7 +9,6 @@ using Unjai.Platform.Api.RateLimiting;
 using Unjai.Platform.Application.Services.JwtKeyStores;
 using Unjai.Platform.Infrastructure.Caching.Extensions;
 using Unjai.Platform.Infrastructure.Persistent.Database.Extensions;
-using Unjai.Platform.Infrastructure.Persistent.Seeding;
 using Unjai.Platform.Infrastructure.RateLimiting.Abstractions;
 using Unjai.Platform.Infrastructure.RateLimiting.Configurations;
 using Unjai.Platform.Infrastructure.RateLimiting.Core;
@@ -261,10 +260,6 @@ if (app.Environment.IsDevelopment())
             options.AddDocument(group);
         }
     });
-
-    app.ApplyMigrations();
 }
-
-await TenantsAdminSeeder.SeedAsync(app.Services, app.Lifetime.ApplicationStopping);
 
 await app.RunAsync();

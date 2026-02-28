@@ -34,6 +34,9 @@ var jwtSecret = configuration.GetValue<string>("Jwt:Secret");
 var apiKeyHealthCheck = configuration.GetValue<string>("ApiKeys:HealthCheck");
 var rateLimitingSecret = configuration.GetValue<string>("RateLimiting:Secret");
 
+builder.AddProject<Projects.Unjai_Platform_Infrastructure_Persistent_DatabaseMigrator>("unjai-platform-infrastructure-persistent-databasemigrator")
+    .WithReference(postgresdb).WaitFor(postgresdb);
+
 var apiProject = builder.AddProject<Projects.Unjai_Platform_Api>("unjai-platform-api")
     .WithReference(postgresdb).WaitFor(postgresdb)
     .WithReference(redis).WaitFor(redis)
