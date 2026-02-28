@@ -20,6 +20,7 @@
     <ProjectReference Include="..\Unjai.Platform.Api\Unjai.Platform.Api.csproj" />
     <ProjectReference Include="..\Unjai.Platform.Infrastructure.Persistent.DatabaseMigrator\Unjai.Platform.Infrastructure.Persistent.DatabaseMigrator.csproj" />
     <ProjectReference Include="..\Unjai.Platform.Mvc.CustomerUser\Unjai.Platform.Mvc.CustomerUser.csproj" />
+    <ProjectReference Include="..\Unjai.Platform.Worker.JwtKeyRotation\Unjai.Platform.Worker.JwtKeyRotation.csproj" />
   </ItemGroup>
 
 </Project>

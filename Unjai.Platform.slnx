@@ -8,6 +8,9 @@
     <Project Path="Src/Unjai.Platform.Extensions.ObjectMapper/Unjai.Platform.Extensions.ObjectMapper.csproj" Id="12f9be13-4e16-4f0c-aa3b-e7a83ed72c30" />
     <Project Path="Src/Unjai.Platform.ServiceDefaults/Unjai.Platform.ServiceDefaults.csproj" />
   </Folder>
+  <Folder Name="/02-Application/WorkerService/">
+    <Project Path="Src/Unjai.Platform.Worker.JwtKeyRotation/Unjai.Platform.Worker.JwtKeyRotation.csproj" />
+  </Folder>
   <Folder Name="/03-Domain/">
     <Project Path="Src/Unjai.Platform.Domain/Unjai.Platform.Domain.csproj" Id="bf4e4921-1056-4ad2-be97-38d15014fff7" />
   </Folder>
