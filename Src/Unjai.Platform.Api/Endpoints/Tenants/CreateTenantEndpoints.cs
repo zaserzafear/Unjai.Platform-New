@@ -1,7 +1,8 @@
 ﻿using Unjai.Platform.Api.Endpoints.Extensions;
 using Unjai.Platform.Api.Models;
 using Unjai.Platform.Application.Services.Tenants.CreateTenant;
-using Unjai.Platform.Contracts.Tenants.Dtos;
+using Unjai.Platform.Contracts.Tenants;
+using Unjai.Platform.Domain.Entities.TenantsAdminPermission;
 using Unjai.Platform.Infrastructure.RateLimiting.Core;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 
@@ -24,6 +25,7 @@ public sealed class CreateTenantEndpoints : IEndpoint
 
             return ApiResponseResults.ToHttpResult(result);
         })
+            .RequireAuthorization(TenantAdminPermissionCode.CreateTenants.ToString().ToUpperInvariant())
             .EnforceRateLimit(RateLimitPolicyKeys.Default)
             .MapToApiVersion(1);
     }

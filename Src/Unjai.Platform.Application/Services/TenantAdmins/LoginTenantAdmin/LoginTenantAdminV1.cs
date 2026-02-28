@@ -2,7 +2,7 @@
 using Unjai.Platform.Application.Abstractions.Security.Authentication;
 using Unjai.Platform.Application.Repositories.TenantAdmins;
 using Unjai.Platform.Contracts.Models;
-using Unjai.Platform.Contracts.TenantAdmins.Dtos;
+using Unjai.Platform.Contracts.TenantAdmins;
 
 namespace Unjai.Platform.Application.Services.TenantAdmins.LoginTenantAdmin;
 

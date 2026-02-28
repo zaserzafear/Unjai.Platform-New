@@ -1,7 +1,7 @@
 ﻿using Unjai.Platform.Api.Endpoints.Extensions;
 using Unjai.Platform.Api.Models;
 using Unjai.Platform.Application.Services.TenantAdmins.LoginTenantAdmin;
-using Unjai.Platform.Contracts.TenantAdmins.Dtos;
+using Unjai.Platform.Contracts.TenantAdmins;
 using Unjai.Platform.Infrastructure.RateLimiting.Core;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 

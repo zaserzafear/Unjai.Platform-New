@@ -10,42 +10,44 @@ internal sealed class TenantRepository(
     ReadDbContext readDb)
     : ITenantRepository
 {
-    public Task CreateAsync(Tenant tenant, CancellationToken ct)
-        => writeDb.Tenants.AddAsync(tenant, ct).AsTask();
+    public Task<bool> ExistsByCodeAsync(string code, CancellationToken ct)
+    {
+        return readDb.Tenants
+            .IgnoreQueryFilters()
+            .AnyAsync(t => t.Code == code, ct);
+    }
 
-    public Task<List<Tenant>> GetAllAsync(int page, int pageSize, CancellationToken ct)
-        => readDb.Tenants
+    public Task CreateAsync(Tenant tenant, CancellationToken ct)
+    {
+        return writeDb.Tenants.AddAsync(tenant, ct)
+            .AsTask();
+    }
+
+    public async Task<IReadOnlyList<Tenant>> GetAllAsync(int page, int pageSize, CancellationToken ct)
+    {
+        var tenants = await readDb.Tenants
             .OrderBy(t => t.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(t => new Tenant
-            {
-                Id = t.Id,
-                Code = t.Code,
-                Name = t.Name,
-                IsActive = t.IsActive,
-                CreatedAt = t.CreatedAt,
-                UpdatedAt = t.UpdatedAt,
-            })
             .ToListAsync(ct);
 
-    public Task<bool> ExistsByCodeAsync(string code, CancellationToken ct)
-        => readDb.Tenants.AnyAsync(t => t.Code == code, ct);
+        return tenants;
+    }
 
     public Task<Tenant?> GetByIdAsync(Guid id, CancellationToken ct)
-        => readDb.Tenants
+    {
+        return readDb.Tenants
             .Where(t => t.Id == id)
-            .Select(t => new Tenant
-            {
-                Id = t.Id,
-                Code = t.Code,
-                Name = t.Name,
-                IsActive = t.IsActive,
-                CreatedAt = t.CreatedAt,
-                UpdatedAt = t.UpdatedAt,
-            })
             .FirstOrDefaultAsync(ct);
+    }
 
     public void Update(Tenant tenant)
-        => writeDb.Tenants.Update(tenant);
+    {
+        writeDb.Tenants.Update(tenant);
+    }
+
+    public void Remove(Tenant tenant)
+    {
+        writeDb.Tenants.Remove(tenant);
+    }
 }
