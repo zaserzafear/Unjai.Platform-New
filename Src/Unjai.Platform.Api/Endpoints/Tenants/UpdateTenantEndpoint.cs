@@ -16,10 +16,10 @@ public sealed class UpdateTenantEndpoint : IEndpoint
             .MapGroup(TenantEndpoints.Base)
             .WithTags(TenantEndpoints.Tag);
 
-        group.MapPut("{id:guid}", async (
+        group.MapPut("{id:guid}/name", async (
             Guid id,
-            UpdateTenantRequestDto request,
-            UpdateTenantV1 useCase,
+            UpdateTenantNameRequestDto request,
+            UpdateTenantNameV1 useCase,
             CancellationToken ct) =>
         {
             var result = await useCase.Handle(id, request, ct);

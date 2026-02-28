@@ -7,13 +7,13 @@ using Unjai.Platform.Domain.Abstractions;
 
 namespace Unjai.Platform.Application.Services.Tenants.UpdateTenant;
 
-public sealed class UpdateTenantV1(
-    ILogger<UpdateTenantV1> logger,
+public sealed class UpdateTenantNameV1(
+    ILogger<UpdateTenantNameV1> logger,
     IUnitOfWork unitOfWork,
     ITenantRepository repository,
     ICacheInvalidationPublisherService cacheInvalidation)
 {
-    public async Task<AppResult<object>> Handle(Guid id, UpdateTenantRequestDto request, CancellationToken ct)
+    public async Task<AppResult<object>> Handle(Guid id, UpdateTenantNameRequestDto request, CancellationToken ct)
     {
         try
         {
