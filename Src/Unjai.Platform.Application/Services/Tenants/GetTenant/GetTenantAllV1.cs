@@ -10,56 +10,50 @@ public sealed class GetTenantAllV1(
     ITenantRepository repository
     )
 {
-    public async Task<AppResult<IReadOnlyList<GetTenantResponseDto>>> Handle(int page, int pageSize, CancellationToken ct)
+    public async Task<AppResult<PagedResult<GetTenantResponseDto>>> Handle(
+        int page,
+        int pageSize,
+        CancellationToken ct)
     {
         if (pageSize is < 1 or > 100)
         {
-            return AppResult<IReadOnlyList<GetTenantResponseDto>>.Fail(
-                    httpStatus: 400,
-                    statusCode: "INVALID_PAGE_SIZE",
-                    message: "pageSize must be between 1 and 100"
-            );
+            return AppResult<PagedResult<GetTenantResponseDto>>.Fail(
+                400, "INVALID_PAGE_SIZE", "pageSize must be between 1 and 100");
         }
 
         if (page < 1)
         {
-            return AppResult<IReadOnlyList<GetTenantResponseDto>>.Fail(
-                    httpStatus: 400,
-                    statusCode: "INVALID_PAGE",
-                    message: "page must be greater than 0"
-            );
+            return AppResult<PagedResult<GetTenantResponseDto>>.Fail(
+                400, "INVALID_PAGE", "page must be greater than 0");
         }
 
         try
         {
-            var result = await repository.GetAllAsync(page, pageSize, ct);
+            var pagedTenants = await repository.GetAllAsync(page, pageSize, ct);
 
-            if (result.Count == 0)
-            {
-                return AppResult<IReadOnlyList<GetTenantResponseDto>>.Fail(
-                    httpStatus: 404,
-                    statusCode: "TENANTS_NOT_FOUND",
-                    message: "No tenants found."
-                );
-            }
-            else
-            {
-                var response = result.Select(t => new GetTenantResponseDto(
+            var dtoItems = pagedTenants.Items
+                .Select(t => new GetTenantResponseDto(
                     t.Id,
                     t.Code,
                     t.Name,
                     t.IsActive,
                     t.CreatedAt,
-                    t.UpdatedAt
-                )).ToList();
+                    t.UpdatedAt))
+                .ToList();
 
-                return AppResult<IReadOnlyList<GetTenantResponseDto>>.Ok(
-                    httpStatus: 200,
-                    statusCode: "TENANTS_FETCHED",
-                    message: "Tenants retrieved successfully.",
-                    data: response
-                );
-            }
+            var response = new PagedResult<GetTenantResponseDto>(
+                Items: dtoItems,
+                Page: pagedTenants.Page,
+                PageSize: pagedTenants.PageSize,
+                TotalCount: pagedTenants.TotalCount
+            );
+
+            return AppResult<PagedResult<GetTenantResponseDto>>.Ok(
+                200,
+                "TENANTS_FETCHED",
+                "Tenants retrieved successfully.",
+                response
+            );
         }
         catch (Exception ex)
         {
@@ -69,10 +63,10 @@ public sealed class GetTenantAllV1(
                 page,
                 pageSize);
 
-            return AppResult<IReadOnlyList<GetTenantResponseDto>>.Fail(
-                httpStatus: 500,
-                statusCode: "INTERNAL_SERVER_ERROR",
-                message: "An unexpected error occurred while retrieving tenants."
+            return AppResult<PagedResult<GetTenantResponseDto>>.Fail(
+                500,
+                "INTERNAL_SERVER_ERROR",
+                "An unexpected error occurred while retrieving tenants."
             );
         }
     }
