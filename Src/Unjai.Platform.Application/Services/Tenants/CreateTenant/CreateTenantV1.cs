@@ -46,7 +46,8 @@ public sealed class CreateTenantV1(
             return AppResult<object>.Ok(
                 httpStatus: 201,
                 statusCode: "TENANT_CREATED",
-                message: "Tenant created successfully."
+                message: "Tenant created successfully.",
+                data: new CreateTenantResponseDto(tenant.Id)
             );
         }
         catch (Exception ex)
