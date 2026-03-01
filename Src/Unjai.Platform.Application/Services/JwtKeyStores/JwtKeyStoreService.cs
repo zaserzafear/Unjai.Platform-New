@@ -37,7 +37,7 @@ public sealed class JwtKeyStoreService(
         }
     }
 
-    public async Task<IEnumerable<JwtSigningKey>> GetAllPublicKeys()
+    public async Task<IEnumerable<JwtSigningKey>> GetAllNotExpiredKeysAsync()
     {
         try
         {

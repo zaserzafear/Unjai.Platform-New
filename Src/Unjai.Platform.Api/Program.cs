@@ -72,13 +72,15 @@ builder.Services.AddHttpContextAccessor();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-builder.Services.AddAuthExtensions(
+builder.Services.AddAuthenticationExtension(
     jwt =>
     {
         builder.Configuration
             .GetSection(JwtSettingConfig.Section)
             .Bind(jwt);
-    },
+    });
+
+builder.Services.AddCoreAuthorizationExtension(
     api =>
     {
         builder.Configuration
@@ -105,7 +107,8 @@ builder.Services.AddAuthExtensions(
                     "ApiKeys:HealthCheck must be configured in production.");
             }
         }
-    });
+    })
+    .AddTenantAdminAuthorizationExtension();
 
 var dbPrimary = builder.Configuration.GetConnectionString("UnjaiDb");
 
@@ -189,7 +192,7 @@ var app = builder.Build();
 
 app.UseTrustedIpSources();
 
-app.UseAuthExtensions();
+app.UseAuthExtension();
 
 app.UseOutputCache();
 
@@ -207,7 +210,8 @@ app.MapGet("/.well-known/openid-configuration", (HttpContext ctx) =>
 
 app.MapGet("/.well-known/jwks.json", async (JwtKeyStoreService keyStore) =>
 {
-    var keys = await keyStore.GetAllPublicKeys();
+    var keys = await keyStore.GetAllNotExpiredKeysAsync();
+
     var jwks = new JsonWebKeySet();
 
     foreach (var k in keys)
