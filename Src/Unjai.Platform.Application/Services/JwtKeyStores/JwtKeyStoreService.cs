@@ -37,21 +37,18 @@ public sealed class JwtKeyStoreService(
         }
     }
 
-    public IEnumerable<JwtSigningKey> GetAllPublicKeys()
+    public async Task<IEnumerable<JwtSigningKey>> GetAllPublicKeys()
     {
         try
         {
             var cacheKey = JwtKeyStoreCacheKeys.GetAllPublicKeys;
 
-            var publicKeys = cache.GetOrCreateAsync(
+            var publicKeys = await cache.GetOrCreateAsync(
                 cacheKey,
                 async ct =>
                 {
                     return await repository.GetAllNotExpiredKeysAsync(ct);
-                })
-                .AsTask()
-                .GetAwaiter()
-                .GetResult();
+                });
 
             return publicKeys;
         }

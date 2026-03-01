@@ -66,17 +66,14 @@ public static class SecurityExtensions
             JwtBearerDefaults.AuthenticationScheme,
             async options =>
             {
-                var jwtKeyStoreService = services
-                .BuildServiceProvider()
-                .GetRequiredService<JwtKeyStoreService>();
+                using var sp = services.BuildServiceProvider();
 
-                var ecdsaKeyProvider = services
-                .BuildServiceProvider()
-                .GetRequiredService<EcdsaKeyProvider>();
+                var jwtKeyStoreService = sp.GetRequiredService<JwtKeyStoreService>();
+                var ecdsaKeyProvider = sp.GetRequiredService<EcdsaKeyProvider>();
 
-                options.TokenValidationParameters.IssuerSigningKeys = jwtKeyStoreService
-                .GetAllPublicKeys()
-                .Select(k => ecdsaKeyProvider.ToPublicKey(k));
+                var keys = await jwtKeyStoreService.GetAllPublicKeys();
+
+                options.TokenValidationParameters.IssuerSigningKeys = keys.Select(k => ecdsaKeyProvider.ToPublicKey(k)).ToArray();
             });
 
         services.AddAuthorization(options =>
