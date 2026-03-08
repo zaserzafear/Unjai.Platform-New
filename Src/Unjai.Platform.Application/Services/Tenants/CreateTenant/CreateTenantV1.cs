@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Unjai.Platform.Application.Repositories.Tenants;
 using Unjai.Platform.Contracts.Models;
-using Unjai.Platform.Contracts.Tenants.Dtos;
+using Unjai.Platform.Contracts.Tenants;
 using Unjai.Platform.Domain.Abstractions;
 using Unjai.Platform.Domain.Entities.Tenants;
 
@@ -36,11 +36,9 @@ public sealed class CreateTenantV1(
                 );
             }
 
-            var tenant = new Tenant
-            {
-                Code = request.Code,
-                Name = request.Name
-            };
+            var tenant = new Tenant(
+                code: request.Code,
+                name: request.Name);
 
             await repository.CreateAsync(tenant, ct);
             await unitOfWork.SaveChangesAsync(ct);
@@ -48,7 +46,8 @@ public sealed class CreateTenantV1(
             return AppResult<object>.Ok(
                 httpStatus: 201,
                 statusCode: "TENANT_CREATED",
-                message: "Tenant created successfully."
+                message: "Tenant created successfully.",
+                data: new CreateTenantResponseDto(tenant.Id)
             );
         }
         catch (Exception ex)

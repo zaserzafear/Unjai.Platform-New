@@ -37,21 +37,18 @@ public sealed class JwtKeyStoreService(
         }
     }
 
-    public IEnumerable<JwtSigningKey> GetAllPublicKeys()
+    public async Task<IEnumerable<JwtSigningKey>> GetAllNotExpiredKeysAsync()
     {
         try
         {
             var cacheKey = JwtKeyStoreCacheKeys.GetAllPublicKeys;
 
-            var publicKeys = cache.GetOrCreateAsync(
+            var publicKeys = await cache.GetOrCreateAsync(
                 cacheKey,
                 async ct =>
                 {
                     return await repository.GetAllNotExpiredKeysAsync(ct);
-                })
-                .AsTask()
-                .GetAwaiter()
-                .GetResult();
+                });
 
             return publicKeys;
         }
@@ -62,7 +59,7 @@ public sealed class JwtKeyStoreService(
         }
     }
 
-    public async Task RotateKeyAsync(TimeSpan keyLifetime, CancellationToken ct)
+    private async Task RotateKeyAsync(TimeSpan keyLifetime, CancellationToken ct)
     {
         try
         {
@@ -109,5 +106,48 @@ public sealed class JwtKeyStoreService(
             logger.LogError(ex, "Failed to rotate JWT signing keys.");
             throw;
         }
+    }
+
+    public async Task<bool> RotateKeyIfNeededAsync(
+        TimeSpan rotateBeforeExpiry,
+        TimeSpan keyLifetime,
+        CancellationToken ct)
+    {
+        var now = DateTime.UtcNow;
+
+        var activeKey = await repository.GetActiveNotExpiredKey(ct);
+
+        if (activeKey is null)
+        {
+            logger.LogWarning("No active JWT signing key found. Rotation required.");
+            await RotateKeyAsync(keyLifetime, ct);
+            return true;
+        }
+
+        var remaining = activeKey.ExpiresAt - now;
+
+        if (remaining <= rotateBeforeExpiry)
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation(
+                    "JWT signing key {KeyId} will expire in {Remaining}. Rotating.",
+                    activeKey.KeyId,
+                    remaining);
+            }
+
+            await RotateKeyAsync(keyLifetime, ct);
+            return true;
+        }
+
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation(
+                "JWT signing key {KeyId} is still valid for {Remaining}. Rotation skipped.",
+                activeKey.KeyId,
+                remaining);
+        }
+
+        return false;
     }
 }

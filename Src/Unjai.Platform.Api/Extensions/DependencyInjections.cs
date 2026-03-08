@@ -11,7 +11,7 @@ using Unjai.Platform.Infrastructure.Security;
 
 namespace Unjai.Platform.Api.Extensions;
 
-public static class DependencyInjections
+internal static class DependencyInjections
 {
     public static IServiceCollection AddDependencyInjections(this IServiceCollection services)
     {

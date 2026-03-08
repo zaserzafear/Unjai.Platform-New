@@ -2,10 +2,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Unjai.Platform.Application.Abstractions.Security.Authentication;
 using Unjai.Platform.Application.Abstractions.Security.Cryptography.Ecdsa;
-using Unjai.Platform.Application.Services.JwtKeyStores;
 using Unjai.Platform.Domain.Entities.TenantsAdminPermission;
 using Unjai.Platform.Infrastructure.Security.Authentication.ApiKey;
 using Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
@@ -24,15 +26,13 @@ public static class SecurityExtensions
         services.AddScoped<ITokenProvider, TokenProvider>();
     }
 
-    public static void AddAuthExtensions(this IServiceCollection services, Action<JwtSettings> jwtSetting, Action<ApiKeyOptions> apiKeyOption)
+    public static void AddAuthenticationExtension(
+        this IServiceCollection services,
+        Action<JwtSettings> jwtSetting)
     {
         var _jwtSetting = new JwtSettings();
         jwtSetting(_jwtSetting);
         services.Configure(jwtSetting);
-
-        var _apiKeyOption = new ApiKeyOptions();
-        apiKeyOption(_apiKeyOption);
-        services.Configure(apiKeyOption);
 
         services.AddAuthentication(options =>
         {
@@ -40,6 +40,10 @@ public static class SecurityExtensions
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         }).AddJwtBearer(options =>
         {
+            options.MapInboundClaims = false;
+            options.RequireHttpsMetadata = false;
+            options.MetadataAddress = _jwtSetting.MetadataAddress;
+
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 RoleClaimType = _jwtSetting.RoleClaimType,
@@ -53,31 +57,50 @@ public static class SecurityExtensions
 
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.FromSeconds(_jwtSetting.ClockSkew),
-
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKeyResolver = (token, securityToken, kid, parameters) =>
-                    parameters.IssuerSigningKeys?.Where(k => k.KeyId == kid)
             };
 
-            options.MapInboundClaims = false;
-        });
-
-        services.PostConfigure<JwtBearerOptions>(
-            JwtBearerDefaults.AuthenticationScheme,
-            async options =>
+            options.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                options.MetadataAddress,
+                new OpenIdConnectConfigurationRetriever(),
+                new HttpDocumentRetriever { RequireHttps = false })
             {
-                var jwtKeyStoreService = services
-                .BuildServiceProvider()
-                .GetRequiredService<JwtKeyStoreService>();
+                RefreshInterval = _jwtSetting.MetadataRefreshInterval,
+                AutomaticRefreshInterval = _jwtSetting.MetadataAutoRefreshInterval,
+            };
 
-                var ecdsaKeyProvider = services
-                .BuildServiceProvider()
-                .GetRequiredService<EcdsaKeyProvider>();
+            options.Events = new JwtBearerEvents
+            {
+                OnAuthenticationFailed = context =>
+                {
+                    var logger = context.HttpContext
+                        .RequestServices
+                        .GetRequiredService<ILoggerFactory>()
+                        .CreateLogger(typeof(SecurityExtensions));
 
-                options.TokenValidationParameters.IssuerSigningKeys = jwtKeyStoreService
-                .GetAllPublicKeys()
-                .Select(k => ecdsaKeyProvider.ToPublicKey(k));
-            });
+                    var ip = context.HttpContext.Connection.RemoteIpAddress?.ToString();
+                    var path = context.HttpContext.Request.Path;
+
+                    var ex = context.Exception;
+
+                    string reason = ex.GetType().Name;
+
+                    logger.LogWarning(ex,
+                        "JWT authentication failed. Reason: {Reason}, IP: {IP}, Path: {Path}",
+                        reason, ip, path);
+
+                    return Task.CompletedTask;
+                }
+            };
+        });
+    }
+
+    public static IServiceCollection AddCoreAuthorizationExtension(
+        this IServiceCollection services,
+        Action<ApiKeyOptions> apiKeyOption)
+    {
+        var _apiKeyOption = new ApiKeyOptions();
+        apiKeyOption(_apiKeyOption);
+        services.Configure(apiKeyOption);
 
         services.AddAuthorization(options =>
         {
@@ -85,7 +108,17 @@ public static class SecurityExtensions
                 policy => policy.Requirements.Add(
                     new HealthChecksApiKeyRequirement(
                         _apiKeyOption.HealthCheck)));
+        });
 
+        services.AddSingleton<IAuthorizationHandler>(new HealthChecksApiKeyHandler(_apiKeyOption.HealthCheck));
+
+        return services;
+    }
+
+    public static IServiceCollection AddTenantAdminAuthorizationExtension(this IServiceCollection services)
+    {
+        services.AddAuthorization(options =>
+        {
             options.AddPolicy(TenantAdminPermissionCode.ReadTenants.ToString().ToUpperInvariant(), policy =>
                 policy.Requirements.Add(
                     new TenantAdminPermissionRequirement(
@@ -107,12 +140,13 @@ public static class SecurityExtensions
                         (int)TenantAdminPermissionCode.DeleteTenants)));
         });
 
-        services.AddSingleton<IAuthorizationHandler>(new HealthChecksApiKeyHandler(_apiKeyOption.HealthCheck));
 
         services.AddScoped<IAuthorizationHandler, TenantAdminPermissionHandler>();
+
+        return services;
     }
 
-    public static WebApplication UseAuthExtensions(this WebApplication app)
+    public static WebApplication UseAuthExtension(this WebApplication app)
     {
         app.UseAuthentication();
         app.UseAuthorization();

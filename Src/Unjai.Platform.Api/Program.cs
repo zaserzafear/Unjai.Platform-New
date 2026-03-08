@@ -9,10 +9,8 @@ using Unjai.Platform.Api.RateLimiting;
 using Unjai.Platform.Application.Services.JwtKeyStores;
 using Unjai.Platform.Infrastructure.Caching.Extensions;
 using Unjai.Platform.Infrastructure.Persistent.Database.Extensions;
-using Unjai.Platform.Infrastructure.Persistent.Seeding;
 using Unjai.Platform.Infrastructure.RateLimiting.Abstractions;
 using Unjai.Platform.Infrastructure.RateLimiting.Configurations;
-using Unjai.Platform.Infrastructure.RateLimiting.Core;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 using Unjai.Platform.Infrastructure.Redis.Extensions;
 using Unjai.Platform.Infrastructure.Security;
@@ -74,13 +72,15 @@ builder.Services.AddHttpContextAccessor();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-builder.Services.AddAuthExtensions(
+builder.Services.AddAuthenticationExtension(
     jwt =>
     {
         builder.Configuration
             .GetSection(JwtSettingConfig.Section)
             .Bind(jwt);
-    },
+    });
+
+builder.Services.AddCoreAuthorizationExtension(
     api =>
     {
         builder.Configuration
@@ -107,7 +107,8 @@ builder.Services.AddAuthExtensions(
                     "ApiKeys:HealthCheck must be configured in production.");
             }
         }
-    });
+    })
+    .AddTenantAdminAuthorizationExtension();
 
 var dbPrimary = builder.Configuration.GetConnectionString("UnjaiDb");
 
@@ -191,23 +192,25 @@ var app = builder.Build();
 
 app.UseTrustedIpSources();
 
-app.UseAuthExtensions();
+app.UseAuthExtension();
 
 app.UseOutputCache();
 
-app.MapGet("/.well-known/openid-configuration", () =>
+app.MapGet("/.well-known/openid-configuration", (HttpContext ctx) =>
 {
+    var issuer = $"{ctx.Request.Scheme}://{ctx.Request.Host}";
+
     return Results.Ok(new
     {
-        issuer = "https://auth.yourdomain.com",
-        jwks_uri = "https://auth.yourdomain.com/.well-known/jwks.json"
+        issuer,
+        jwks_uri = $"{issuer}/.well-known/jwks.json",
+        id_token_signing_alg_values_supported = OpenIdMetadata.SigningAlgorithms
     });
-}).EnforceRateLimit(RateLimitPolicyKeys.Default);
+});
 
-app.MapGet("/.well-known/jwks.json", (
-    JwtKeyStoreService keyStore) =>
+app.MapGet("/.well-known/jwks.json", async (JwtKeyStoreService keyStore) =>
 {
-    var keys = keyStore.GetAllPublicKeys();
+    var keys = await keyStore.GetAllNotExpiredKeysAsync();
 
     var jwks = new JsonWebKeySet();
 
@@ -229,7 +232,7 @@ app.MapGet("/.well-known/jwks.json", (
     }
 
     return Results.Ok(jwks);
-}).EnforceRateLimit(RateLimitPolicyKeys.Default);
+});
 
 var apiVersionSetBuilder = app.NewApiVersionSet();
 
@@ -261,10 +264,14 @@ if (app.Environment.IsDevelopment())
             options.AddDocument(group);
         }
     });
-
-    app.ApplyMigrations();
 }
 
-await TenantsAdminSeeder.SeedAsync(app.Services, app.Lifetime.ApplicationStopping);
-
 await app.RunAsync();
+
+static class OpenIdMetadata
+{
+    public static readonly string[] SigningAlgorithms =
+    {
+        SecurityAlgorithms.EcdsaSha256
+    };
+}

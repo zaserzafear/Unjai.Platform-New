@@ -1,3 +1,3 @@
-﻿namespace Unjai.Platform.Contracts.CustomerUsers.Dtos;
+﻿namespace Unjai.Platform.Contracts.CustomerUsers;
 
 public sealed record GetCustomerUserReponseDto(Guid Id, string FirstName, string LastName, string Email, bool EmailVerified);

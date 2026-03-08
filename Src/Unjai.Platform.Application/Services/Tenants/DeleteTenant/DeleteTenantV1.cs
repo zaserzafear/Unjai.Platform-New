@@ -2,18 +2,17 @@
 using Unjai.Platform.Application.Abstractions.Caching;
 using Unjai.Platform.Application.Repositories.Tenants;
 using Unjai.Platform.Contracts.Models;
-using Unjai.Platform.Contracts.Tenants.Dtos;
 using Unjai.Platform.Domain.Abstractions;
 
-namespace Unjai.Platform.Application.Services.Tenants.UpdateTenant;
+namespace Unjai.Platform.Application.Services.Tenants.DeleteTenant;
 
-public sealed class UpdateTenantV1(
-    ILogger<UpdateTenantV1> logger,
+public sealed class DeleteTenantV1(
+    ILogger<DeleteTenantV1> logger,
     IUnitOfWork unitOfWork,
     ITenantRepository repository,
     ICacheInvalidationPublisherService cacheInvalidation)
 {
-    public async Task<AppResult<object>> Handle(Guid id, UpdateTenantRequestDto request, CancellationToken ct)
+    public async Task<AppResult<object>> Handle(Guid id, CancellationToken ct)
     {
         try
         {
@@ -27,9 +26,7 @@ public sealed class UpdateTenantV1(
                 );
             }
 
-            entity.Name = request.Name;
-
-            repository.Update(entity);
+            repository.Remove(entity);
             await unitOfWork.SaveChangesAsync(ct);
 
             var cacheKey = TenantCacheKeys.GetById(id);
@@ -37,8 +34,8 @@ public sealed class UpdateTenantV1(
 
             return AppResult<object>.Ok(
                 httpStatus: 200,
-                statusCode: "TENANT_UPDATED",
-                message: "Tenant updated successfully."
+                statusCode: "TENANT_DELETED",
+                message: "Tenant deleted successfully."
             );
         }
         catch (Exception ex)

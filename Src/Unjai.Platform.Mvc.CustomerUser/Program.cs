@@ -39,13 +39,15 @@ builder.Services.Configure<RouteOptions>(options =>
 });
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddAuthExtensions(
+builder.Services.AddAuthenticationExtension(
     jwt =>
     {
         builder.Configuration
             .GetSection(JwtSettingConfig.Section)
             .Bind(jwt);
-    },
+    });
+
+builder.Services.AddCoreAuthorizationExtension(
     api =>
     {
         builder.Configuration
@@ -153,18 +155,9 @@ var app = builder.Build();
 
 app.UseTrustedIpSources();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-}
-else
-{
-    app.UseExceptionHandler("/Home/Error");
-}
-
 app.UseRouting();
 
-app.UseAuthExtensions();
+app.UseAuthExtension();
 
 app.UseOutputCache();
 
@@ -176,5 +169,14 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+}
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+}
 
 await app.RunAsync();

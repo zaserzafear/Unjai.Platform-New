@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Unjai.Platform.Application.Services.CustomerUsers.Exceptions;
-using Unjai.Platform.Contracts.CustomerUsers.Dtos;
+using Unjai.Platform.Contracts.CustomerUsers;
 using Unjai.Platform.Contracts.Models;
 
 namespace Unjai.Platform.Application.Services.CustomerUsers.GetCustomerUser;

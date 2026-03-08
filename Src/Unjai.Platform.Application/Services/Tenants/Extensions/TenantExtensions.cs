@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Unjai.Platform.Application.Services.Tenants.CreateTenant;
+using Unjai.Platform.Application.Services.Tenants.DeleteTenant;
 using Unjai.Platform.Application.Services.Tenants.GetTenant;
 using Unjai.Platform.Application.Services.Tenants.UpdateTenant;
 
@@ -12,6 +13,7 @@ public static class TenantExtensions
         Services.AddScoped<CreateTenantV1>();
         Services.AddScoped<GetTenantAllV1>();
         Services.AddScoped<GetTenantByIdV1>();
-        Services.AddScoped<UpdateTenantV1>();
+        Services.AddScoped<UpdateTenantNameV1>();
+        Services.AddScoped<DeleteTenantV1>();
     }
 }

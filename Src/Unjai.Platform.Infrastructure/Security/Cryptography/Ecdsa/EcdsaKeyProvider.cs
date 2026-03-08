@@ -4,7 +4,7 @@ using Unjai.Platform.Domain.Entities.JwtSigningKeys;
 
 namespace Unjai.Platform.Infrastructure.Security.Cryptography.Ecdsa;
 
-public sealed class EcdsaKeyProvider
+internal sealed class EcdsaKeyProvider
 {
     private readonly ECDsa ecdsa;
 

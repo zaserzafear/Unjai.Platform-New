@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Unjai.Platform.Application.Repositories.Tenants;
 using Unjai.Platform.Contracts.Models;
-using Unjai.Platform.Contracts.Tenants.Dtos;
+using Unjai.Platform.Contracts.Tenants;
 
 namespace Unjai.Platform.Application.Services.Tenants.GetTenant;
 
