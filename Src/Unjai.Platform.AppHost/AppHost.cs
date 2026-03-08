@@ -8,8 +8,7 @@ var postgres = builder.AddPostgres("postgres").WithImageTag("18")
     .WithLifetime(ContainerLifetime.Persistent)
     .WithPgAdmin(pgAdmin => pgAdmin.WithLifetime(ContainerLifetime.Persistent))
     .WithEnvironment("POSTGRES_DB", unjaiDbName)
-    .WithBindMount(@"..\.container\postgres\initdb", "/docker-entrypoint-initdb.d")
-    ;
+    .WithBindMount(@"..\.container\postgres\initdb", "/docker-entrypoint-initdb.d");
 
 var creationScript = $$"""
 DO
@@ -33,22 +32,37 @@ var configuration = builder.Configuration;
 var apiKeyHealthCheck = configuration.GetValue<string>("ApiKeys:HealthCheck");
 var rateLimitingSecret = configuration.GetValue<string>("RateLimiting:Secret");
 
-builder.AddProject<Projects.Unjai_Platform_Infrastructure_Persistent_DatabaseMigrator>("unjai-platform-infrastructure-persistent-databasemigrator")
-    .WithReference(postgresdb).WaitFor(postgresdb);
+var migrator = builder
+    .AddProject<Projects.Unjai_Platform_Infrastructure_Persistent_DatabaseMigrator>(
+        "unjai-platform-infrastructure-persistent-databasemigrator")
+    .WithReference(postgresdb)
+    .WaitFor(postgresdb);
 
-builder.AddProject<Projects.Unjai_Platform_Worker_JwtKeyRotation>("unjai-platform-worker-jwtkeyrotation")
-    .WithReference(postgresdb).WaitFor(postgresdb)
-    .WithReference(redis).WaitFor(redis);
+var jwtKeyRotation = builder
+    .AddProject<Projects.Unjai_Platform_Worker_JwtKeyRotation>(
+        "unjai-platform-worker-jwtkeyrotation")
+    .WaitForCompletion(migrator)
+    .WithReference(postgresdb)
+    .WaitFor(postgresdb)
+    .WithReference(redis)
+    .WaitFor(redis);
 
-var apiProject = builder.AddProject<Projects.Unjai_Platform_Api>("unjai-platform-api")
-    .WithReference(postgresdb).WaitFor(postgresdb)
-    .WithReference(redis).WaitFor(redis)
+var apiProject = builder
+    .AddProject<Projects.Unjai_Platform_Api>("unjai-platform-api")
+    .WaitForCompletion(jwtKeyRotation)
+    .WithReference(postgresdb)
+    .WaitFor(postgresdb)
+    .WithReference(redis)
+    .WaitFor(redis)
     .WithEnvironment("ApiKeys__HealthCheck", apiKeyHealthCheck)
     .WithEnvironment("RateLimiting__Secret", rateLimitingSecret);
 
-builder.AddProject<Projects.Unjai_Platform_Mvc_CustomerUser>("unjai-platform-mvc-customeruser")
-    .WithReference(redis).WaitFor(redis)
+builder
+    .AddProject<Projects.Unjai_Platform_Mvc_CustomerUser>("unjai-platform-mvc-customeruser")
     .WithReference(apiProject)
+    .WithReference(redis)
+    .WaitFor(redis)
+    .WaitFor(apiProject)
     .WithEnvironment("ApiKeys__HealthCheck", apiKeyHealthCheck)
     .WithEnvironment("RateLimiting__Secret", rateLimitingSecret);
 
