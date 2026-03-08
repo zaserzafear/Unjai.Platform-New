@@ -30,8 +30,11 @@ public static class SecurityExtensions
         this IServiceCollection services,
         Action<JwtSettings> jwtSetting)
     {
-        var _jwtSetting = new JwtSettings();
-        jwtSetting(_jwtSetting);
+        var settings = new JwtSettings();
+        jwtSetting(settings);
+
+        ValidateJwtSettings(settings);
+
         services.Configure(jwtSetting);
 
         services.AddAuthentication(options =>
@@ -42,21 +45,21 @@ public static class SecurityExtensions
         {
             options.MapInboundClaims = false;
             options.RequireHttpsMetadata = false;
-            options.MetadataAddress = _jwtSetting.MetadataAddress;
+            options.MetadataAddress = settings.MetadataAddress;
 
             options.TokenValidationParameters = new TokenValidationParameters
             {
-                RoleClaimType = _jwtSetting.RoleClaimType,
-                NameClaimType = _jwtSetting.NameClaimType,
+                RoleClaimType = settings.RoleClaimType,
+                NameClaimType = settings.NameClaimType,
 
                 ValidateIssuer = true,
-                ValidIssuer = _jwtSetting.Issuer,
+                ValidIssuer = settings.Issuer,
 
                 ValidateAudience = true,
-                ValidAudience = _jwtSetting.Audience,
+                ValidAudience = settings.Audience,
 
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.FromSeconds(_jwtSetting.ClockSkew),
+                ClockSkew = TimeSpan.FromSeconds(settings.ClockSkew),
             };
 
             options.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
@@ -64,8 +67,8 @@ public static class SecurityExtensions
                 new OpenIdConnectConfigurationRetriever(),
                 new HttpDocumentRetriever { RequireHttps = false })
             {
-                RefreshInterval = _jwtSetting.MetadataRefreshInterval,
-                AutomaticRefreshInterval = _jwtSetting.MetadataAutoRefreshInterval,
+                RefreshInterval = settings.MetadataRefreshInterval,
+                AutomaticRefreshInterval = settings.MetadataAutoRefreshInterval,
             };
 
             options.Events = new JwtBearerEvents
@@ -94,25 +97,61 @@ public static class SecurityExtensions
         });
     }
 
+    private static void ValidateJwtSettings(JwtSettings settings)
+    {
+        if (string.IsNullOrWhiteSpace(settings.Issuer))
+            throw new InvalidOperationException("Jwt:Issuer is required.");
+
+        if (string.IsNullOrWhiteSpace(settings.Audience))
+            throw new InvalidOperationException("Jwt:Audience is required.");
+
+        if (string.IsNullOrWhiteSpace(settings.MetadataAddress))
+            throw new InvalidOperationException("Jwt:MetadataAddress is required.");
+
+        if (settings.MetadataRefreshInterval <= TimeSpan.Zero)
+            throw new InvalidOperationException("Jwt:MetadataRefreshInterval must be greater than 0.");
+
+        if (settings.MetadataAutoRefreshInterval <= TimeSpan.Zero)
+            throw new InvalidOperationException("Jwt:MetadataAutoRefreshInterval must be greater than 0.");
+
+        if (settings.AccessTokenExpireMinutes < 0)
+            throw new InvalidOperationException("Jwt:AccessTokenExpireMinutes must be greater than or equal to 0.");
+
+        if (settings.RefreshTokenExpireDays < 0)
+            throw new InvalidOperationException("Jwt:RefreshTokenExpireDays must be greater than or equal to 0.");
+
+        if (settings.ClockSkew < 0)
+            throw new InvalidOperationException("Jwt:ClockSkew must be greater than or equal to 0.");
+    }
+
     public static IServiceCollection AddCoreAuthorizationExtension(
         this IServiceCollection services,
         Action<ApiKeyOptions> apiKeyOption)
     {
-        var _apiKeyOption = new ApiKeyOptions();
-        apiKeyOption(_apiKeyOption);
+        var options = new ApiKeyOptions();
+        apiKeyOption(options);
+
+        ValidateApiKeyOptions(options);
+
         services.Configure(apiKeyOption);
 
-        services.AddAuthorization(options =>
+        services.AddAuthorization(optionsBuilder =>
         {
-            options.AddPolicy(JwtPolicyConfig.HealthPolicyName,
+            optionsBuilder.AddPolicy(JwtPolicyConfig.HealthPolicyName,
                 policy => policy.Requirements.Add(
-                    new HealthChecksApiKeyRequirement(
-                        _apiKeyOption.HealthCheck)));
+                    new HealthChecksApiKeyRequirement(options.HealthCheck)));
         });
 
-        services.AddSingleton<IAuthorizationHandler>(new HealthChecksApiKeyHandler(_apiKeyOption.HealthCheck));
+        services.AddSingleton<IAuthorizationHandler>(
+            new HealthChecksApiKeyHandler(options.HealthCheck));
 
         return services;
+    }
+
+    private static void ValidateApiKeyOptions(ApiKeyOptions options)
+    {
+        if (string.IsNullOrWhiteSpace(options.HealthCheck))
+            throw new InvalidOperationException("ApiKeys:HealthCheck is required.");
     }
 
     public static IServiceCollection AddTenantAdminAuthorizationExtension(this IServiceCollection services)
@@ -139,7 +178,6 @@ public static class SecurityExtensions
                     new TenantAdminPermissionRequirement(
                         (int)TenantAdminPermissionCode.DeleteTenants)));
         });
-
 
         services.AddScoped<IAuthorizationHandler, TenantAdminPermissionHandler>();
 

@@ -16,49 +16,13 @@ var logger = loggerFactory.CreateLogger<Program>();
 
 builder.AddServiceDefaults();
 
-var dbPrimary = builder.Configuration.GetConnectionString("UnjaiDb");
-
-if (string.IsNullOrWhiteSpace(dbPrimary))
-{
-    throw new InvalidOperationException(
-        "ConnectionString 'UnjaiDb' must be configured.");
-}
-
-var dbRead = builder.Configuration.GetConnectionString("UnjaiDbRead");
-if (string.IsNullOrWhiteSpace(dbRead))
-{
-    logger.LogWarning(
-        "ConnectionString 'UnjaiDbRead' is missing. Falling back to 'UnjaiDb'.");
-
-    dbRead = dbPrimary;
-}
-
-var dbWrite = builder.Configuration.GetConnectionString("UnjaiDbWrite");
-if (string.IsNullOrWhiteSpace(dbWrite))
-{
-    logger.LogWarning(
-        "ConnectionString 'UnjaiDbWrite' is missing. Falling back to 'UnjaiDb'.");
-
-    dbWrite = dbPrimary;
-}
-
 builder.Services.AddPostgresClientExtension(
-    dbPrimary,
-    dbRead,
-    dbWrite);
+    builder.Configuration.GetConnectionString(PostgresConfig.DefaultConnectionString),
+    builder.Configuration.GetConnectionString(PostgresConfig.ReadConnectionString),
+    builder.Configuration.GetConnectionString(PostgresConfig.WriteConnectionString),
+    logger);
 
-var redisConnectionString =
-    builder.Configuration.GetConnectionString("Redis");
-
-if (string.IsNullOrWhiteSpace(redisConnectionString))
-{
-    throw new InvalidOperationException(
-        "Redis connection string 'Redis' was not found or is empty.");
-}
-else
-{
-    builder.Services.AddRedisConnection(redisConnectionString);
-}
+builder.Services.AddRedisConnection(builder.Configuration.GetConnectionString(RedisConfig.ConnectionString));
 
 builder.Services.AddCachingExtension();
 

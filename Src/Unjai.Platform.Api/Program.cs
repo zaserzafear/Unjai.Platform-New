@@ -16,7 +16,6 @@ using Unjai.Platform.Infrastructure.Redis.Extensions;
 using Unjai.Platform.Infrastructure.Security;
 using Unjai.Platform.Infrastructure.Security.Authentication.ApiKey;
 using Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
-using Unjai.Platform.Infrastructure.Security.Cryptography;
 using Unjai.Platform.Infrastructure.Security.Networking.TrustedIp;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -81,109 +80,32 @@ builder.Services.AddAuthenticationExtension(
     });
 
 builder.Services.AddCoreAuthorizationExtension(
-    api =>
+    apiKey =>
     {
         builder.Configuration
             .GetSection(ApiKeyConfig.Section)
-            .Bind(api);
-
-        if (string.IsNullOrWhiteSpace(api.HealthCheck))
-        {
-            if (builder.Environment.IsDevelopment())
-            {
-                api.HealthCheck = CryptoHelper.GenerateSecret(32);
-
-                if (logger.IsEnabled(LogLevel.Critical))
-                {
-                    logger.LogCritical(
-                    "SECURITY WARNING (DEV ONLY): ApiKeys:HealthCheck was auto-generated. " +
-                    "COPY THIS VALUE AND STORE IT SECURELY. Value={ApiKey}",
-                    api.HealthCheck);
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException(
-                    "ApiKeys:HealthCheck must be configured in production.");
-            }
-        }
+            .Bind(apiKey);
     })
     .AddTenantAdminAuthorizationExtension();
 
-var dbPrimary = builder.Configuration.GetConnectionString("UnjaiDb");
-
-if (string.IsNullOrWhiteSpace(dbPrimary))
-{
-    throw new InvalidOperationException(
-        "ConnectionString 'UnjaiDb' must be configured.");
-}
-
-var dbRead = builder.Configuration.GetConnectionString("UnjaiDbRead");
-if (string.IsNullOrWhiteSpace(dbRead))
-{
-    logger.LogWarning(
-        "ConnectionString 'UnjaiDbRead' is missing. Falling back to 'UnjaiDb'.");
-
-    dbRead = dbPrimary;
-}
-
-var dbWrite = builder.Configuration.GetConnectionString("UnjaiDbWrite");
-if (string.IsNullOrWhiteSpace(dbWrite))
-{
-    logger.LogWarning(
-        "ConnectionString 'UnjaiDbWrite' is missing. Falling back to 'UnjaiDb'.");
-
-    dbWrite = dbPrimary;
-}
-
 builder.Services.AddPostgresClientExtension(
-    dbPrimary,
-    dbRead,
-    dbWrite);
+    builder.Configuration.GetConnectionString(PostgresConfig.DefaultConnectionString),
+    builder.Configuration.GetConnectionString(PostgresConfig.ReadConnectionString),
+    builder.Configuration.GetConnectionString(PostgresConfig.WriteConnectionString),
+    logger);
 
-var redisConnectionString =
-    builder.Configuration.GetConnectionString("Redis");
-
-if (string.IsNullOrWhiteSpace(redisConnectionString))
-{
-    throw new InvalidOperationException(
-        "Redis connection string 'Redis' was not found or is empty.");
-}
-else
-{
-    builder.Services.AddRedisConnection(redisConnectionString);
-}
+builder.Services.AddRedisConnection(builder.Configuration.GetConnectionString(RedisConfig.ConnectionString));
 
 builder.Services.AddCachingExtension();
 
-var rateLimitingOptions =
-    builder.Configuration
-        .GetSection(RateLimitingConfig.Section)
-        .Get<RateLimitingOptions>()
-    ?? throw new InvalidOperationException("RateLimiting configuration missing");
-
-if (string.IsNullOrWhiteSpace(rateLimitingOptions.Secret))
-{
-    if (builder.Environment.IsDevelopment())
+builder.Services.AddRateLimitingExtension(
+    rateLimit =>
     {
-        rateLimitingOptions.Secret = CryptoHelper.GenerateSecret(64);
+        builder.Configuration
+            .GetSection(RateLimitingConfig.Section)
+            .Bind(rateLimit);
+    });
 
-        if (logger.IsEnabled(LogLevel.Critical))
-        {
-            logger.LogCritical(
-                "SECURITY WARNING (DEV ONLY): RateLimiting:Secret was auto-generated. " +
-                "COPY THIS VALUE AND STORE IT SECURELY. Value={Secret}",
-                rateLimitingOptions.Secret);
-        }
-    }
-    else
-    {
-        throw new InvalidOperationException(
-            "RateLimiting:Secret must be configured in production.");
-    }
-}
-
-builder.Services.AddRateLimitingExtension(rateLimitingOptions);
 builder.Services.AddScoped<IMinimalRateLimitResultFactory, RateLimitResultFactory>();
 
 builder.Services.AddDependencyInjections();

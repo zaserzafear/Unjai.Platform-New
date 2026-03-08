@@ -7,7 +7,6 @@ using Unjai.Platform.Infrastructure.Redis.Extensions;
 using Unjai.Platform.Infrastructure.Security;
 using Unjai.Platform.Infrastructure.Security.Authentication.ApiKey;
 using Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
-using Unjai.Platform.Infrastructure.Security.Cryptography;
 using Unjai.Platform.Infrastructure.Security.Networking.TrustedIp;
 using Unjai.Platform.Mvc.CustomerUser.Configurations;
 using Unjai.Platform.Mvc.CustomerUser.RateLimiting;
@@ -30,6 +29,7 @@ var trustIpSourceOptions = builder.Configuration
     .GetSection(TrustIpSourceConfig.Section)
     .Get<TrustIpSourceOptions>()
     ?? new TrustIpSourceOptions();
+
 builder.Services.AddTrustedIpSources(trustIpSourceOptions);
 
 // Add services to the container.
@@ -37,6 +37,7 @@ builder.Services.Configure<RouteOptions>(options =>
 {
     options.LowercaseUrls = true;
 });
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddAuthenticationExtension(
@@ -48,75 +49,23 @@ builder.Services.AddAuthenticationExtension(
     });
 
 builder.Services.AddCoreAuthorizationExtension(
-    api =>
+    apiKey =>
     {
         builder.Configuration
             .GetSection(ApiKeyConfig.Section)
-            .Bind(api);
-
-        if (string.IsNullOrWhiteSpace(api.HealthCheck))
-        {
-            if (builder.Environment.IsDevelopment())
-            {
-                api.HealthCheck = CryptoHelper.GenerateSecret(32);
-
-                if (logger.IsEnabled(LogLevel.Critical))
-                {
-                    logger.LogCritical(
-                    "SECURITY WARNING (DEV ONLY): ApiKeys:HealthCheck was auto-generated. " +
-                    "COPY THIS VALUE AND STORE IT SECURELY. Value={ApiKey}",
-                    api.HealthCheck);
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException(
-                    "ApiKeys:HealthCheck must be configured in production.");
-            }
-        }
+            .Bind(apiKey);
     });
 
-var redisConnectionString =
-    builder.Configuration.GetConnectionString("Redis");
+builder.Services.AddRedisConnection(builder.Configuration.GetConnectionString(RedisConfig.ConnectionString));
 
-if (string.IsNullOrWhiteSpace(redisConnectionString))
-{
-    throw new InvalidOperationException(
-        "Redis connection string 'Redis' was not found or is empty.");
-}
-else
-{
-    builder.Services.AddRedisConnection(redisConnectionString);
-}
-
-var rateLimitingOptions =
-    builder.Configuration
-        .GetSection(RateLimitingConfig.Section)
-        .Get<RateLimitingOptions>()
-    ?? throw new InvalidOperationException("RateLimiting configuration missing");
-
-if (string.IsNullOrWhiteSpace(rateLimitingOptions.Secret))
-{
-    if (builder.Environment.IsDevelopment())
+builder.Services.AddRateLimitingExtension(
+    rateLimit =>
     {
-        rateLimitingOptions.Secret = CryptoHelper.GenerateSecret(64);
+        builder.Configuration
+            .GetSection(RateLimitingConfig.Section)
+            .Bind(rateLimit);
+    });
 
-        if (logger.IsEnabled(LogLevel.Critical))
-        {
-            logger.LogCritical(
-                "SECURITY WARNING (DEV ONLY): RateLimiting:Secret was auto-generated. " +
-                "COPY THIS VALUE AND STORE IT SECURELY. Value={Secret}",
-                rateLimitingOptions.Secret);
-        }
-    }
-    else
-    {
-        throw new InvalidOperationException(
-            "RateLimiting:Secret must be configured in production.");
-    }
-}
-
-builder.Services.AddRateLimitingExtension(rateLimitingOptions);
 builder.Services.AddScoped<IMvcRateLimitResultFactory, MvcRateLimitResultFactory>();
 
 builder.Services.AddOptions<ApiOptions>()

@@ -7,8 +7,11 @@ public static class RedisConnectionExtension
 {
     public static void AddRedisConnection(
         this IServiceCollection services,
-        string redisConnectionString)
+        string? redisConnectionString)
     {
+        if (string.IsNullOrWhiteSpace(redisConnectionString))
+            throw new InvalidOperationException("Redis connection string 'Redis' was not found or is empty.");
+
         services.AddSingleton<IConnectionMultiplexer>(
             ConnectionMultiplexer.Connect(redisConnectionString));
 
@@ -23,4 +26,9 @@ public static class RedisConnectionExtension
             };
         });
     }
+}
+
+public static class RedisConfig
+{
+    public const string ConnectionString = "Redis";
 }
