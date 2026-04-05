@@ -2,6 +2,7 @@
 using Unjai.Platform.Domain.Entities.JwtSigningKeys;
 using Unjai.Platform.Domain.Entities.Tenants;
 using Unjai.Platform.Domain.Entities.TenantsAdmin;
+using Unjai.Platform.Domain.Entities.TenantsAdminRefreshToken;
 using Unjai.Platform.Domain.Entities.TenantsAdminRolePermission;
 using Unjai.Platform.Infrastructure.Persistent.Database.Conventions;
 using Unjai.Platform.Infrastructure.Persistent.Outbox;
@@ -30,5 +31,6 @@ internal class AppDbContext<TContext> : DbContext
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<TenantAdmin> TenantAdmins => Set<TenantAdmin>();
     public DbSet<TenantAdminRolePermission> TenantAdminRolePermissions => Set<TenantAdminRolePermission>();
+    public DbSet<TenantAdminRefreshToken> TenantAdminRefreshTokens => Set<TenantAdminRefreshToken>();
     public DbSet<JwtSigningKey> JwtSigningKeys => Set<JwtSigningKey>();
 }

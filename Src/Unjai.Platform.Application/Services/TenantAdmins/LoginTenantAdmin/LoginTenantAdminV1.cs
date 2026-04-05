@@ -5,12 +5,14 @@ using Unjai.Platform.Application.Diagnostics;
 using Unjai.Platform.Application.Repositories.TenantAdmins;
 using Unjai.Platform.Contracts.Models;
 using Unjai.Platform.Contracts.TenantAdmins;
+using Unjai.Platform.Domain.Abstractions;
 
 namespace Unjai.Platform.Application.Services.TenantAdmins.LoginTenantAdmin;
 
 public sealed class LoginTenantAdminV1(
     ILogger<LoginTenantAdminV1> logger,
     ITenantAdminRepository repository,
+    IUnitOfWork unitOfWork,
     ITokenProvider jwtTokenIssuer,
     ActivitySource activitySource)
 {
@@ -50,14 +52,16 @@ public sealed class LoginTenantAdminV1(
             try
             {
                 var accessToken = await jwtTokenIssuer.IssueAccessToken(tenantAdmin, ct);
+                var refreshTokenEntity = await repository.AddRefreshTokenAsync(tenantAdmin.Id, expireDays: 7, ct);
 
-                tokenActivity?.SetTag("auth.token.type", "access");
-                tokenActivity?.SetTag("auth.token.expires_at", accessToken.expires);
+                await unitOfWork.SaveChangesAsync(ct);
+
+                tokenActivity?.SetTag("auth.token.type", "access_and_refresh");
+                tokenActivity?.SetTag("auth.token.access_expires_at", accessToken.Expires);
+                tokenActivity?.SetTag("auth.token.refresh_expires_at", refreshTokenEntity.ExpiresAt);
                 tokenActivity?.SetStatus(ActivityStatusCode.Ok);
 
                 activity?.SetTag("auth.login.result", "success");
-                activity?.SetTag("auth.token.type", "access");
-                activity?.SetTag("auth.token.expires_at", accessToken.expires);
                 activity?.SetStatus(ActivityStatusCode.Ok);
 
                 return AppResult<LoginTenantAdminResponseDto>.Ok(
@@ -65,9 +69,10 @@ public sealed class LoginTenantAdminV1(
                     statusCode: "LOGIN_SUCCESSFUL",
                     message: "Tenant admin logged in successfully.",
                     data: new LoginTenantAdminResponseDto(
-                        accessToken.token,
-                        accessToken.expires,
-                        string.Empty)
+                        accessToken.Token,
+                        accessToken.Expires,
+                        refreshTokenEntity.Token,
+                        new DateTimeOffset(refreshTokenEntity.ExpiresAt).ToUnixTimeSeconds())
                 );
             }
             catch (Exception ex)

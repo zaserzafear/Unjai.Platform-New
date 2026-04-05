@@ -29,14 +29,14 @@ export POSTGRES_CONNECTIONSTRING='Host=localhost;Port=5432;Username=postgres;Pas
 ```bash
 dotnet ef migrations add Initial \
   --project ./Src/Unjai.Platform.Infrastructure.Persistent/Unjai.Platform.Infrastructure.Persistent.csproj \
-  --context AppDbContext
+  --context WriteDbContext
 ```
 
 ### Remove Migration
 ```bash
 dotnet ef migrations remove \
   --project ./Src/Unjai.Platform.Infrastructure.Persistent/Unjai.Platform.Infrastructure.Persistent.csproj \
-  --context AppDbContext
+  --context WriteDbContext
 ```
 
 ### Generate SQL Script (Idempotent)
@@ -44,7 +44,7 @@ Generates an idempotent SQL script containing all migrations up to the latest on
 ```bash
 dotnet ef migrations script \
   --project ./Src/Unjai.Platform.Infrastructure.Persistent/Unjai.Platform.Infrastructure.Persistent.csproj \
-  --context AppDbContext \
+  --context WriteDbContext \
   --idempotent \
   --output ./Src/.container/postgres/initdb/20260125072850_Initial.sql
 ```
@@ -57,7 +57,7 @@ Only migrations after **FROM** and up to **TO** will be included in the script.
 ```bash
 dotnet ef migrations script \
   --project ./Src/Unjai.Platform.Infrastructure.Persistent/Unjai.Platform.Infrastructure.Persistent.csproj \
-  --context AppDbContext \
+  --context WriteDbContext \
   --idempotent \
   <FROM> \
   <TO> \

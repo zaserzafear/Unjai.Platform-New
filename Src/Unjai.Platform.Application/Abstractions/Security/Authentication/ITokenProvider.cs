@@ -4,5 +4,5 @@ namespace Unjai.Platform.Application.Abstractions.Security.Authentication;
 
 public interface ITokenProvider
 {
-    Task<(string token, long expires)> IssueAccessToken(TenantAdmin entity, CancellationToken ct);
+    Task<(string Token, long Expires)> IssueAccessToken(TenantAdmin entity, CancellationToken ct);
 }

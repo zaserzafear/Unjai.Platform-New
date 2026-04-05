@@ -4,7 +4,7 @@ using Unjai.Platform.Domain.Entities.TenantsAdmin;
 
 namespace Unjai.Platform.Infrastructure.Persistent.Database.Configurations;
 
-internal sealed class TenantsAdminConfiguration
+internal sealed class TenantAdminConfiguration
     : BaseEntityConfiguration<TenantAdmin>
 {
     public override void Configure(EntityTypeBuilder<TenantAdmin> entity)

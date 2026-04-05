@@ -17,7 +17,7 @@ internal sealed class TokenProvider(
     EcdsaKeyProvider ecdsaKeyProvider)
     : ITokenProvider
 {
-    public async Task<(string token, long expires)> IssueAccessToken(TenantAdmin entity, CancellationToken ct)
+    public async Task<(string Token, long Expires)> IssueAccessToken(TenantAdmin entity, CancellationToken ct)
     {
         var jwtSettingsValue = jwtSettings.Value;
 
