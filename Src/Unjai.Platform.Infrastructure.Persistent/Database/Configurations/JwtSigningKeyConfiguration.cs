@@ -9,7 +9,7 @@ internal sealed class JwtSigningKeyConfiguration
 {
     public void Configure(EntityTypeBuilder<JwtSigningKey> entity)
     {
-        entity.ToTable("jwt_signing_key");
+        entity.ToTable("jwt_signing_keys");
 
         entity.HasKey(o => o.KeyId);
 
@@ -31,7 +31,7 @@ internal sealed class JwtSigningKeyConfiguration
         entity.HasIndex(o => o.IsActive)
               .IsUnique()
               .HasFilter("\"is_active\" = true")
-              .HasDatabaseName("idx_jwt_signing_key_active");
+              .HasDatabaseName("idx_jwt_signing_keys_active");
 
         entity.Property(e => e.CreatedAt)
               .HasColumnName("created_at")

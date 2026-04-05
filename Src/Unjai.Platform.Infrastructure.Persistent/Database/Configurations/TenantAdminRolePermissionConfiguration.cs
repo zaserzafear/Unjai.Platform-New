@@ -9,7 +9,7 @@ internal sealed class TenantAdminRolePermissionConfiguration
 {
     public void Configure(EntityTypeBuilder<TenantAdminRolePermission> entity)
     {
-        entity.ToTable("tenants_admin_role_permissions");
+        entity.ToTable("tenant_admin_role_permissions");
 
         entity.Property(x => x.RoleId)
             .HasColumnName("role_id");

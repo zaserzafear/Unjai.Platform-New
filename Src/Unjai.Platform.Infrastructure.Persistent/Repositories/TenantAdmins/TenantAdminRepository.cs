@@ -58,14 +58,27 @@ internal sealed class TenantAdminRepository(WriteDbContext writeDbContext, ReadD
 
     public async Task<TenantAdminRefreshToken> AddRefreshTokenAsync(Guid tenantAdminId, int expireDays = 7, CancellationToken ct = default)
     {
-        var randomNumber = new byte[64];
-        using var rng = RandomNumberGenerator.Create();
-        rng.GetBytes(randomNumber);
+        string tokenText = string.Empty;
+        bool isUnique = false;
+
+        while (!isUnique)
+        {
+            var randomNumber = RandomNumberGenerator.GetBytes(64);
+            tokenText = Convert.ToBase64String(randomNumber);
+
+            bool isExists = await writeDbContext.TenantAdminRefreshTokens
+                .AnyAsync(x => x.Token == tokenText, ct);
+
+            if (!isExists)
+            {
+                isUnique = true;
+            }
+        }
 
         var refreshToken = new TenantAdminRefreshToken
         {
             TenantAdminId = tenantAdminId,
-            Token = Convert.ToBase64String(randomNumber),
+            Token = tokenText,
             ExpiresAt = DateTime.UtcNow.AddDays(expireDays),
             IsRevoked = false,
             CreatedAt = DateTime.UtcNow

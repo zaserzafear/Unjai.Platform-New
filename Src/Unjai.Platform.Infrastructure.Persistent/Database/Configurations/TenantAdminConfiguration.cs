@@ -9,7 +9,7 @@ internal sealed class TenantAdminConfiguration
 {
     public override void Configure(EntityTypeBuilder<TenantAdmin> entity)
     {
-        entity.ToTable("tenants_admin");
+        entity.ToTable("tenant_admins");
 
         entity.Property(x => x.Username)
             .HasColumnName("username")

@@ -23,6 +23,7 @@ internal sealed class TenantAdminRefreshTokenConfiguration
 
         entity.Property(e => e.Token)
               .HasColumnName("token")
+              .HasMaxLength(500)
               .IsRequired();
 
         entity.Property(e => e.ExpiresAt)
@@ -39,5 +40,8 @@ internal sealed class TenantAdminRefreshTokenConfiguration
               .IsRequired()
               .HasDefaultValueSql("now()")
               .ValueGeneratedOnAdd();
+
+        entity.HasIndex(e => e.Token)
+              .IsUnique();
     }
 }

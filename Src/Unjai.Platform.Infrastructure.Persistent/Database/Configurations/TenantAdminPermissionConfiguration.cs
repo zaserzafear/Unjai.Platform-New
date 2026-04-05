@@ -9,7 +9,7 @@ internal sealed class TenantAdminPermissionConfiguration
 {
     public void Configure(EntityTypeBuilder<TenantAdminPermission> entity)
     {
-        entity.ToTable("tenants_admin_permissions");
+        entity.ToTable("tenant_admin_permissions");
 
         entity.HasKey(x => x.Id);
 
