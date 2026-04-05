@@ -1,5 +1,4 @@
-﻿using Unjai.Platform.Application.Services.CustomerUsers.Extensions;
-using Unjai.Platform.Application.Services.JwtKeyStores;
+﻿using Unjai.Platform.Application.Services.JwtKeyStores;
 using Unjai.Platform.Application.Services.TenantAdminRolePermissions;
 using Unjai.Platform.Application.Services.TenantAdmins.Extensions;
 using Unjai.Platform.Application.Services.Tenants.Extensions;
@@ -18,8 +17,6 @@ internal static class DependencyInjections
         services.AddJwtSigningKeyRepository();
         services.AddJwtKeyStoreService();
         services.AddSecurityExtensions();
-
-        services.AddCustomerUserServiceExtension();
 
         services.AddTenantRepositoryExtensions();
         services.AddTenantServiceExtension();

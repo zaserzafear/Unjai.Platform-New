@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.Extensions.Options;
 using Unjai.Platform.Infrastructure.RateLimiting.Abstractions;
 using Unjai.Platform.Infrastructure.RateLimiting.AspNetCore.Delegates;
@@ -20,6 +21,9 @@ using var loggerFactory = LoggerFactory.Create(config =>
 });
 
 var logger = loggerFactory.CreateLogger<Program>();
+
+builder.Services.AddSingleton(_ =>
+    new ActivitySource(builder.Environment.ApplicationName));
 
 builder.AddServiceDefaults();
 

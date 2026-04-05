@@ -4,7 +4,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var unjaiDbName = "UnjaiDb";
 
-var postgres = builder.AddPostgres("postgres").WithImageTag("18")
+var postgres = builder.AddPostgres("postgres").WithImageTag("18.3-alpine")
     .WithLifetime(ContainerLifetime.Persistent)
     .WithPgAdmin(pgAdmin => pgAdmin.WithLifetime(ContainerLifetime.Persistent))
     .WithEnvironment("POSTGRES_DB", unjaiDbName)
@@ -24,9 +24,12 @@ $$;
 var postgresdb = postgres.AddDatabase(unjaiDbName)
     .WithCreationScript(creationScript);
 
-var redis = builder.AddRedis("Redis")
+var redis = builder.AddRedis("Redis").WithImageTag("8.6-alpine")
     .WithLifetime(ContainerLifetime.Persistent)
     .WithRedisInsight(redisInsight => redisInsight.WithLifetime(ContainerLifetime.Persistent));
+
+var rabbitmq = builder.AddRabbitMQ("RabbitMQ").WithImageTag("4.2-alpine")
+    .WithLifetime(ContainerLifetime.Persistent);
 
 var configuration = builder.Configuration;
 var apiKeyHealthCheck = configuration.GetValue<string>("ApiKeys:HealthCheck");
@@ -34,13 +37,13 @@ var rateLimitingSecret = configuration.GetValue<string>("RateLimiting:Secret");
 
 var migrator = builder
     .AddProject<Projects.Unjai_Platform_Infrastructure_Persistent_DatabaseMigrator>(
-        "unjai-platform-infrastructure-persistent-databasemigrator")
+        "unjai-db-migrator")
     .WithReference(postgresdb)
     .WaitFor(postgresdb);
 
 var jwtKeyRotation = builder
     .AddProject<Projects.Unjai_Platform_Worker_JwtKeyRotation>(
-        "unjai-platform-worker-jwtkeyrotation")
+        "unjai-jwt-rotation")
     .WaitForCompletion(migrator)
     .WithReference(postgresdb)
     .WaitFor(postgresdb)
@@ -48,7 +51,7 @@ var jwtKeyRotation = builder
     .WaitFor(redis);
 
 var apiProject = builder
-    .AddProject<Projects.Unjai_Platform_Api>("unjai-platform-api")
+    .AddProject<Projects.Unjai_Platform_Api>("unjai-api")
     .WaitForCompletion(jwtKeyRotation)
     .WithReference(postgresdb)
     .WaitFor(postgresdb)
@@ -58,7 +61,7 @@ var apiProject = builder
     .WithEnvironment("RateLimiting__Secret", rateLimitingSecret);
 
 builder
-    .AddProject<Projects.Unjai_Platform_Mvc_CustomerUser>("unjai-platform-mvc-customeruser")
+    .AddProject<Projects.Unjai_Platform_Mvc_CustomerUser>("unjai-mvc-customer")
     .WithReference(apiProject)
     .WithReference(redis)
     .WaitFor(redis)

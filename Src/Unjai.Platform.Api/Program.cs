@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using System.Security.Cryptography;
 using Asp.Versioning;
@@ -27,6 +28,9 @@ using var loggerFactory = LoggerFactory.Create(config =>
 });
 
 var logger = loggerFactory.CreateLogger<Program>();
+
+builder.Services.AddSingleton(_ =>
+    new ActivitySource(builder.Environment.ApplicationName));
 
 var trustIpSourceOptions = builder.Configuration
     .GetSection(TrustIpSourceConfig.Section)
@@ -134,7 +138,7 @@ app.MapGet("/.well-known/jwks.json", async (JwtKeyStoreService keyStore) =>
 {
     var keys = await keyStore.GetAllNotExpiredKeysAsync();
 
-    var jwks = new JsonWebKeySet();
+    var jwksList = new List<object>();
 
     foreach (var k in keys)
     {
@@ -147,13 +151,21 @@ app.MapGet("/.well-known/jwks.json", async (JwtKeyStoreService keyStore) =>
         };
 
         var jwk = JsonWebKeyConverter.ConvertFromECDsaSecurityKey(securityKey);
-        jwk.Use = "sig";
-        jwk.Alg = SecurityAlgorithms.EcdsaSha256;
 
-        jwks.Keys.Add(jwk);
+        jwksList.Add(new
+        {
+            kid = jwk.Kid,
+            kty = jwk.Kty,
+            alg = SecurityAlgorithms.EcdsaSha256,
+            use = "sig",
+            crv = jwk.Crv,
+            x = jwk.X,
+            y = jwk.Y
+        });
     }
 
-    return Results.Ok(jwks);
+    // Return object ตามโครงสร้างมาตรฐานของ JWKS
+    return Results.Ok(new { keys = jwksList });
 });
 
 var apiVersionSetBuilder = app.NewApiVersionSet();

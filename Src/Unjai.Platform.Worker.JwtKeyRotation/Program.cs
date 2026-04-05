@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Unjai.Platform.Infrastructure.Caching.Extensions;
 using Unjai.Platform.Infrastructure.Persistent.Database.Extensions;
 using Unjai.Platform.Infrastructure.Redis.Extensions;
@@ -13,6 +14,9 @@ using var loggerFactory = LoggerFactory.Create(config =>
 });
 
 var logger = loggerFactory.CreateLogger<Program>();
+
+builder.Services.AddSingleton(_ =>
+    new ActivitySource(builder.Environment.ApplicationName));
 
 builder.AddServiceDefaults();
 

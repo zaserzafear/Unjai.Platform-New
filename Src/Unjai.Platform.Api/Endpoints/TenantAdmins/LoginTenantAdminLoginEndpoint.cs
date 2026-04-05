@@ -7,7 +7,7 @@ using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 
 namespace Unjai.Platform.Api.Endpoints.TenantAdmins;
 
-public sealed class LoginTenantAdminEndpoint : IEndpoint
+public sealed class LoginTenantAdminLoginEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
@@ -24,6 +24,7 @@ public sealed class LoginTenantAdminEndpoint : IEndpoint
 
             return ApiResponseResults.ToHttpResult(result);
         })
+            .AllowAnonymous()
             .EnforceRateLimit(RateLimitPolicyKeys.Login)
             .MapToApiVersion(1);
     }
