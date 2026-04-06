@@ -7,6 +7,7 @@ using Unjai.Platform.Application.Abstractions.Security.Authentication;
 using Unjai.Platform.Application.Services.JwtKeyStores;
 using Unjai.Platform.Domain.Entities.TenantsAdmin;
 using Unjai.Platform.Domain.Security.Principals;
+using Unjai.Platform.Infrastructure.Security.Authentication.RefreshToken;
 using Unjai.Platform.Infrastructure.Security.Cryptography.Ecdsa;
 
 namespace Unjai.Platform.Infrastructure.Security.Authentication.Jwt;
@@ -32,7 +33,7 @@ internal sealed class TokenProvider(
         return await IssuerToken(claims, jwtSettingsValue, ct);
     }
 
-    private async Task<(string token, long expires)> IssuerToken(IEnumerable<Claim> claims, JwtSettings settings, CancellationToken ct)
+    private async Task<(string Token, long Expires)> IssuerToken(IEnumerable<Claim> claims, JwtSettings settings, CancellationToken ct)
     {
         var now = DateTime.UtcNow;
         var expires = now.AddMinutes(settings.AccessTokenExpireMinutes);
@@ -59,5 +60,16 @@ internal sealed class TokenProvider(
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
         return (tokenString, expiresUnix);
+    }
+
+    public (string Token, string TokenHash, DateTime Expires) IssueRefreshToken(Guid prefix, CancellationToken ct)
+    {
+        string randomToken = RefreshTokenProtector.GenerateToken();
+        string plainToken = $"{prefix:N}_{randomToken}";
+        string tokenHash = RefreshTokenProtector.HashToken(plainToken);
+
+        DateTime expires = DateTime.UtcNow.AddDays(jwtSettings.Value.RefreshTokenExpireDays);
+
+        return (plainToken, tokenHash, expires);
     }
 }

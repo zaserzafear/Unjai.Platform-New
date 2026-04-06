@@ -6,6 +6,7 @@ using Unjai.Platform.Application.Repositories.TenantAdmins;
 using Unjai.Platform.Contracts.Models;
 using Unjai.Platform.Contracts.TenantAdmins;
 using Unjai.Platform.Domain.Abstractions;
+using Unjai.Platform.Domain.Entities.TenantsAdminRefreshToken;
 
 namespace Unjai.Platform.Application.Services.TenantAdmins.LoginTenantAdmin;
 
@@ -52,13 +53,23 @@ public sealed class LoginTenantAdminV1(
             try
             {
                 var accessToken = await jwtTokenIssuer.IssueAccessToken(tenantAdmin, ct);
-                var refreshTokenResult = await repository.AddRefreshTokenAsync(tenantAdmin.Id, expireDays: 7, ct);
+                var refreshToken = jwtTokenIssuer.IssueRefreshToken(tenantAdmin.Id, ct);
+
+                var tenantAdminRefreshToken = new TenantAdminRefreshToken
+                {
+                    TenantAdminId = tenantAdmin.Id,
+                    TokenHash = refreshToken.TokenHash,
+                    ExpiresAt = refreshToken.Expires,
+                    CreatedAt = DateTime.UtcNow,
+                };
+
+                await repository.AddRefreshTokenAsync(tenantAdminRefreshToken, ct);
 
                 await unitOfWork.SaveChangesAsync(ct);
 
                 tokenActivity?.SetTag("auth.token.type", "access_and_refresh");
                 tokenActivity?.SetTag("auth.token.access_expires_at", accessToken.Expires);
-                tokenActivity?.SetTag("auth.token.refresh_expires_at", refreshTokenResult.Expires);
+                tokenActivity?.SetTag("auth.token.refresh_expires_at", refreshToken.Expires);
                 tokenActivity?.SetStatus(ActivityStatusCode.Ok);
 
                 activity?.SetTag("auth.login.result", "success");
@@ -71,8 +82,8 @@ public sealed class LoginTenantAdminV1(
                     data: new TenantAdminLoginResponseDto(
                         accessToken.Token,
                         accessToken.Expires,
-                        refreshTokenResult.PlainToken,
-                        refreshTokenResult.Expires)
+                        refreshToken.Token,
+                        new DateTimeOffset(refreshToken.Expires).ToUnixTimeSeconds())
                 );
             }
             catch (Exception ex)
@@ -81,7 +92,6 @@ public sealed class LoginTenantAdminV1(
                 tokenActivity?.SetTag("error.type", ex.GetType().FullName);
                 tokenActivity?.SetTag("error.message", ex.Message);
                 tokenActivity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-
                 throw;
             }
         }

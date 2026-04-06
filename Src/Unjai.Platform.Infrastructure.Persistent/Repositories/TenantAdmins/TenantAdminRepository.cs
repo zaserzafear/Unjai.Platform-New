@@ -3,7 +3,6 @@ using Unjai.Platform.Application.Repositories.TenantAdmins;
 using Unjai.Platform.Domain.Entities.TenantsAdmin;
 using Unjai.Platform.Domain.Entities.TenantsAdminRefreshToken;
 using Unjai.Platform.Infrastructure.Persistent.Database;
-using Unjai.Platform.Infrastructure.Security.Authentication.RefreshToken;
 using Unjai.Platform.Infrastructure.Security.Cryptography.Hashing;
 
 namespace Unjai.Platform.Infrastructure.Persistent.Repositories.TenantAdmins;
@@ -57,42 +56,10 @@ internal sealed class TenantAdminRepository(
         return tenantAdmin;
     }
 
-    public async Task<RefreshTokenCreationResult> AddRefreshTokenAsync(
-        Guid tenantAdminId,
-        int expireDays = 7,
-        CancellationToken ct = default)
+    public async Task<TenantAdminRefreshToken> AddRefreshTokenAsync(TenantAdminRefreshToken tenantAdminRefreshToken, CancellationToken ct = default)
     {
-        string plainToken = string.Empty;
-        string tokenHash = string.Empty;
-        bool isUnique = false;
+        await writeDbContext.TenantAdminRefreshTokens.AddAsync(tenantAdminRefreshToken, ct);
 
-        while (!isUnique)
-        {
-            plainToken = RefreshTokenProtector.GenerateToken();
-            tokenHash = RefreshTokenProtector.HashToken(plainToken);
-
-            bool isExists = await writeDbContext.TenantAdminRefreshTokens
-                .AnyAsync(x => x.TokenHash == tokenHash, ct);
-
-            if (!isExists)
-            {
-                isUnique = true;
-            }
-        }
-
-        var refreshToken = new TenantAdminRefreshToken
-        {
-            TenantAdminId = tenantAdminId,
-            TokenHash = tokenHash,
-            ExpiresAt = DateTime.UtcNow.AddDays(expireDays),
-            IsRevoked = false,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        await writeDbContext.TenantAdminRefreshTokens.AddAsync(refreshToken, ct);
-
-        return new RefreshTokenCreationResult(
-            PlainToken: plainToken,
-            Expires: new DateTimeOffset(refreshToken.ExpiresAt).ToUnixTimeSeconds());
+        return tenantAdminRefreshToken;
     }
 }
