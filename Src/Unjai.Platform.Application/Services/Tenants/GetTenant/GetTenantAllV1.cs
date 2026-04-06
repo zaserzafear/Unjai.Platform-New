@@ -12,7 +12,7 @@ public sealed class GetTenantAllV1(
     ITenantRepository repository,
     ActivitySource activitySource)
 {
-    public async Task<AppResult<PagedResult<GetTenantResponseDto>>> Handle(
+    public async Task<AppResult<PagedResult<TenantGetResponseDto>>> Handle(
     int page,
     int pageSize,
     CancellationToken ct)
@@ -32,7 +32,7 @@ public sealed class GetTenantAllV1(
                 activity?.SetTag("validation.error.code", "INVALID_PAGE_SIZE");
                 activity?.SetStatus(ActivityStatusCode.Ok);
 
-                return AppResult<PagedResult<GetTenantResponseDto>>.Fail(
+                return AppResult<PagedResult<TenantGetResponseDto>>.Fail(
                     400,
                     "INVALID_PAGE_SIZE",
                     "pageSize must be between 1 and 100");
@@ -44,7 +44,7 @@ public sealed class GetTenantAllV1(
                 activity?.SetTag("validation.error.code", "INVALID_PAGE");
                 activity?.SetStatus(ActivityStatusCode.Ok);
 
-                return AppResult<PagedResult<GetTenantResponseDto>>.Fail(
+                return AppResult<PagedResult<TenantGetResponseDto>>.Fail(
                     400,
                     "INVALID_PAGE",
                     "page must be greater than 0");
@@ -76,7 +76,7 @@ public sealed class GetTenantAllV1(
             }
 
             var dtoItems = pagedTenants.Items
-                .Select(t => new GetTenantResponseDto(
+                .Select(t => new TenantGetResponseDto(
                     t.Id,
                     t.Code,
                     t.Name,
@@ -85,7 +85,7 @@ public sealed class GetTenantAllV1(
                     t.UpdatedAt))
                 .ToList();
 
-            var response = new PagedResult<GetTenantResponseDto>(
+            var response = new PagedResult<TenantGetResponseDto>(
                 Items: dtoItems,
                 Page: pagedTenants.Page,
                 PageSize: pagedTenants.PageSize,
@@ -97,7 +97,7 @@ public sealed class GetTenantAllV1(
             activity?.SetTag("tenant.fetch.result", "success");
             activity?.SetStatus(ActivityStatusCode.Ok);
 
-            return AppResult<PagedResult<GetTenantResponseDto>>.Ok(
+            return AppResult<PagedResult<TenantGetResponseDto>>.Ok(
                 200,
                 "TENANTS_FETCHED",
                 "Tenants retrieved successfully.",
@@ -118,7 +118,7 @@ public sealed class GetTenantAllV1(
                 page,
                 pageSize);
 
-            return AppResult<PagedResult<GetTenantResponseDto>>.Fail(
+            return AppResult<PagedResult<TenantGetResponseDto>>.Fail(
                 500,
                 "INTERNAL_SERVER_ERROR",
                 "An unexpected error occurred while retrieving tenants."

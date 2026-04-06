@@ -5,9 +5,9 @@ using Unjai.Platform.Contracts.TenantAdmins;
 using Unjai.Platform.Infrastructure.RateLimiting.Core;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 
-namespace Unjai.Platform.Api.Endpoints.TenantAdmins;
+namespace Unjai.Platform.Api.Endpoints.TenantAdmins.V1;
 
-public sealed class LoginTenantAdminLoginEndpoint : IEndpoint
+public sealed class TenantAdminLoginEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
@@ -16,7 +16,7 @@ public sealed class LoginTenantAdminLoginEndpoint : IEndpoint
             .WithTags(TenantAdminEndpoints.Tag);
 
         group.MapPost("login", async (
-            LoginTenantAdminRequestDto request,
+            TenantAdminLoginRequestDto request,
             LoginTenantAdminV1 useCase,
             CancellationToken ct) =>
         {

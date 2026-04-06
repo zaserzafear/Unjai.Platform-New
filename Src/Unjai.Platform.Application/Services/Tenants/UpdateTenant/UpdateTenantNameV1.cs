@@ -17,7 +17,7 @@ public sealed class UpdateTenantNameV1(
     ICacheInvalidationPublisherService cacheInvalidation,
     ActivitySource activitySource)
 {
-    public async Task<AppResult<object>> Handle(Guid id, UpdateTenantNameRequestDto request, CancellationToken ct)
+    public async Task<AppResult<object>> Handle(Guid id, TenantUpdateNameRequestDto request, CancellationToken ct)
     {
         using var activity = activitySource.StartMethodActivity(typeof(UpdateTenantNameV1));
 

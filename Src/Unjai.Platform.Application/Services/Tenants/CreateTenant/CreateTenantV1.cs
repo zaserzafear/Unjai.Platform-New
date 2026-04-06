@@ -15,7 +15,7 @@ public sealed class CreateTenantV1(
     ITenantRepository repository,
     ActivitySource activitySource)
 {
-    public async Task<AppResult<object>> Handle(CreateTenantRequestDto request, CancellationToken ct)
+    public async Task<AppResult<object>> Handle(TenantCreateRequestDto request, CancellationToken ct)
     {
         using var activity = activitySource.StartMethodActivity(typeof(CreateTenantV1));
 
@@ -107,7 +107,7 @@ public sealed class CreateTenantV1(
                 httpStatus: 201,
                 statusCode: "TENANT_CREATED",
                 message: "Tenant created successfully.",
-                data: new CreateTenantResponseDto(tenant.Id)
+                data: new TenantCreateResponseDto(tenant.Id)
             );
         }
         catch (Exception ex)

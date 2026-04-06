@@ -1,6 +1,8 @@
 ﻿namespace Unjai.Platform.Contracts.TenantAdmins;
 
-public sealed record LoginTenantAdminResponseDto(
+public record class TenantAdminLoginRequestDto(string Username, string Password);
+
+public sealed record TenantAdminLoginResponseDto(
     string AccessToken,
     long AccessTokenExpires,
     string RefreshToken,

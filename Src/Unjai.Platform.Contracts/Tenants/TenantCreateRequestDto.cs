@@ -1,6 +1,6 @@
 ﻿namespace Unjai.Platform.Contracts.Tenants;
 
-public sealed record CreateTenantRequestDto(
+public sealed record TenantCreateRequestDto(
     string Code,
     string Name);
 

@@ -14,7 +14,7 @@ public sealed class GetTenantByIdV1(
     HybridCache cache,
     ActivitySource activitySource)
 {
-    public async Task<AppResult<GetTenantResponseDto>> Handle(Guid id, CancellationToken ct)
+    public async Task<AppResult<TenantGetResponseDto>> Handle(Guid id, CancellationToken ct)
     {
         using var activity = activitySource.StartMethodActivity(typeof(GetTenantByIdV1));
 
@@ -68,14 +68,14 @@ public sealed class GetTenantByIdV1(
                 activity?.SetTag("tenant.fetch.result", "not_found");
                 activity?.SetStatus(ActivityStatusCode.Ok);
 
-                return AppResult<GetTenantResponseDto>.Fail(
+                return AppResult<TenantGetResponseDto>.Fail(
                     httpStatus: 404,
                     statusCode: "TENANTS_NOT_FOUND",
                     message: "Tenant not found"
                 );
             }
 
-            var response = new GetTenantResponseDto(
+            var response = new TenantGetResponseDto(
                 tenant.Id,
                 tenant.Code,
                 tenant.Name,
@@ -87,7 +87,7 @@ public sealed class GetTenantByIdV1(
             activity?.SetTag("tenant.fetch.result", "success");
             activity?.SetStatus(ActivityStatusCode.Ok);
 
-            return AppResult<GetTenantResponseDto>.Ok(
+            return AppResult<TenantGetResponseDto>.Ok(
                 httpStatus: 200,
                 statusCode: "TENANTS_FETCHED",
                 message: "Tenants retrieved successfully.",
@@ -107,7 +107,7 @@ public sealed class GetTenantByIdV1(
                 "An error occurred while retrieving tenant with id '{TenantId}'",
                 id);
 
-            return AppResult<GetTenantResponseDto>.Fail(
+            return AppResult<TenantGetResponseDto>.Fail(
                 httpStatus: 500,
                 statusCode: "INTERNAL_SERVER_ERROR",
                 message: "An unexpected error occurred while retrieving tenant."

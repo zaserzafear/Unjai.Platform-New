@@ -5,9 +5,9 @@ using Unjai.Platform.Domain.Entities.TenantsAdminPermission;
 using Unjai.Platform.Infrastructure.RateLimiting.Core;
 using Unjai.Platform.Infrastructure.RateLimiting.Extensions;
 
-namespace Unjai.Platform.Api.Endpoints.Tenants;
+namespace Unjai.Platform.Api.Endpoints.Tenants.V1;
 
-public sealed class DeleteTenantEndpoints : IEndpoint
+public sealed class TenantDeleteEndpoints : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {

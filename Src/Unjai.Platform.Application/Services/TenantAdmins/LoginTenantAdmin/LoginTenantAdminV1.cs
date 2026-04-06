@@ -16,7 +16,7 @@ public sealed class LoginTenantAdminV1(
     ITokenProvider jwtTokenIssuer,
     ActivitySource activitySource)
 {
-    public async Task<AppResult<LoginTenantAdminResponseDto>> Handle(LoginTenantAdminRequestDto request, CancellationToken ct)
+    public async Task<AppResult<TenantAdminLoginResponseDto>> Handle(TenantAdminLoginRequestDto request, CancellationToken ct)
     {
         using var activity = activitySource.StartMethodActivity(typeof(LoginTenantAdminV1));
 
@@ -36,7 +36,7 @@ public sealed class LoginTenantAdminV1(
                 activity?.SetTag("auth.failure_reason", "invalid_credentials");
                 activity?.SetStatus(ActivityStatusCode.Ok);
 
-                return AppResult<LoginTenantAdminResponseDto>.Fail(
+                return AppResult<TenantAdminLoginResponseDto>.Fail(
                     httpStatus: 401,
                     statusCode: "INVALID_CREDENTIALS",
                     message: "Invalid username or password."
@@ -64,11 +64,11 @@ public sealed class LoginTenantAdminV1(
                 activity?.SetTag("auth.login.result", "success");
                 activity?.SetStatus(ActivityStatusCode.Ok);
 
-                return AppResult<LoginTenantAdminResponseDto>.Ok(
+                return AppResult<TenantAdminLoginResponseDto>.Ok(
                     httpStatus: 200,
                     statusCode: "LOGIN_SUCCESSFUL",
                     message: "Tenant admin logged in successfully.",
-                    data: new LoginTenantAdminResponseDto(
+                    data: new TenantAdminLoginResponseDto(
                         accessToken.Token,
                         accessToken.Expires,
                         refreshTokenResult.PlainToken,
@@ -97,7 +97,7 @@ public sealed class LoginTenantAdminV1(
                 "An error occurred while logging in tenant admin with username '{Username}'.",
                 request.Username);
 
-            return AppResult<LoginTenantAdminResponseDto>.Fail(
+            return AppResult<TenantAdminLoginResponseDto>.Fail(
                 httpStatus: 500,
                 statusCode: "INTERNAL_SERVER_ERROR",
                 message: "An error occurred while processing the login request."

@@ -1,6 +1,6 @@
 ﻿namespace Unjai.Platform.Contracts.Tenants;
 
-public sealed record GetTenantResponseDto(
+public sealed record TenantGetResponseDto(
     Guid Id,
     string Code,
     string Name,
