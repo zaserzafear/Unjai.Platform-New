@@ -21,8 +21,8 @@ internal sealed class TenantAdminRefreshTokenConfiguration
               .HasColumnName("tenant_admin_id")
               .IsRequired();
 
-        entity.Property(e => e.Token)
-              .HasColumnName("token")
+        entity.Property(e => e.TokenHash)
+              .HasColumnName("token_hash")
               .HasMaxLength(500)
               .IsRequired();
 
@@ -41,7 +41,7 @@ internal sealed class TenantAdminRefreshTokenConfiguration
               .HasDefaultValueSql("now()")
               .ValueGeneratedOnAdd();
 
-        entity.HasIndex(e => e.Token)
+        entity.HasIndex(e => e.TokenHash)
               .IsUnique();
     }
 }

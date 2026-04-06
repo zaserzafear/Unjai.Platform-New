@@ -1,14 +1,16 @@
-﻿using System.Security.Cryptography;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Unjai.Platform.Application.Repositories.TenantAdmins;
 using Unjai.Platform.Domain.Entities.TenantsAdmin;
 using Unjai.Platform.Domain.Entities.TenantsAdminRefreshToken;
 using Unjai.Platform.Infrastructure.Persistent.Database;
+using Unjai.Platform.Infrastructure.Security.Authentication.RefreshToken;
 using Unjai.Platform.Infrastructure.Security.Cryptography.Hashing;
 
 namespace Unjai.Platform.Infrastructure.Persistent.Repositories.TenantAdmins;
 
-internal sealed class TenantAdminRepository(WriteDbContext writeDbContext, ReadDbContext readDbContext) : ITenantAdminRepository
+internal sealed class TenantAdminRepository(
+    WriteDbContext writeDbContext,
+    ReadDbContext readDbContext) : ITenantAdminRepository
 {
     public async Task<bool> HasDefaultAdminAsync(CancellationToken ct = default)
     {
@@ -40,34 +42,37 @@ internal sealed class TenantAdminRepository(WriteDbContext writeDbContext, ReadD
             })
             .SingleOrDefaultAsync(ct);
 
-        if (tenantAdmin == null)
+        if (tenantAdmin is null)
         {
             return null;
         }
 
-        bool isValid = PasswordHasher.Verify(
-            password,
-            tenantAdmin.PasswordHash
-        );
+        bool isValid = PasswordHasher.Verify(password, tenantAdmin.PasswordHash);
 
         if (!isValid)
+        {
             return null;
+        }
 
         return tenantAdmin;
     }
 
-    public async Task<TenantAdminRefreshToken> AddRefreshTokenAsync(Guid tenantAdminId, int expireDays = 7, CancellationToken ct = default)
+    public async Task<RefreshTokenCreationResult> AddRefreshTokenAsync(
+        Guid tenantAdminId,
+        int expireDays = 7,
+        CancellationToken ct = default)
     {
-        string tokenText = string.Empty;
+        string plainToken = string.Empty;
+        string tokenHash = string.Empty;
         bool isUnique = false;
 
         while (!isUnique)
         {
-            var randomNumber = RandomNumberGenerator.GetBytes(64);
-            tokenText = Convert.ToBase64String(randomNumber);
+            plainToken = RefreshTokenProtector.GenerateToken();
+            tokenHash = RefreshTokenProtector.HashToken(plainToken);
 
             bool isExists = await writeDbContext.TenantAdminRefreshTokens
-                .AnyAsync(x => x.Token == tokenText, ct);
+                .AnyAsync(x => x.TokenHash == tokenHash, ct);
 
             if (!isExists)
             {
@@ -78,7 +83,7 @@ internal sealed class TenantAdminRepository(WriteDbContext writeDbContext, ReadD
         var refreshToken = new TenantAdminRefreshToken
         {
             TenantAdminId = tenantAdminId,
-            Token = tokenText,
+            TokenHash = tokenHash,
             ExpiresAt = DateTime.UtcNow.AddDays(expireDays),
             IsRevoked = false,
             CreatedAt = DateTime.UtcNow
@@ -86,6 +91,8 @@ internal sealed class TenantAdminRepository(WriteDbContext writeDbContext, ReadD
 
         await writeDbContext.TenantAdminRefreshTokens.AddAsync(refreshToken, ct);
 
-        return refreshToken;
+        return new RefreshTokenCreationResult(
+            PlainToken: plainToken,
+            Expires: new DateTimeOffset(refreshToken.ExpiresAt).ToUnixTimeSeconds());
     }
 }

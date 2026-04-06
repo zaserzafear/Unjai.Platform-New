@@ -52,13 +52,13 @@ public sealed class LoginTenantAdminV1(
             try
             {
                 var accessToken = await jwtTokenIssuer.IssueAccessToken(tenantAdmin, ct);
-                var refreshTokenEntity = await repository.AddRefreshTokenAsync(tenantAdmin.Id, expireDays: 7, ct);
+                var refreshTokenResult = await repository.AddRefreshTokenAsync(tenantAdmin.Id, expireDays: 7, ct);
 
                 await unitOfWork.SaveChangesAsync(ct);
 
                 tokenActivity?.SetTag("auth.token.type", "access_and_refresh");
                 tokenActivity?.SetTag("auth.token.access_expires_at", accessToken.Expires);
-                tokenActivity?.SetTag("auth.token.refresh_expires_at", refreshTokenEntity.ExpiresAt);
+                tokenActivity?.SetTag("auth.token.refresh_expires_at", refreshTokenResult.Expires);
                 tokenActivity?.SetStatus(ActivityStatusCode.Ok);
 
                 activity?.SetTag("auth.login.result", "success");
@@ -71,8 +71,8 @@ public sealed class LoginTenantAdminV1(
                     data: new LoginTenantAdminResponseDto(
                         accessToken.Token,
                         accessToken.Expires,
-                        refreshTokenEntity.Token,
-                        new DateTimeOffset(refreshTokenEntity.ExpiresAt).ToUnixTimeSeconds())
+                        refreshTokenResult.PlainToken,
+                        refreshTokenResult.Expires)
                 );
             }
             catch (Exception ex)
